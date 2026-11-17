@@ -285,7 +285,9 @@ const Deeds = () => {
     const s = store.get('ddr_kids_deeds', { day: today, done: [], total: 0 });
     return s.day === today ? s : { day: today, done: [], total: s.total || 0 };
   });
-  useEffect(() => store.set('ddr_kids_deeds', state), [state]);
+  useEffect(() => {
+    store.set('ddr_kids_deeds', state);
+  }, [state]);
   const toggle = (id: string) =>
     setState((s) => {
       const has = s.done.includes(id);

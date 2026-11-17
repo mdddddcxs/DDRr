@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { HandHeart, MessageCircle, Package, Phone, ShieldCheck, Smartphone } from 'lucide-react';
 import { ButtonLink, Container, Eyebrow, PageHero, formatFCFA } from '../components/ui';
-import { CONTACT, SCHOOL_CAMPAIGN } from '../constants';
+import { SCHOOL_CAMPAIGN } from '../constants';
+import { telHref, useSite, waHref } from '../lib/site';
 import { getCampaign, getRecentDonations, type PublicDonation } from '../services/db';
 import type { DonationCampaign } from '../types';
 
@@ -17,6 +18,7 @@ const timeAgo = (iso: string) => {
 };
 
 const Donations = () => {
+  const site = useSite();
   const [c, setC] = useState<DonationCampaign>(SCHOOL_CAMPAIGN);
   const [recent, setRecent] = useState<PublicDonation[]>([]);
   useEffect(() => {
@@ -24,7 +26,6 @@ const Donations = () => {
     getRecentDonations(8).then(setRecent);
   }, []);
   const pct = Math.min(100, Math.round((c.currentAmount / c.targetAmount) * 100));
-  const waText = encodeURIComponent(`Assalamou alaykoum, je souhaite faire un don pour « ${c.title} ».`);
 
   return (
     <>
@@ -83,11 +84,11 @@ const Donations = () => {
                 </p>
               )}
               <div className="mt-5 space-y-3">
-                <a href={`https://wa.me/${CONTACT.whatsapp}?text=${waText}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 py-3.5 font-bold text-white transition hover:bg-emerald-500">
+                <a href={waHref(site.contact.whatsapp, `Assalamou alaykoum, je souhaite faire un don pour « ${c.title} ».`)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 py-3.5 font-bold text-white transition hover:bg-emerald-500">
                   <MessageCircle className="h-5 w-5" /> Donner via WhatsApp
                 </a>
-                <a href={`tel:${CONTACT.phones[0].replace(/\s/g, '')}`} className="flex items-center justify-center gap-2 rounded-full border border-white/10 py-3.5 font-bold text-cream-100 transition hover:bg-white/5">
-                  <Phone className="h-5 w-5" /> Appeler {CONTACT.phones[0]}
+                <a href={telHref(site.contact.phones[0] || '')} className="flex items-center justify-center gap-2 rounded-full border border-white/10 py-3.5 font-bold text-cream-100 transition hover:bg-white/5">
+                  <Phone className="h-5 w-5" /> Appeler {site.contact.phones[0]}
                 </a>
               </div>
               <p className="mt-5 flex items-start gap-2 text-xs text-sand-500">

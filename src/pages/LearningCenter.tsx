@@ -55,11 +55,11 @@ const SOCIAL_LINKS = [
         icon: (
             <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.791-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         ), 
-        url: 'https://www.facebook.com/Oustazdianeoff', 
+        url: 'https://www.facebook.com/ismaelAKAofficiel', 
         bgClass: 'bg-[#1877F2]',
         borderClass: 'border-[#1877F2]',
         label: 'Rejoindre la communauté',
-        subLabel: 'Oustaz Diané Officiel'
+        subLabel: 'Oustaz Diané et Ismaël Aka - DDR'
     },
     { 
         name: 'YouTube', 
@@ -77,11 +77,11 @@ const SOCIAL_LINKS = [
         icon: (
             <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.49-3.35-3.98-5.6-.48-2.24-.08-4.62 1.09-6.64 1.19-2.05 3.29-3.56 5.6-4.05 1.58-.33 3.24-.18 4.79.46V11c-1.28-.65-2.73-.8-4.13-.39-1.27.37-2.33 1.25-2.94 2.42-.62 1.18-.63 2.61-.02 3.8.61 1.2 1.71 2.11 3.01 2.51 1.34.41 2.82.25 4.05-.44 1.24-.7 2.05-2 2.1-3.41.06-2.95.02-5.9.03-8.85h-.01c-.13-.01-.2.01-.53-.02-.85-.22-1.32-.87-1.6-1.58-.23-.6-.32-1.23-.32-1.85V3.06c0-.26.02-.51.05-.76.08-.72.4-1.37.94-1.87.53-.49 1.18-.76 1.91-.79h.03z"/></svg>
         ), 
-        url: 'https://www.tiktok.com/@ddrofficielle', 
+        url: 'https://www.tiktok.com/@ddrofficiel', 
         bgClass: 'bg-[#000000]',
         borderClass: 'border-gray-600',
         label: 'Shorts & Reels',
-        subLabel: '@ddrofficielle'
+        subLabel: '@ddrofficiel'
     }
 ];
 
@@ -208,7 +208,7 @@ const LearningCenter = React.memo(() => {
     // --- FONCTIONS ACTIVES ---
     
     const handleShare = async () => {
-        const text = `${dailyStory.title}\n\n"${dailyStory.content.substring(0, 100)}..."\n\nLisez la suite sur La DDR : https://ddr.ci`;
+        const text = `${dailyStory.title}\n\n"${dailyStory.content.substring(0, 100)}..."\n\nLisez la suite sur le site de La DDR : ${window.location.origin}/learning`;
         
         if (navigator.share) {
             try {
@@ -221,8 +221,12 @@ const LearningCenter = React.memo(() => {
                 console.log('Partage annulé');
             }
         } else {
-            navigator.clipboard.writeText(text);
-            setToast({ message: "✅ Texte copié ! Vous pouvez maintenant le coller sur WhatsApp ou Facebook.", type: 'success' });
+            try {
+                await navigator.clipboard.writeText(text);
+                setToast({ message: "✅ Texte copié ! Vous pouvez maintenant le coller sur WhatsApp ou Facebook.", type: 'success' });
+            } catch {
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+            }
             setTimeout(() => setToast(null), 3000);
         }
     };
@@ -275,6 +279,7 @@ const LearningCenter = React.memo(() => {
                 <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur flex items-center justify-center p-4 animate-fade-up">
                     <button 
                         onClick={() => setSelectedVideo(null)} 
+                        aria-label="Fermer la vidéo"
                         className="absolute top-4 right-4 text-sand-400 hover:text-white p-2"
                     >
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -336,6 +341,7 @@ const LearningCenter = React.memo(() => {
                                 <button 
                                     key={idx} 
                                     onClick={() => setCurrentSlide(idx)}
+                                    aria-label={`Verset ${idx + 1}`}
                                     className={`h-1 rounded-full transition-all duration-700 ${idx === currentSlide ? 'bg-brand-500 w-16' : 'bg-white/10 w-6 hover:bg-white/30'}`}
                                 />
                             ))}
@@ -588,6 +594,7 @@ const LearningCenter = React.memo(() => {
                                 </button>
                                 <button 
                                     onClick={() => setTasbihCount(0)}
+                                    aria-label="Remettre le compteur à zéro"
                                     className="w-16 h-16 bg-white/5 hover:bg-white/10 text-sand-400 rounded-2xl font-bold flex items-center justify-center border border-white/10 transition-all"
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>

@@ -35,7 +35,7 @@ async function yt(path: string, params: Record<string, string>, key: string) {
 
 export async function GET(): Promise<Response> {
   const key = process.env.YOUTUBE_API_KEY;
-  const handle = (process.env.YOUTUBE_CHANNEL_HANDLE || 'ddrofficielle').replace(/^@/, '');
+  const handle = (process.env.YOUTUBE_CHANNEL_HANDLE || 'ddrlavraiechaine').replace(/^@/, '');
   const channelIdEnv = process.env.YOUTUBE_CHANNEL_ID;
   if (!key) return json({ videos: [], configured: false }, 200, false);
 

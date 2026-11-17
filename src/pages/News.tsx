@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { CalendarDays, Newspaper } from 'lucide-react';
 import { ButtonLink, Container, PageHero } from '../components/ui';
 import { fetchNews } from '../services/socialService';
-import { SOCIAL_LINKS } from '../constants';
+import { useSite } from '../lib/site';
 import type { NewsItem } from '../types';
 
 const CATEGORY: Record<NewsItem['category'], string> = { Event: 'Événement', News: 'Actualité', Announcement: 'Annonce' };
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 const News = () => {
+  const site = useSite();
   const [news, setNews] = useState<NewsItem[] | null>(null);
   useEffect(() => {
     fetchNews().then(setNews);
@@ -30,9 +31,9 @@ const News = () => {
             <h2 className="mt-4 font-serif text-2xl font-semibold text-cream-50">Les premières actualités arrivent bientôt</h2>
             <p className="mt-2 text-sand-400">En attendant, suivez la DDR sur ses réseaux.</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <ButtonLink href={SOCIAL_LINKS.facebook} variant="ghost" size="sm">Facebook</ButtonLink>
-              <ButtonLink href={SOCIAL_LINKS.youtube} variant="ghost" size="sm">YouTube</ButtonLink>
-              <ButtonLink href={SOCIAL_LINKS.tiktok} variant="ghost" size="sm">TikTok</ButtonLink>
+              <ButtonLink href={site.social.facebook} variant="ghost" size="sm">Facebook</ButtonLink>
+              <ButtonLink href={site.social.youtube} variant="ghost" size="sm">YouTube</ButtonLink>
+              <ButtonLink href={site.social.tiktok} variant="ghost" size="sm">TikTok</ButtonLink>
             </div>
           </div>
         ) : (

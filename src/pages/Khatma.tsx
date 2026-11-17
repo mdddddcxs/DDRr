@@ -143,17 +143,13 @@ const Khatma = () => {
       setCurrentPlayingIndex(null);
 
       try {
-          // 1. Texte Arabe
-          const arabicRes = await fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/quran-uthmani`);
-          const arabicData = await arabicRes.json();
-
-          // 2. Traduction Française
-          const frenchRes = await fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/fr.hamidullah`);
-          const frenchData = await frenchRes.json();
-          
-          // 3. Audio (Selon le récitateur choisi)
-          const audioRes = await fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/${selectedReciter}`);
-          const audioData = await audioRes.json();
+          // Texte arabe, traduction et audio chargés en parallèle (l'audio est facultatif)
+          const get = (edition: string) => fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/${edition}`).then((r) => r.json());
+          const [arabicData, frenchData, audioData] = await Promise.all([
+              get('quran-uthmani'),
+              get('fr.hamidullah'),
+              get(selectedReciter).catch(() => null),
+          ]);
 
           if (arabicData.code === 200 && frenchData.code === 200) {
               const mergedVerses: Verse[] = arabicData.data.ayahs.map((ayah: any, index: number) => ({
@@ -162,7 +158,7 @@ const Khatma = () => {
                   translation: frenchData.data.ayahs[index].text,
                   numberInSurah: ayah.numberInSurah,
                   surahName: ayah.surah.englishName,
-                  audio: audioData.data.ayahs[index].audio // URL Audio MP3
+                  audio: audioData?.data?.ayahs?.[index]?.audio // URL audio MP3 (si disponible)
               }));
               setVerses(mergedVerses);
               // Précharger le premier audio

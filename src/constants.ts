@@ -1,32 +1,6 @@
 
-import type { Speaker, DonationCampaign, ProphetStory } from './types';
+import type { DonationCampaign, ProphetStory } from './types';
 
-export const SPEAKERS: Speaker[] = [
-    {
-        id: 'diane',
-        name: 'Oustaz Diané',
-        role: 'Le Savant du Comparatisme',
-        bio: 'Figure emblématique de la DDR, Oustaz Diané est reconnu pour sa maîtrise exceptionnelle des textes bibliques et coraniques. Sa pédagogie et sa rigueur scientifique ont guidé des milliers de personnes vers la vérité.',
-        imageUrl: '/images/oustaz-diane.jpg', // déposer la vraie photo dans public/images/ (sinon initiales)
-        socials: {
-            facebook: 'https://www.facebook.com/Oustazdianeoff',
-            youtube: 'https://www.youtube.com/@ddrlavraiechaine',
-            tiktok: 'https://www.tiktok.com/@ddrofficielle'
-        }
-    },
-    {
-        id: 'aka',
-        name: 'Ismaël Aka',
-        role: 'Le Stratège du Débat',
-        bio: 'Redoutable débatteur, Ismaël Aka se distingue par son éloquence et sa capacité à déconstruire les arguments complexes avec simplicité. Il est un pilier de la Dawa de rue en Côte d\'Ivoire.',
-        imageUrl: '/images/ismael-aka.jpg',
-        socials: {
-            facebook: 'https://www.facebook.com/ismaelAKAofficiel',
-            youtube: 'https://www.youtube.com/@ddrlavraiechaine',
-            tiktok: 'https://www.tiktok.com/@ddrofficielle'
-        }
-    }
-];
 
 export const PROPHET_STORIES: ProphetStory[] = [
     {
@@ -162,16 +136,3 @@ export const COUNTRY_CODES = [
     { code: '+44', flag: '🇬🇧' },
 ];
 
-// Liens officiels (à vérifier avec la DDR)
-export const SOCIAL_LINKS = {
-    youtube: 'https://www.youtube.com/@ddrlavraiechaine',
-    tiktok: 'https://www.tiktok.com/@ddrofficielle',
-    facebook: 'https://www.facebook.com/Oustazdianeoff',
-};
-
-export const CONTACT = {
-    phones: ['+225 07 47 32 04 55', '+225 05 05 40 86 85'],
-    whatsapp: '2250747320455',
-    email: 'ladawahdanslarue.ddr@gmail.com',
-    address: "Yopougon Andokoi, en face du commissariat du 23ᵉ arrondissement, Abidjan",
-};

@@ -292,3 +292,50 @@ export async function getAdminCounts() {
   ]);
   return { appointments: apts.count || 0, messages: msgs.count || 0, conversions: conv.count || 0 };
 }
+
+// ---------------------------------------------------------------------------
+// Contenu du site, photos et administrateurs
+// ---------------------------------------------------------------------------
+export async function saveSiteContent(content: unknown) {
+  unwrap(await db().from('settings').upsert({ key: 'site_content', value: content, updated_at: new Date().toISOString() }));
+}
+
+/** Envoie une photo dans l'espace public "media" et renvoie son adresse. */
+export async function uploadMedia(file: File, folder: 'speakers' | 'campaign' | 'news' | 'misc'): Promise<string> {
+  if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) throw new Error('Format accepté : JPG, PNG ou WebP.');
+  if (file.size > 5 * 1024 * 1024) throw new Error('Image trop lourde (5 Mo maximum).');
+  const ext = file.type.split('/')[1].replace('jpeg', 'jpg');
+  const path = `${folder}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+  unwrap(await db().storage.from('media').upload(path, file, { contentType: file.type, cacheControl: '31536000', upsert: false }));
+  return db().storage.from('media').getPublicUrl(path).data.publicUrl;
+}
+
+export type AdminUser = { userId: string; email: string; name: string; createdAt: string };
+export async function listAdmins(): Promise<AdminUser[]> {
+  const data = unwrap(await db().rpc('list_admins')) as any[];
+  return (data || []).map((r) => ({ userId: r.user_id, email: r.email, name: r.display_name || '', createdAt: r.created_at }));
+}
+export async function removeAdmin(userId: string) {
+  unwrap(await db().rpc('remove_admin', { target: userId }));
+}
+export async function createAdmin(a: { email: string; password: string; name: string }) {
+  const { data } = await db().auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Session expirée, reconnectez-vous.');
+  const r = await fetch('/api/admin-users', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+    body: JSON.stringify(a),
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.message || 'Création impossible.');
+}
+export async function getMyEmail(): Promise<string> {
+  const { data } = await db().auth.getSession();
+  return data.session?.user?.email || '';
+}
+export async function changeMyPassword(password: string) {
+  if (password.length < 10) throw new Error('Le mot de passe doit faire au moins 10 caractères.');
+  const { error } = await db().auth.updateUser({ password });
+  if (error) throw error;
+}

@@ -6,7 +6,8 @@ import {
 import PrayerTimes from '../components/PrayerTimes';
 import { LogoMark } from '../components/Logo';
 import { Avatar, ButtonLink, Container, Eyebrow, SectionHeading, formatFCFA } from '../components/ui';
-import { SPEAKERS, SCHOOL_CAMPAIGN, SOCIAL_LINKS } from '../constants';
+import { SCHOOL_CAMPAIGN } from '../constants';
+import { useSite } from '../lib/site';
 import { fetchNews, fetchYoutubeDebates } from '../services/socialService';
 import { getCampaign } from '../services/db';
 import type { Debate, DonationCampaign, NewsItem } from '../types';
@@ -85,7 +86,7 @@ const Hero = () => {
               maxLength={300}
               className="min-w-0 flex-1 bg-transparent py-2 text-base text-cream-50 placeholder:text-sand-500 focus:outline-none"
             />
-            <button className="shrink-0 rounded-full bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-500">Demander</button>
+            <button disabled={!q.trim()} className="shrink-0 rounded-full bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-500 disabled:opacity-50">Demander</button>
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {SUGGESTIONS.map((s) => (
@@ -132,7 +133,9 @@ const QuickAccess = () => (
   </Container>
 );
 
-const Preche = ({ videos }: { videos: Debate[] }) => (
+const Preche = ({ videos }: { videos: Debate[] }) => {
+  const site = useSite();
+  return (
   <section className="py-20 md:py-28">
     <Container>
       <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.15fr]">
@@ -142,26 +145,28 @@ const Preche = ({ videos }: { videos: Debate[] }) => (
             Le prêche du <span className="text-gradient-gold">jeudi</span>
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-sand-400">
-            Chaque jeudi à 16 h, la DDR vous donne rendez-vous place Ficgayo, à Yopougon. Un moment de partage, de questions-réponses et de fraternité, ouvert à tous, quelle que soit votre religion.
+            Chaque {site.preche.day} à {site.preche.time}, la DDR vous donne rendez-vous : {site.preche.place}. Un moment de partage, de questions-réponses et de fraternité, ouvert à tous, quelle que soit votre religion.
           </p>
           <dl className="mt-8 grid gap-3 sm:grid-cols-2">
             <div className="card flex items-center gap-3 p-4">
               <MapPin className="h-5 w-5 text-brand-400" />
               <div>
                 <dt className="text-xs font-bold uppercase tracking-wide text-sand-500">Lieu</dt>
-                <dd className="font-semibold text-cream-100">Place Ficgayo, Yopougon</dd>
+                <dd className="font-semibold text-cream-100">
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.preche.mapsQuery || site.preche.place)}`} target="_blank" rel="noopener noreferrer" className="hover:text-brand-300">{site.preche.place}</a>
+                </dd>
               </div>
             </div>
             <div className="card flex items-center gap-3 p-4">
               <Clock className="h-5 w-5 text-brand-400" />
               <div>
                 <dt className="text-xs font-bold uppercase tracking-wide text-sand-500">Heure</dt>
-                <dd className="font-semibold text-cream-100">Tous les jeudis · 16 h</dd>
+                <dd className="font-semibold text-cream-100">Chaque {site.preche.day} · {site.preche.time}</dd>
               </div>
             </div>
           </dl>
           <div className="mt-8 flex flex-wrap gap-3">
-            <ButtonLink href={SOCIAL_LINKS.youtube} className="!bg-red-600 hover:!bg-red-500 !shadow-none">
+            <ButtonLink href={site.social.youtube} className="!bg-red-600 hover:!bg-red-500 !shadow-none">
               <PlayCircle className="h-5 w-5" /> Suivre en direct sur YouTube
             </ButtonLink>
             <ButtonLink to="/appointments" variant="ghost">
@@ -181,7 +186,7 @@ const Preche = ({ videos }: { videos: Debate[] }) => (
               </div>
             </>
           ) : (
-            <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" className="card card-hover grid aspect-video place-items-center p-8 text-center">
+            <a href={site.social.youtube} target="_blank" rel="noopener noreferrer" className="card card-hover grid aspect-video place-items-center p-8 text-center">
               <span>
                 <PlayCircle className="mx-auto h-14 w-14 text-red-500" />
                 <span className="mt-4 block font-serif text-2xl text-cream-50">Toutes nos vidéos sur YouTube</span>
@@ -194,6 +199,7 @@ const Preche = ({ videos }: { videos: Debate[] }) => (
     </Container>
   </section>
 );
+};
 
 const VideoCard = ({ video, big = false }: { video: Debate; big?: boolean }) => (
   <Link to={`/debates?v=${video.id}`} className="group relative block overflow-hidden rounded-3xl border border-white/10 bg-night-800">
@@ -212,23 +218,26 @@ const VideoCard = ({ video, big = false }: { video: Debate; big?: boolean }) => 
   </Link>
 );
 
-const Speakers = () => (
+const Speakers = () => {
+  const site = useSite();
+  return (
   <section className="relative py-20 md:py-28">
     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-950/20 to-transparent" aria-hidden />
     <Container className="relative">
       <SectionHeading eyebrow="Nos prédicateurs" title="Les voix de la DDR" subtitle="Deux frères au service du dialogue, de la science et de la vérité, avec respect pour chacun." />
       <div className="grid gap-6 md:grid-cols-2">
-        {SPEAKERS.map((s) => (
+        {site.speakers.map((s) => (
           <article key={s.id} className="card card-hover flex flex-col gap-6 p-7 sm:flex-row sm:items-start">
-            <Avatar name={s.name} src={s.imageUrl} className="h-24 w-24 shrink-0 text-3xl" />
+            <Avatar name={s.name} src={s.photoUrl || undefined} className="h-24 w-24 shrink-0 text-3xl" />
             <div>
               <h3 className="font-serif text-2xl font-semibold text-cream-50">{s.name}</h3>
               <p className="text-sm font-bold text-brand-300">{s.role}</p>
               <p className="mt-3 text-[15px] leading-relaxed text-sand-400">{s.bio}</p>
               <div className="mt-4 flex gap-3 text-sm font-semibold">
-                {s.socials.facebook && <a href={s.socials.facebook} target="_blank" rel="noopener noreferrer" className="text-cream-200 hover:text-brand-300">Facebook</a>}
-                {s.socials.youtube && <a href={s.socials.youtube} target="_blank" rel="noopener noreferrer" className="text-cream-200 hover:text-brand-300">YouTube</a>}
-                {s.socials.tiktok && <a href={s.socials.tiktok} target="_blank" rel="noopener noreferrer" className="text-cream-200 hover:text-brand-300">TikTok</a>}
+                {s.whatsapp && <a href={`https://wa.me/${s.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-emerald-300 hover:text-emerald-200">WhatsApp</a>}
+                {s.facebook && <a href={s.facebook} target="_blank" rel="noopener noreferrer" className="text-cream-200 hover:text-brand-300">Facebook</a>}
+                {s.youtube && <a href={s.youtube} target="_blank" rel="noopener noreferrer" className="text-cream-200 hover:text-brand-300">YouTube</a>}
+                {s.tiktok && <a href={s.tiktok} target="_blank" rel="noopener noreferrer" className="text-cream-200 hover:text-brand-300">TikTok</a>}
               </div>
             </div>
           </article>
@@ -237,6 +246,7 @@ const Speakers = () => (
     </Container>
   </section>
 );
+};
 
 const Campaign = ({ c }: { c: DonationCampaign }) => {
   const pct = Math.min(100, Math.round((c.currentAmount / c.targetAmount) * 100));

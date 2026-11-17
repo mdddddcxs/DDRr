@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { AdminTitle, Empty, fmtDateTime, useAdminData } from '../../components/AdminLayout';
 import { Button, Notice } from '../../components/ui';
-import { deleteNews, listAllNews, saveNews } from '../../services/db';
+import { deleteNews, listAllNews, saveNews, uploadMedia } from '../../services/db';
+import { ImageField } from '../../components/forms';
 import type { NewsItem } from '../../types';
 
 type Draft = { id?: string; title: string; summary: string; body: string; imageUrl: string; category: NewsItem['category'] };
@@ -43,7 +44,7 @@ const AdminContent = () => {
           </div>
           <div><label className="label" htmlFor="n-sum">Résumé (affiché dans la liste)</label><textarea id="n-sum" rows={2} maxLength={400} value={draft.summary} onChange={(e) => setDraft({ ...draft, summary: e.target.value })} className="input" /></div>
           <div><label className="label" htmlFor="n-body">Texte complet</label><textarea id="n-body" rows={10} value={draft.body} onChange={(e) => setDraft({ ...draft, body: e.target.value })} className="input font-mono text-sm" placeholder="Astuce : **gras**, - liste, > citation" /></div>
-          <div><label className="label" htmlFor="n-img">Image (adresse https)</label><input id="n-img" value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} className="input" placeholder="https://…" /></div>
+          <ImageField id="n-img" label="Photo de l’article" value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} upload={(f) => uploadMedia(f, 'news')} />
           {err && <Notice tone="error">{err}</Notice>}
           <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setDraft(null)}>Annuler</Button><Button type="submit" disabled={saving}>{saving ? 'Publication…' : draft.id ? 'Enregistrer' : 'Publier'}</Button></div>
         </form>

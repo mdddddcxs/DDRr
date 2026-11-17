@@ -41,3 +41,59 @@ export const PhoneField = ({
 
 export const fullPhone = (country: string, number: string) => `${country} ${number.trim()}`;
 export const isPhoneValid = (number: string) => number.replace(/\D/g, '').length >= 8;
+
+/** Champ photo pour l'admin : envoi depuis le téléphone/ordinateur ou adresse https. */
+export const ImageField = ({
+  id,
+  label,
+  value,
+  onChange,
+  upload,
+  round = false,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+  upload: (file: File) => Promise<string>;
+  round?: boolean;
+}) => {
+  const [busy, setBusy] = React.useState(false);
+  const [err, setErr] = React.useState('');
+  const pick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    if (!f) return;
+    setBusy(true);
+    setErr('');
+    try {
+      onChange(await upload(f));
+    } catch (x: any) {
+      setErr(x?.message || 'Envoi impossible.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div>
+      <span className="label">{label}</span>
+      <div className="flex items-center gap-4">
+        <div className={`h-20 w-20 shrink-0 overflow-hidden bg-night-800 ring-1 ring-white/10 ${round ? 'rounded-full' : 'rounded-xl'}`}>
+          {value ? <img src={value} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-xs text-sand-500">Aucune</span>}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <label htmlFor={id} className={`cursor-pointer rounded-full bg-brand-600 px-4 py-2 text-sm font-bold text-white hover:bg-brand-500 ${busy ? 'pointer-events-none opacity-60' : ''}`}>
+            {busy ? 'Envoi…' : value ? 'Changer la photo' : 'Choisir une photo'}
+          </label>
+          <input id={id} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={pick} />
+          {value && (
+            <button type="button" onClick={() => onChange('')} className="rounded-full bg-white/5 px-4 py-2 text-sm font-bold text-sand-400 hover:text-white">
+              Retirer
+            </button>
+          )}
+        </div>
+      </div>
+      {err && <p className="mt-2 text-sm text-red-300">{err}</p>}
+    </div>
+  );
+};

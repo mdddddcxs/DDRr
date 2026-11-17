@@ -11,7 +11,7 @@ import { subscribeNewsletter } from '../services/db';
 import { friendlyError } from '../lib/supabase';
 import { Honeypot, Spinner } from './ui';
 import type { Debate } from '../types';
-import { SOCIAL_LINKS } from '../constants';
+import { telHref, useSite } from '../lib/site';
 
 type NavItem = { name: string; path: string; desc?: string; icon?: React.ComponentType<{ className?: string }> };
 type NavGroup = { name: string; items: NavItem[] };
@@ -64,7 +64,9 @@ const Dropdown = ({ group, active }: { group: NavGroup; active: boolean }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const location = useLocation();
-  useEffect(() => setOpen(false), [location.pathname]);
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
   useEffect(() => {
     const onDoc = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
     document.addEventListener('mousedown', onDoc);
@@ -73,8 +75,10 @@ const Dropdown = ({ group, active }: { group: NavGroup; active: boolean }) => {
   return (
     <div ref={ref} className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
         aria-expanded={open}
+        aria-haspopup="true"
         className={`flex items-center gap-1 rounded-full px-3.5 py-2 text-[14px] font-semibold transition ${active ? 'text-brand-300' : 'text-cream-200 hover:text-white'}`}
       >
         {group.name}
@@ -136,11 +140,14 @@ const Newsletter = () => {
 };
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const site = useSite();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => setMobileOpen(false), [location.pathname]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -264,13 +271,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </p>
               <p className="font-serif text-sm italic text-brand-300">« Pour ma foi et pour ma religion »</p>
               <div className="flex gap-2">
-                <Social href={SOCIAL_LINKS.youtube} label="YouTube">
+                <Social href={site.social.youtube} label="YouTube">
                   <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6z" />
                 </Social>
-                <Social href={SOCIAL_LINKS.tiktok} label="TikTok">
+                <Social href={site.social.tiktok} label="TikTok">
                   <path d="M12.5 0h3.9c.1 1.5.6 3.1 1.8 4.2 1.1 1.1 2.7 1.6 4.2 1.8V10a10 10 0 0 1-5.8-1.9v8.8c-.1 1.4-.5 2.8-1.4 3.9a7.3 7.3 0 0 1-5.9 3.2 7.2 7.2 0 0 1-7.9-6.6c-.5-2.2-.1-4.6 1-6.6a7.2 7.2 0 0 1 10.4-3.6V11a3.6 3.6 0 0 0-4.1-.4 3.4 3.4 0 0 0-1.6 4.6 3.5 3.5 0 0 0 3 2.5 3.4 3.4 0 0 0 4-2.4c.1-.5.1-1 .1-1.5z" />
                 </Social>
-                <Social href={SOCIAL_LINKS.facebook} label="Facebook">
+                {site.social.instagram && (
+                  <Social href={site.social.instagram} label="Instagram">
+                    <path d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zM17.3 5.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z" />
+                  </Social>
+                )}
+                <Social href={site.social.facebook} label="Facebook">
                   <path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12z" />
                 </Social>
               </div>
@@ -288,21 +300,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <FooterCol title="Nous trouver">
               <li className="flex gap-3 text-sm text-sand-400">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
-                <span>
-                  <strong className="block text-cream-100">Yopougon Andokoi</strong>
-                  En face du commissariat du 23ᵉ arrondissement, Abidjan
-                </span>
+                <span>{site.contact.address}</span>
               </li>
               <li className="flex gap-3 text-sm text-sand-400">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
                 <span className="flex flex-col">
-                  <a href="tel:+2250747320455" className="hover:text-white">+225 07 47 32 04 55</a>
-                  <a href="tel:+2250505408685" className="hover:text-white">+225 05 05 40 86 85</a>
+                  {site.contact.phones.map((p) => (
+                    <a key={p} href={telHref(p)} className="hover:text-white">{p}</a>
+                  ))}
                 </span>
               </li>
               <li className="flex gap-3 text-sm text-sand-400">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
-                <a href="mailto:ladawahdanslarue.ddr@gmail.com" className="break-all hover:text-white">ladawahdanslarue.ddr@gmail.com</a>
+                <a href={`mailto:${site.contact.email}`} className="break-all hover:text-white">{site.contact.email}</a>
               </li>
             </FooterCol>
 
@@ -311,8 +321,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <p className="mb-4 text-sm text-sand-400">Recevez les dates des prochains débats et conférences.</p>
               <Newsletter />
               <div className="mt-6 rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-sm text-sand-400">
-                <p className="font-bold text-cream-100">Prêche chaque jeudi · 16h</p>
-                Place Ficgayo, Yopougon
+                <p className="font-bold text-cream-100">Prêche chaque {site.preche.day} · {site.preche.time}</p>
+                {site.preche.place}
               </div>
             </div>
           </div>

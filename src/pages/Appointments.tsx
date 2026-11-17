@@ -4,12 +4,13 @@ import { Button, ButtonLink, Container, Honeypot, Notice, PageHero } from '../co
 import { PhoneField, fullPhone, isPhoneValid } from '../components/forms';
 import { submitAppointment } from '../services/db';
 import { friendlyError } from '../lib/supabase';
-import { CONTACT } from '../constants';
+import { telHref, useSite, waHref } from '../lib/site';
 
 const SUBJECTS = ['Question religieuse', 'Je souhaite devenir musulman', 'Don matériel / logistique', 'Proposition de débat', 'Presse / médias', 'Autre'];
 const today = () => new Date().toISOString().slice(0, 10);
 
 const Appointments = () => {
+  const site = useSite();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('+225');
   const [phone, setPhone] = useState('');
@@ -66,21 +67,21 @@ const Appointments = () => {
               <h2 className="font-serif text-2xl font-semibold text-cream-50">Besoin d’une réponse rapide ?</h2>
               <p className="mt-2 text-sm text-sand-400">Appelez-nous ou écrivez sur WhatsApp.</p>
               <div className="mt-5 space-y-3">
-                {CONTACT.phones.map((p) => (
-                  <a key={p} href={`tel:${p.replace(/\s/g, '')}`} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-brand-500/50">
+                {site.contact.phones.map((p) => (
+                  <a key={p} href={telHref(p)} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-brand-500/50">
                     <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-600 text-white"><Phone className="h-5 w-5" /></span>
                     <span className="font-mono text-lg font-bold text-cream-50">{p}</span>
                   </a>
                 ))}
-                <a href={`https://wa.me/${CONTACT.whatsapp}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 font-bold text-emerald-200 transition hover:bg-emerald-500/20">
+                <a href={waHref(site.contact.whatsapp)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 font-bold text-emerald-200 transition hover:bg-emerald-500/20">
                   <MessageCircle className="h-5 w-5" /> Écrire sur WhatsApp
                 </a>
               </div>
             </div>
             <div className="card p-6">
               <h3 className="flex items-center gap-2 font-bold text-cream-50"><MapPin className="h-5 w-5 text-brand-400" /> Siège</h3>
-              <p className="mt-2 text-sm leading-relaxed text-sand-400">{CONTACT.address}. Nous recevons sur rendez-vous confirmé.</p>
-              <a href="https://www.google.com/maps/search/?api=1&query=Yopougon+Andokoi+Abidjan" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-brand-300 hover:text-brand-200">
+              <p className="mt-2 text-sm leading-relaxed text-sand-400">{site.contact.address}. Nous recevons sur rendez-vous confirmé.</p>
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.contact.address)}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-brand-300 hover:text-brand-200">
                 Ouvrir dans Google Maps →
               </a>
             </div>

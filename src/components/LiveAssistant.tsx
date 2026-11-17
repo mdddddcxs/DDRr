@@ -15,7 +15,9 @@ const LiveAssistant = () => {
   const client = useRef<LiveClient | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => endRef.current?.scrollIntoView({ block: 'end' }), [messages, loading, open]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: 'end' });
+  }, [messages, loading, open]);
   useEffect(() => () => client.current?.disconnect(), []);
   useEffect(() => {
     if (!open && client.current) {

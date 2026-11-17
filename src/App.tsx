@@ -7,6 +7,7 @@ import Maintenance from './pages/Maintenance';
 import { checkIsAdmin, getMaintenance } from './services/db';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
+import { SiteProvider } from './lib/site';
 
 // Les pages sont chargées à la demande : le site s'ouvre plus vite, surtout sur mobile.
 const Chat = lazy(() => import('./pages/Chat'));
@@ -34,6 +35,7 @@ const AdminContent = lazy(() => import('./pages/Admin/AdminContent'));
 const AdminAppointments = lazy(() => import('./pages/Admin/AdminAppointments'));
 const AdminConversions = lazy(() => import('./pages/Admin/AdminConversions'));
 const AdminSettings = lazy(() => import('./pages/Admin/AdminSettings'));
+const AdminSite = lazy(() => import('./pages/Admin/AdminSite'));
 
 const PageLoader = () => (
   <div className="grid min-h-[50vh] place-items-center text-brand-400">
@@ -85,6 +87,7 @@ const AppRoutes = () => {
                     <Route path="donations" element={<AdminDonations />} />
                     <Route path="campaigns" element={<AdminCampaigns />} />
                     <Route path="content" element={<AdminContent />} />
+                    <Route path="site" element={<AdminSite />} />
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="*" element={<Navigate to="dashboard" replace />} />
                   </Routes>
@@ -128,7 +131,9 @@ const AppRoutes = () => {
 
 const App = () => (
   <BrowserRouter>
-    <AppRoutes />
+    <SiteProvider>
+      <AppRoutes />
+    </SiteProvider>
   </BrowserRouter>
 );
 

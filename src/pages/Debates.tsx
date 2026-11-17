@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import { PlayCircle, Search, X } from 'lucide-react';
 import { ButtonLink, Container, PageHero } from '../components/ui';
 import { fetchYoutubeDebates } from '../services/socialService';
-import { SOCIAL_LINKS } from '../constants';
+import { useSite } from '../lib/site';
 import type { Debate } from '../types';
 
 const Debates = () => {
+  const site = useSite();
   const [videos, setVideos] = useState<Debate[] | null>(null);
   const [query, setQuery] = useState('');
   const [params, setParams] = useSearchParams();
@@ -82,7 +83,7 @@ const Debates = () => {
             <PlayCircle className="mx-auto h-14 w-14 text-red-500" />
             <h2 className="mt-4 font-serif text-2xl font-semibold text-cream-50">Retrouvez toutes nos vidéos sur YouTube</h2>
             <p className="mt-2 text-sand-400">Débats, prêches du jeudi et directs : abonnez-vous pour ne rien manquer.</p>
-            <ButtonLink href={SOCIAL_LINKS.youtube} className="mt-6 !bg-red-600 hover:!bg-red-500">Ouvrir la chaîne YouTube</ButtonLink>
+            <ButtonLink href={site.social.youtube} className="mt-6 !bg-red-600 hover:!bg-red-500">Ouvrir la chaîne YouTube</ButtonLink>
           </div>
         ) : list.length === 0 ? (
           <p className="py-16 text-center text-sand-400">Aucune vidéo ne correspond à « {query} ».</p>
@@ -112,7 +113,7 @@ const Debates = () => {
 
         {videos && videos.length > 0 && (
           <div className="mt-12 text-center">
-            <ButtonLink href={SOCIAL_LINKS.youtube} variant="ghost">Voir toutes les vidéos sur YouTube</ButtonLink>
+            <ButtonLink href={site.social.youtube} variant="ghost">Voir toutes les vidéos sur YouTube</ButtonLink>
           </div>
         )}
       </Container>

@@ -4,7 +4,7 @@ import { Button, ButtonLink, Container, Honeypot, Notice, PageHero } from '../co
 import { PhoneField, fullPhone, isPhoneValid } from '../components/forms';
 import { submitTestimony } from '../services/db';
 import { friendlyError } from '../lib/supabase';
-import { SOCIAL_LINKS } from '../constants';
+import { useSite } from '../lib/site';
 
 const MAX_SECONDS = 180;
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -67,6 +67,7 @@ function useRecorder() {
 }
 
 const Conversions = () => {
+  const site = useSite();
   const [mode, setMode] = useState<'text' | 'audio'>('text');
   const [name, setName] = useState('');
   const [country, setCountry] = useState('+225');
@@ -113,7 +114,7 @@ const Conversions = () => {
         title={<>Votre chemin vers la foi <span className="text-gradient-gold">peut en guider d’autres</span></>}
         subtitle="Vous avez embrassé l’Islam, ou une parole de la DDR vous a touché ? Partagez votre histoire, par écrit ou en message vocal. Nous la lirons avec soin."
       >
-        <ButtonLink href={SOCIAL_LINKS.youtube} variant="ghost">Voir les témoignages en vidéo</ButtonLink>
+        <ButtonLink href={site.social.youtube} variant="ghost">Voir les témoignages en vidéo</ButtonLink>
       </PageHero>
 
       <Container className="pb-10">

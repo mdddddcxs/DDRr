@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { AdminTitle, useAdminData } from '../../components/AdminLayout';
 import { Button, Notice, formatFCFA } from '../../components/ui';
-import { getCampaign, updateCampaign } from '../../services/db';
+import { getCampaign, updateCampaign, uploadMedia } from '../../services/db';
+import { ImageField } from '../../components/forms';
 
 const AdminCampaigns = () => {
   const { data: c, reload } = useAdminData(() => getCampaign());
@@ -38,7 +39,7 @@ const AdminCampaigns = () => {
         <div><label className="label" htmlFor="c-title">Titre</label><input id="c-title" required maxLength={200} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="input" /></div>
         <div><label className="label" htmlFor="c-desc">Description</label><textarea id="c-desc" rows={5} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="input" /></div>
         <div><label className="label" htmlFor="c-target">Objectif (F CFA)</label><input id="c-target" type="number" min={1} value={form.target} onChange={(e) => setForm({ ...form, target: e.target.value })} className="input" /></div>
-        <div><label className="label" htmlFor="c-img">Image (adresse https, facultatif)</label><input id="c-img" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} className="input" placeholder="https://…" /></div>
+        <ImageField id="c-img" label="Photo du projet (chantier, maquette…)" value={form.imageUrl} onChange={(url) => setForm({ ...form, imageUrl: url })} upload={(f) => uploadMedia(f, 'campaign')} />
         {err && <Notice tone="error">{err}</Notice>}
         {state === 'saved' && <Notice tone="success">Campagne mise à jour.</Notice>}
         <Button type="submit" disabled={state === 'saving' || !c}>{state === 'saving' ? 'Enregistrement…' : 'Enregistrer'}</Button>

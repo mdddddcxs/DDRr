@@ -183,7 +183,7 @@ const Tools = () => {
               if (navigator.canShare && navigator.canShare({ files: [file] })) {
                   await navigator.share({
                       title: 'Rappel DDR',
-                      text: `"${currentQuote.french}" - Créé sur ddr.ci`,
+                      text: `"${currentQuote.french}" - La DDR (Dawah dans la rue)`,
                       files: [file]
                   });
               } else {
@@ -524,7 +524,7 @@ const Tools = () => {
                                     <div className={`inline-block border-t border-b py-1 px-4 mb-2 ${currentTemplate.text} border-current opacity-80`}>
                                         <p className="text-xs font-bold uppercase tracking-[0.2em]">{currentQuote.source}</p>
                                     </div>
-                                    <p className={`text-[10px] uppercase tracking-widest opacity-60 ${currentTemplate.text}`}>www.ddr.ci</p>
+                                    <p className={`text-[10px] uppercase tracking-widest opacity-60 ${currentTemplate.text}`}>La DDR · Dawah dans la rue</p>
                                 </div>
                             </div>
                         </div>

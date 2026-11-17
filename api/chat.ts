@@ -26,7 +26,16 @@ export async function POST(req: Request): Promise<Response> {
   const messages = raw
     .filter((m: any) => m && (m.role === 'user' || m.role === 'model') && typeof m.text === 'string' && m.text.trim())
     .slice(-MAX_MESSAGES)
-    .map((m: any) => ({ role: m.role, parts: [{ text: m.text.slice(0, MAX_CHARS) }] }));
+    .map((m: any) => ({ role: m.role as 'user' | 'model', text: String(m.text).slice(0, MAX_CHARS) }))
+    // Gemini attend une alternance user/model qui commence par user : on fusionne et on nettoie.
+    .reduce((acc: { role: 'user' | 'model'; text: string }[], m: { role: 'user' | 'model'; text: string }) => {
+      if (!acc.length && m.role === 'model') return acc;
+      const last = acc[acc.length - 1];
+      if (last && last.role === m.role) last.text += '\n' + m.text;
+      else acc.push({ ...m });
+      return acc;
+    }, [])
+    .map((m: { role: string; text: string }) => ({ role: m.role, parts: [{ text: m.text }] }));
   if (!messages.length || messages[messages.length - 1].role !== 'user') return json({ error: 'bad_request' }, 400);
 
   const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
