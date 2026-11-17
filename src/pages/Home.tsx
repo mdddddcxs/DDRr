@@ -228,7 +228,10 @@ const Speakers = () => {
       <div className="grid gap-6 md:grid-cols-2">
         {site.speakers.map((s) => (
           <article key={s.id} className="card card-hover flex flex-col gap-6 p-7 sm:flex-row sm:items-start">
-            <Avatar name={s.name} src={s.photoUrl || undefined} className="h-24 w-24 shrink-0 text-3xl" />
+            <figure className="shrink-0 text-center">
+              <Avatar name={s.name} src={s.photoUrl || undefined} className="h-28 w-28 text-3xl object-top ring-2 ring-brand-500/40" />
+              {s.photoUrl && s.photoCredit && <figcaption className="mt-1.5 text-[10px] text-sand-500">{s.photoCredit}</figcaption>}
+            </figure>
             <div>
               <h3 className="font-serif text-2xl font-semibold text-cream-50">{s.name}</h3>
               <p className="text-sm font-bold text-brand-300">{s.role}</p>

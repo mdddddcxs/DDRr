@@ -10,6 +10,7 @@ export type SpeakerInfo = {
   role: string;
   bio: string;
   photoUrl: string;
+  photoCredit?: string;
   facebook?: string;
   youtube?: string;
   tiktok?: string;
@@ -43,7 +44,8 @@ export const DEFAULT_SITE: SiteContent = {
       name: 'Oustaz Diané',
       role: 'Prédicateur, cofondateur de la DDR',
       bio: 'Surnommé « Ordinateur », Oustaz Diané compare la Bible et le Coran devant tous ceux qui veulent comprendre. Il anime chaque semaine le rappel de la DDR à Yopougon et intervient régulièrement dans les médias ivoiriens.',
-      photoUrl: '',
+      photoUrl: '/images/oustaz-diane.jpg',
+      photoCredit: 'Photo : The Code',
       youtube: 'https://www.youtube.com/@ddrlavraiechaine',
       whatsapp: '2250747320455',
     },
@@ -52,7 +54,8 @@ export const DEFAULT_SITE: SiteContent = {
       name: 'Ismaël Aka',
       role: 'Prédicateur et débatteur de la DDR',
       bio: 'Ismaël Aka répond aux questions du public et débat avec des contradicteurs de toutes convictions, avec une approche pensée pour parler aux jeunes. Ses débats sont suivis par des centaines de milliers de personnes sur les réseaux.',
-      photoUrl: '',
+      photoUrl: '/images/ismael-aka.jpg',
+      photoCredit: 'Photo : Ivoire 5G',
       facebook: 'https://www.facebook.com/ismaelAKAofficiel',
       tiktok: 'https://www.tiktok.com/@ismael.aka.ddr',
       whatsapp: '2250768973405',
@@ -93,6 +96,7 @@ export function mergeSite(raw: any): SiteContent {
           role: str(s?.role, ''),
           bio: str(s?.bio, ''),
           photoUrl: safeUrl(s?.photoUrl, ''),
+          photoCredit: str(s?.photoCredit, '').slice(0, 80),
           facebook: safeUrl(s?.facebook, ''),
           youtube: safeUrl(s?.youtube, ''),
           tiktok: safeUrl(s?.tiktok, ''),
@@ -107,7 +111,7 @@ export function safeUrl(v: any, d: string): string {
   if (typeof v !== 'string') return d;
   const t = v.trim();
   if (!t) return '';
-  return /^https:\/\/[^\s"'<>]+$/i.test(t) ? t : d;
+  return /^https:\/\/[^\s"'<>]+$/i.test(t) || /^\/images\/[\w.-]+$/.test(t) ? t : d;
 }
 
 export const telHref = (p: string) => `tel:${p.replace(/[^\d+]/g, '')}`;

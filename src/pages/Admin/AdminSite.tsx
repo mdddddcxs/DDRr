@@ -125,6 +125,7 @@ const AdminSite = () => {
               </div>
             </div>
             <ImageField id={`photo-${sp.id}`} label="Photo officielle" value={sp.photoUrl} onChange={(url) => setSpeaker(i, { photoUrl: url })} upload={(f) => uploadMedia(f, 'speakers')} round />
+            <Field id={`c-${sp.id}`} label="Crédit photo (ex. : Photo : DDR)" value={sp.photoCredit || ''} onChange={(v) => setSpeaker(i, { photoCredit: v })} />
             <Field id={`n-${sp.id}`} label="Nom" value={sp.name} onChange={(v) => setSpeaker(i, { name: v })} />
             <Field id={`r-${sp.id}`} label="Rôle" value={sp.role} onChange={(v) => setSpeaker(i, { role: v })} />
             <Field id={`b-${sp.id}`} label="Présentation" value={sp.bio} onChange={(v) => setSpeaker(i, { bio: v })} area />
