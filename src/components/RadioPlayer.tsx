@@ -1,5 +1,6 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ChevronDown, ListMusic, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
 
 interface Station {
     id: string;
@@ -71,262 +72,147 @@ const STATIONS: Station[] = [
     }
 ];
 
+/** Lecteur Coran discret : une pastille en bas à droite qui s'ouvre en petit lecteur. */
 const RadioPlayer = React.memo(() => {
-    const [currentStationIndex, setCurrentStationIndex] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isListOpen, setIsListOpen] = useState(false);
-    const [volume] = useState(0.8);
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const [isVisible, setIsVisible] = useState(true);
+  const [index, setIndex] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [showList, setShowList] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const station = STATIONS[index];
 
-    const station = STATIONS[currentStationIndex];
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a || !playing) return;
+    setError(false);
+    a.play().catch(() => {
+      setPlaying(false);
+      setError(true);
+    });
+  }, [index, playing]);
 
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume;
-        }
-    }, [volume]);
+  const toggle = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (playing) {
+      a.pause();
+      setPlaying(false);
+    } else {
+      setLoading(true);
+      setPlaying(true);
+    }
+  };
+  const go = (delta: number) => {
+    setIndex((i) => (i + delta + STATIONS.length) % STATIONS.length);
+    setPlaying(true);
+  };
 
-    useEffect(() => {
-        if (audioRef.current) {
-            // Utilisation de setTimeout pour éviter l'erreur de setState synchrone dans un effect
-            setTimeout(() => {
-                setIsLoading(true);
-                setHasError(false);
-            }, 0);
-            
-            audioRef.current.pause();
-            audioRef.current.load();
+  return (
+    <>
+      <audio
+        ref={audioRef}
+        src={station.url}
+        preload="none"
+        onEnded={() => go(1)}
+        onWaiting={() => setLoading(true)}
+        onPlaying={() => {
+          setLoading(false);
+          setError(false);
+        }}
+        onError={() => {
+          setLoading(false);
+          if (playing) {
+            setPlaying(false);
+            setError(true);
+          }
+        }}
+      />
 
-            if (isPlaying) {
-                const playPromise = audioRef.current.play();
-                if (playPromise !== undefined) {
-                    playPromise
-                        .then(() => setIsLoading(false))
-                        .catch((error) => {
-                            console.error("Erreur lecture:", error);
-                            setIsPlaying(false);
-                            setIsLoading(false);
-                        });
-                }
-            } else {
-                setTimeout(() => setIsLoading(false), 0);
-            }
-        }
-    }, [currentStationIndex, station.url, isPlaying]);
-
-    const changeStation = (index: number) => {
-        setCurrentStationIndex(index);
-        setIsListOpen(false);
-        setIsPlaying(true);
-    };
-
-    const togglePlay = () => {
-        if (!audioRef.current) return;
-        
-        if (isPlaying) {
-            audioRef.current.pause();
-            setIsPlaying(false);
-        } else {
-            setIsLoading(true);
-            setHasError(false);
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => setIsLoading(false))
-                    .catch(e => {
-                        console.error("Erreur lecture:", e);
-                        setIsPlaying(false);
-                        setIsLoading(false);
-                        setHasError(true);
-                    });
-            }
-        }
-    };
-
-    if (!isVisible) return (
-        <button 
-            onClick={() => setIsVisible(true)}
-            className="fixed bottom-24 right-4 z-[55] bg-black border border-brand-500 text-white p-3 rounded-xl shadow-[0_0_20px_rgba(234,88,12,0.5)] hover:scale-110 transition flex items-center justify-center group overflow-hidden"
-            title="Ouvrir le Lecteur Coran"
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="fixed bottom-5 right-4 z-40 flex items-center gap-2.5 rounded-full border border-gold-400/25 bg-night-900/90 py-2 pl-2 pr-4 text-sm font-bold text-cream-100 shadow-2xl backdrop-blur-xl transition hover:border-gold-400/60"
+          aria-label="Ouvrir le lecteur de Coran"
         >
-             <div className="absolute inset-0 bg-brand-500 opacity-20 group-hover:opacity-30 transition"></div>
-             {/* ICONE RADIO RETRO */}
-             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="4" y="10" width="32" height="22" rx="3" fill="#1A1A1A" stroke="#EA580C" strokeWidth="2"/>
-                <circle cx="12" cy="21" r="5" stroke="#EA580C" strokeWidth="1.5"/>
-                <circle cx="12" cy="21" r="1.5" fill="#EA580C"/>
-                <rect x="20" y="14" width="12" height="4" rx="1" fill="#333"/>
-                <rect x="20" y="20" width="12" height="2" rx="1" fill="#333"/>
-                <rect x="20" y="24" width="12" height="2" rx="1" fill="#333"/>
-                <path d="M8 10L8 4" stroke="#EA580C" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="8" cy="4" r="2" fill="#EA580C"/>
-             </svg>
+          <span className={`grid h-9 w-9 place-items-center rounded-full ${playing ? 'bg-brand-600 text-white' : 'bg-gold-400/15 text-gold-300'}`}>
+            {playing ? <Equalizer /> : <Play className="h-4 w-4 translate-x-px" />}
+          </span>
+          <span className="hidden sm:inline">{playing ? station.name : 'Écouter le Coran'}</span>
         </button>
-    );
-
-    return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 flex flex-col items-end pointer-events-none">
-            
-            <div className={`w-full md:w-96 bg-black/95 backdrop-blur-xl border-t md:border-l md:border-t border-brand-500/30 shadow-2xl transition-all duration-300 pointer-events-auto ${isListOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 h-0'}`}>
-                <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-brand-900/10">
-                    <h3 className="text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        Playlist Coranique
-                    </h3>
-                    <button onClick={() => setIsListOpen(false)} className="text-gray-400 hover:text-white">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                    </button>
-                </div>
-                <div className="max-h-60 overflow-y-auto custom-scrollbar p-2 space-y-2">
-                    {STATIONS.map((s, idx) => (
-                        <button 
-                            key={s.id}
-                            onClick={() => changeStation(idx)}
-                            className={`w-full flex items-center gap-4 p-3 rounded-lg transition-all group ${currentStationIndex === idx ? 'bg-brand-900/40 border border-brand-500/50' : 'hover:bg-gray-900 border border-transparent'}`}
-                        >
-                            <div className={`w-10 h-10 rounded flex items-center justify-center font-bold text-lg ${currentStationIndex === idx ? 'bg-brand-500 text-black' : 'bg-gray-800 text-gray-400 group-hover:bg-gray-700'}`}>
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                            </div>
-                            <div className="text-left flex-1">
-                                <div className="flex justify-between">
-                                    <span className={`font-bold text-sm ${currentStationIndex === idx ? 'text-white' : 'text-gray-300'}`}>{s.name}</span>
-                                    <span className="text-xs font-mono text-brand-500">{s.frequency}</span>
-                                </div>
-                                <p className="text-xs text-gray-500">{s.description}</p>
-                            </div>
-                        </button>
-                    ))}
-                </div>
+      ) : (
+        <div className="fixed bottom-5 right-4 z-40 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-3xl border border-white/10 bg-night-900/95 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl animate-fade-up">
+          <div className="flex items-center justify-between px-5 pt-4">
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-gold-300">Récitation · Mishary Alafasy</span>
+            <button onClick={() => setOpen(false)} className="rounded-full p-1.5 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Réduire le lecteur">
+              <ChevronDown className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="px-5 pb-4 pt-2">
+            <p className="font-serif text-xl font-semibold text-cream-50">{station.name}</p>
+            <p className="text-sm text-sand-400">{error ? 'Lecture impossible pour le moment. Réessayez.' : station.description}</p>
+            <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10">
+              {playing && <div className={`h-full w-full bg-gradient-to-r from-brand-600 via-gold-300 to-brand-600 bg-[length:200%_100%] ${loading ? 'animate-shimmer opacity-60' : 'animate-shimmer'}`} />}
             </div>
-
-            <div className="w-full bg-[#09090b] border-t border-gray-800 shadow-[0_-5px_30px_rgba(0,0,0,0.9)] text-white pointer-events-auto relative">
-                
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gray-900">
-                    {isPlaying && !isLoading && !hasError && (
-                        <div className="h-full bg-gradient-to-r from-brand-600 via-yellow-500 to-brand-600 animate-[shimmer_2s_infinite_linear] w-full"></div>
-                    )}
-                    {isLoading && (
-                        <div className="h-full bg-brand-500 w-1/3 animate-[slide_1s_infinite_ease-in-out]"></div>
-                    )}
-                    {hasError && (
-                        <div className="h-full bg-red-600 w-full"></div>
-                    )}
-                </div>
-
-                <audio 
-                    ref={audioRef} 
-                    src={station.url}
-                    crossOrigin="anonymous"
-                    onEnded={() => {
-                        const next = (currentStationIndex + 1) % STATIONS.length;
-                        changeStation(next);
-                    }}
-                    onError={(e) => {
-                        console.log("Erreur flux audio", e);
-                        setIsLoading(false);
-                        setIsPlaying(false);
-                        setHasError(true);
-                    }}
-                    onPlaying={() => {
-                        setIsLoading(false);
-                        setHasError(false);
-                    }}
-                    onWaiting={() => setIsLoading(true)}
-                />
-
-                <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
-                    
-                    <div className="flex items-center gap-4 flex-1 overflow-hidden">
-                        {/* ICONE RADIO AVANCEE */}
-                        <div className="relative group cursor-pointer w-12 h-12 shrink-0" onClick={() => setIsListOpen(!isListOpen)}>
-                            <svg width="100%" height="100%" viewBox="0 0 40 40" fill="none" className={`transition-all duration-500 ${isPlaying ? 'drop-shadow-[0_0_8px_rgba(234,88,12,0.8)]' : 'grayscale opacity-70'}`}>
-                                <rect x="4" y="10" width="32" height="22" rx="3" fill="#1A1A1A" stroke={isPlaying ? "#EA580C" : "#555"} strokeWidth="2"/>
-                                <circle cx="12" cy="21" r="5" stroke={isPlaying ? "#EA580C" : "#555"} strokeWidth="1.5"/>
-                                <circle cx="12" cy="21" r="1.5" fill={isPlaying ? "#EA580C" : "#555"}/>
-                                <rect x="20" y="14" width="12" height="4" rx="1" fill="#333"/>
-                                <rect x="20" y="20" width="12" height="2" rx="1" fill="#333"/>
-                                <path d="M8 10L8 4" stroke={isPlaying ? "#EA580C" : "#555"} strokeWidth="2" strokeLinecap="round"/>
-                                <circle cx="8" cy="4" r="2" fill={isPlaying ? "#EA580C" : "#555"}/>
-                            </svg>
-                        </div>
-                        
-                        <div className="flex flex-col overflow-hidden">
-                            <div className="flex items-center gap-2">
-                                <span className={`text-[10px] font-bold px-1.5 rounded flex items-center gap-1 uppercase tracking-wider ${hasError ? 'bg-red-500/20 text-red-500' : isPlaying ? 'bg-green-500/20 text-green-500' : 'bg-gray-800 text-gray-500'}`}>
-                                    {hasError ? 'ERREUR' : isPlaying ? 'LECTURE' : 'PAUSE'}
-                                </span>
-                                <span className="text-[10px] text-brand-500 font-mono hidden sm:block">{station.frequency}</span>
-                            </div>
-                            <h4 className="font-bold text-sm md:text-lg text-white truncate leading-tight mt-0.5">{station.name}</h4>
-                            <p className="text-xs text-gray-500 truncate">{station.description}</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        <button 
-                            onClick={() => {
-                                const prev = (currentStationIndex - 1 + STATIONS.length) % STATIONS.length;
-                                changeStation(prev);
-                            }}
-                            className="text-gray-500 hover:text-white hidden sm:block transition"
-                        >
-                            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                        </button>
-
-                        <button 
-                            onClick={togglePlay}
-                            disabled={isLoading}
-                            className={`w-14 h-14 rounded-full flex items-center justify-center transition shadow-lg border-4 ${
-                                isPlaying 
-                                ? 'bg-black border-brand-500 text-brand-500 shadow-[0_0_20px_rgba(234,88,12,0.4)]' 
-                                : hasError 
-                                    ? 'bg-red-900 border-red-700 text-white'
-                                    : 'bg-brand-600 border-brand-600 text-white hover:bg-brand-500'
-                            }`}
-                        >
-                            {isLoading ? (
-                                <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            ) : isPlaying ? (
-                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                            ) : (
-                                <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            )}
-                        </button>
-
-                        <button 
-                            onClick={() => {
-                                const next = (currentStationIndex + 1) % STATIONS.length;
-                                changeStation(next);
-                            }}
-                            className="text-gray-500 hover:text-white hidden sm:block transition"
-                        >
-                            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-4 flex-1 justify-end">
-                        <button 
-                            onClick={() => setIsListOpen(!isListOpen)}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition ${isListOpen ? 'bg-brand-600 border-brand-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'}`}
-                        >
-                            <span className="hidden md:inline">Sourates</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-                        </button>
-
-                        <button 
-                            onClick={() => setIsVisible(false)}
-                            className="text-gray-600 hover:text-red-500 transition ml-2"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-                </div>
+            <div className="mt-4 flex items-center justify-between">
+              <button onClick={() => setShowList((v) => !v)} className={`rounded-full p-2.5 transition ${showList ? 'bg-brand-500/20 text-brand-300' : 'text-sand-400 hover:bg-white/5 hover:text-white'}`} aria-label="Liste des sourates">
+                <ListMusic className="h-5 w-5" />
+              </button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => go(-1)} className="rounded-full p-2.5 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Sourate précédente">
+                  <SkipBack className="h-5 w-5" />
+                </button>
+                <button onClick={toggle} className="grid h-14 w-14 place-items-center rounded-full bg-brand-600 text-white shadow-[0_10px_30px_-8px_rgba(234,88,12,0.8)] transition hover:bg-brand-500" aria-label={playing ? 'Pause' : 'Lecture'}>
+                  {playing && loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" /> : playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 translate-x-0.5" />}
+                </button>
+                <button onClick={() => go(1)} className="rounded-full p-2.5 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Sourate suivante">
+                  <SkipForward className="h-5 w-5" />
+                </button>
+              </div>
+              <button
+                onClick={() => {
+                  audioRef.current?.pause();
+                  setPlaying(false);
+                  setOpen(false);
+                }}
+                className="rounded-full p-2.5 text-sand-400 hover:bg-white/5 hover:text-white"
+                aria-label="Arrêter"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
+          </div>
+          {showList && (
+            <ul className="max-h-60 overflow-y-auto border-t border-white/5 p-2">
+              {STATIONS.map((s, i) => (
+                <li key={s.id}>
+                  <button
+                    onClick={() => {
+                      setIndex(i);
+                      setPlaying(true);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${i === index ? 'bg-brand-500/15 text-brand-200' : 'text-cream-200 hover:bg-white/5'}`}
+                  >
+                    <span className="font-semibold">{s.name}</span>
+                    <span className="text-xs text-sand-500">{s.description}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-    );
+      )}
+    </>
+  );
 });
+
+const Equalizer = () => (
+  <span className="flex h-4 items-end gap-[3px]" aria-hidden>
+    {[0, 1, 2].map((i) => (
+      <span key={i} className="w-[3px] rounded-full bg-white" style={{ height: '100%', animation: `float ${0.6 + i * 0.2}s ease-in-out infinite`, transformOrigin: 'bottom' }} />
+    ))}
+  </span>
+);
 
 export default RadioPlayer;

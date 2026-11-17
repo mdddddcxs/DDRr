@@ -39,7 +39,7 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
   {
     id: '5',
     question: "Qu'est-ce que la DDR ?",
-    answer: "La DDR (Dawa Dans la Rue) est une association basée en Côte d'Ivoire, dirigée par Oustaz Diane. Son objectif est de propager le message de l'Islam à travers le dialogue interreligieux, la science et la sagesse, notamment par des débats publics et des prêches hebdomadaires.",
+    answer: "La DDR (Dawa Dans la Rue) est une association basée en Côte d'Ivoire, dirigée par Oustaz Diané. Son objectif est de propager le message de l'Islam à travers le dialogue interreligieux, la science et la sagesse, notamment par des débats publics et des prêches hebdomadaires.",
     keywords: ['ddr', 'association', 'dawa', 'oustaz diane', 'cote d\'ivoire'],
     category: 'ddr'
   },

@@ -1,222 +1,129 @@
+import React, { useEffect, useState } from 'react';
+import { HandHeart, MessageCircle, Package, Phone, ShieldCheck, Smartphone } from 'lucide-react';
+import { ButtonLink, Container, Eyebrow, PageHero, formatFCFA } from '../components/ui';
+import { CONTACT, SCHOOL_CAMPAIGN } from '../constants';
+import { getCampaign, getRecentDonations, type PublicDonation } from '../services/db';
+import type { DonationCampaign } from '../types';
 
-import React, { useState } from 'react';
-import { SCHOOL_CAMPAIGN, MOCK_DONATIONS } from '../constants';
-import { Donation } from '../types';
-import DonationModal from '../components/DonationModal';
-import { motion } from 'framer-motion';
-import { Heart, Users, ShieldCheck, Globe } from 'lucide-react';
+// Le paiement en ligne (Mobile Money) sera activé quand la DDR aura son propre compte marchand.
+// D'ici là, cette page explique comment donner en contactant directement l'association.
+const ONLINE_PAYMENT_READY = false;
+
+const timeAgo = (iso: string) => {
+  const d = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (d < 3600) return `il y a ${Math.max(1, Math.round(d / 60))} min`;
+  if (d < 86400) return `il y a ${Math.round(d / 3600)} h`;
+  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+};
 
 const Donations = () => {
-    const [showModal, setShowModal] = useState(false);
-    const [donations] = useState<Donation[]>(() => {
-        const stored = localStorage.getItem('ddr_donations');
-        const realDonations = stored ? JSON.parse(stored) : [];
-        const all = [...realDonations, ...MOCK_DONATIONS];
-        all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        return all.slice(0, 10);
-    });
-    const campaign = SCHOOL_CAMPAIGN;
-    const progress = (campaign.currentAmount / campaign.targetAmount) * 100;
+  const [c, setC] = useState<DonationCampaign>(SCHOOL_CAMPAIGN);
+  const [recent, setRecent] = useState<PublicDonation[]>([]);
+  useEffect(() => {
+    getCampaign().then(setC);
+    getRecentDonations(8).then(setRecent);
+  }, []);
+  const pct = Math.min(100, Math.round((c.currentAmount / c.targetAmount) * 100));
+  const waText = encodeURIComponent(`Assalamou alaykoum, je souhaite faire un don pour « ${c.title} ».`);
 
-    return (
-        <div className="min-h-screen bg-black text-white pt-24 pb-20 relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-600/10 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-600/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+  return (
+    <>
+      <PageHero
+        eyebrow="Sadaqa jariya"
+        title={<>Investir pour <span className="text-gradient-gold">l’éternité</span></>}
+        subtitle="Votre don n’est pas une dépense : c’est une aumône continue qui bénéficiera à des générations d’élèves et de fidèles."
+      />
+      <Container className="pb-10">
+        <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+          <article className="card overflow-hidden">
+            <div className="relative aspect-[16/8] bg-night-800">
+              {c.imageUrl && <img src={c.imageUrl} alt="" className="h-full w-full object-cover opacity-80" />}
+              <div className="absolute inset-0 bg-gradient-to-t from-night-900 via-night-900/30 to-transparent" />
+              <div className="absolute bottom-0 p-6 md:p-8">
+                <Eyebrow>Projet en cours</Eyebrow>
+                <h2 className="mt-3 font-serif text-3xl font-semibold text-cream-50 md:text-4xl">{c.title}</h2>
+              </div>
+            </div>
+            <div className="p-6 md:p-8">
+              <p className="text-lg leading-relaxed text-sand-400">{c.description}</p>
+              <div className="mt-8 flex items-end justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-sand-500">Collecté</p>
+                  <p className="font-serif text-4xl font-semibold text-white">{formatFCFA(c.currentAmount)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold uppercase tracking-wide text-sand-500">Objectif</p>
+                  <p className="text-xl font-bold text-cream-200">{formatFCFA(c.targetAmount)}</p>
+                </div>
+              </div>
+              <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+                <div className="h-full rounded-full bg-gradient-to-r from-brand-600 via-brand-400 to-gold-300" style={{ width: `${Math.max(pct, 2)}%` }} />
+              </div>
+              <p className="mt-2 text-sm font-bold text-brand-300">{pct}% de l’objectif</p>
+              <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+                {c.trustIndicators.map((t) => (
+                  <li key={t.title} className="rounded-2xl border border-white/5 bg-black/20 p-4">
+                    <span className="text-2xl" aria-hidden>{t.icon}</span>
+                    <p className="mt-2 font-bold text-cream-50">{t.title}</p>
+                    <p className="text-sm text-sand-400">{t.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </article>
+
+          <aside className="space-y-6">
+            <div className="card border-brand-500/25 p-6 md:p-8">
+              <h2 className="flex items-center gap-2 font-serif text-2xl font-semibold text-cream-50">
+                <HandHeart className="h-6 w-6 text-brand-400" /> Comment donner
+              </h2>
+              {!ONLINE_PAYMENT_READY && (
+                <p className="mt-3 rounded-2xl border border-gold-400/25 bg-gold-400/10 p-3 text-sm text-gold-200">
+                  <Smartphone className="mr-1 inline h-4 w-4" /> Le don en ligne par Wave, Orange Money et MTN arrive très bientôt. En attendant, contactez-nous : un responsable vous indique le numéro officiel de la DDR.
+                </p>
+              )}
+              <div className="mt-5 space-y-3">
+                <a href={`https://wa.me/${CONTACT.whatsapp}?text=${waText}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 py-3.5 font-bold text-white transition hover:bg-emerald-500">
+                  <MessageCircle className="h-5 w-5" /> Donner via WhatsApp
+                </a>
+                <a href={`tel:${CONTACT.phones[0].replace(/\s/g, '')}`} className="flex items-center justify-center gap-2 rounded-full border border-white/10 py-3.5 font-bold text-cream-100 transition hover:bg-white/5">
+                  <Phone className="h-5 w-5" /> Appeler {CONTACT.phones[0]}
+                </a>
+              </div>
+              <p className="mt-5 flex items-start gap-2 text-xs text-sand-500">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                Ne donnez qu’aux numéros communiqués par les responsables de la DDR. La DDR ne vous demandera jamais votre code secret.
+              </p>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 relative z-10">
-                {/* Header Section */}
-                <div className="text-center mb-16">
-                    <motion.span 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-block py-1.5 px-4 rounded-full bg-brand-900/30 border border-brand-500/30 text-brand-500 text-xs font-bold tracking-[0.2em] uppercase mb-6"
-                    >
-                        Sadaqa Jariya
-                    </motion.span>
-                    <motion.h1 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-extrabold text-white mb-6 font-serif"
-                    >
-                        Investir pour <span className="text-brand-500">l'Éternité</span>
-                    </motion.h1>
-                    <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed"
-                    >
-                        Votre don n'est pas une dépense, c'est un placement auprès d'Allah pour la construction d'un complexe éducatif et spirituel majeur.
-                    </motion.p>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                    {/* Left: Campaign Details */}
-                    <div className="lg:col-span-7 space-y-12">
-                        {/* Main Campaign Card */}
-                        <motion.div 
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="bg-[#0f0f11] border border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl"
-                        >
-                            <div className="h-80 relative overflow-hidden group">
-                                <img 
-                                    src={campaign.imageUrl} 
-                                    alt={campaign.title} 
-                                    className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f11] via-transparent to-transparent"></div>
-                                <div className="absolute bottom-8 left-8 right-8">
-                                    <h2 className="text-3xl font-bold text-white mb-2 font-serif">{campaign.title}</h2>
-                                    <p className="text-gray-300 text-sm flex items-center gap-2">
-                                        <Globe className="w-4 h-4 text-brand-500" />
-                                        Abidjan, Côte d'Ivoire
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="p-8 md:p-10">
-                                <p className="text-gray-400 text-lg leading-relaxed mb-10">
-                                    {campaign.description}
-                                </p>
-
-                                {/* Progress Stats */}
-                                <div className="space-y-6 mb-10">
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Récolté</p>
-                                            <p className="text-4xl font-mono font-bold text-white">{campaign.currentAmount.toLocaleString()} <span className="text-brand-500 text-xl">F</span></p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Objectif</p>
-                                            <p className="text-2xl font-mono font-bold text-gray-400">{campaign.targetAmount.toLocaleString()} F</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="relative h-4 bg-gray-900 rounded-full overflow-hidden border border-gray-800 shadow-inner">
-                                        <motion.div 
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${progress}%` }}
-                                            transition={{ duration: 1.5, ease: "easeOut" }}
-                                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-brand-700 via-brand-500 to-yellow-500 rounded-full"
-                                        >
-                                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-20"></div>
-                                        </motion.div>
-                                    </div>
-
-                                    <div className="flex justify-between text-sm font-bold">
-                                        <span className="text-brand-500">{Math.round(progress)}% complété</span>
-                                        <span className="text-gray-500">Il manque {(campaign.targetAmount - campaign.currentAmount).toLocaleString()} F</span>
-                                    </div>
-                                </div>
-
-                                <button 
-                                    onClick={() => setShowModal(true)}
-                                    className="w-full py-5 bg-brand-600 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(234,88,12,0.4)] hover:bg-brand-500 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 text-xl uppercase tracking-widest"
-                                >
-                                    <Heart className="w-6 h-6 fill-current" />
-                                    Faire un Don Maintenant
-                                </button>
-                            </div>
-                        </motion.div>
-
-                        {/* Trust Indicators Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {campaign.trustIndicators.map((item, idx) => (
-                                <motion.div 
-                                    key={idx}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.3 + (idx * 0.1) }}
-                                    className="bg-[#121214] border border-gray-800 p-6 rounded-3xl hover:border-brand-500/30 transition-colors group"
-                                >
-                                    <div className="text-3xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</div>
-                                    <h4 className="text-white font-bold mb-2">{item.title}</h4>
-                                    <p className="text-gray-500 text-sm leading-relaxed">{item.text}</p>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Right: Recent Donors & Transparency */}
-                    <div className="lg:col-span-5 space-y-8">
-                        {/* Recent Donors List */}
-                        <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="bg-[#0f0f11] border border-gray-800 rounded-[2.5rem] p-8 shadow-xl"
-                        >
-                            <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <Users className="w-5 h-5 text-brand-500" />
-                                    Derniers Donateurs
-                                </h3>
-                                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Temps réel</span>
-                            </div>
-
-                            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                                {donations.map((don, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-black/40 border border-gray-800/50 hover:border-brand-500/30 transition-all group">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border ${don.isAnonymous ? 'bg-gray-900 border-gray-700 text-gray-500' : 'bg-brand-900/20 border-brand-500/30 text-brand-500'}`}>
-                                                {don.isAnonymous ? '?' : don.donorName?.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <p className={`text-sm font-bold ${don.isAnonymous ? 'text-gray-500 italic' : 'text-white'}`}>
-                                                    {don.donorName || 'Anonyme'}
-                                                </p>
-                                                <p className="text-[10px] text-gray-600 uppercase tracking-widest">{new Date(don.createdAt).toLocaleDateString()}</p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-brand-500 font-mono font-bold">+{don.amount.toLocaleString()} F</p>
-                                            <p className="text-[10px] text-gray-600 uppercase">{don.method}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-8 pt-6 border-t border-gray-800 text-center">
-                                <p className="text-xs text-gray-500 italic">"Celui qui construit une mosquée pour Allah, Allah lui construit une demeure au Paradis."</p>
-                            </div>
-                        </motion.div>
-
-                        {/* Security & Transparency Card */}
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="bg-brand-900/10 border border-brand-500/20 rounded-[2rem] p-8"
-                        >
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 bg-brand-500/20 rounded-2xl flex items-center justify-center">
-                                    <ShieldCheck className="w-6 h-6 text-brand-500" />
-                                </div>
-                                <div>
-                                    <h4 className="text-white font-bold">100% Sécurisé</h4>
-                                    <p className="text-brand-400 text-xs uppercase font-bold tracking-widest">Paiement Certifié</p>
-                                </div>
-                            </div>
-                            <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                                Vos transactions sont traitées via CinetPay, leader du paiement en Afrique de l'Ouest. Nous ne stockons aucune information bancaire.
-                            </p>
-                            <div className="flex flex-wrap gap-3 opacity-50 grayscale hover:grayscale-0 transition-all">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" className="h-4" alt="Paypal" />
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-4" alt="Visa" />
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-4" alt="Mastercard" />
-                            </div>
-                        </motion.div>
-                    </div>
-                </div>
+            <div className="card p-6">
+              <h3 className="flex items-center gap-2 font-bold text-cream-50"><Package className="h-5 w-5 text-brand-400" /> Don matériel</h3>
+              <p className="mt-2 text-sm text-sand-400">Ciment, fer, chaises, livres, sonorisation… Dites-nous ce que vous souhaitez offrir, nous organisons la récupération.</p>
+              <ButtonLink to="/appointments" variant="ghost" size="sm" className="mt-4">Proposer un don matériel</ButtonLink>
             </div>
 
-            {showModal && <DonationModal onClose={() => setShowModal(false)} />}
+            {recent.length > 0 && (
+              <div className="card p-6">
+                <h3 className="font-bold text-cream-50">Derniers dons</h3>
+                <ul className="mt-4 divide-y divide-white/5">
+                  {recent.map((d) => (
+                    <li key={d.id} className="flex items-center justify-between py-3 text-sm">
+                      <span className="text-cream-200">{d.donorName}</span>
+                      <span className="text-right">
+                        <span className="block font-bold text-white">{formatFCFA(d.amount)}</span>
+                        <span className="text-xs text-sand-500">{timeAgo(d.createdAt)}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs text-sand-500">Qu’Allah accepte de chacun.</p>
+              </div>
+            )}
+          </aside>
         </div>
-    );
+      </Container>
+    </>
+  );
 };
 
 export default Donations;

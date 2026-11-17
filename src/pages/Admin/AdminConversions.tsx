@@ -1,0 +1,47 @@
+import React from 'react';
+import { Phone } from 'lucide-react';
+import { AdminTitle, Empty, fmtDateTime, useAdminData } from '../../components/AdminLayout';
+import { listConversionRequests, updateConversionStatus } from '../../services/db';
+import type { ConversionRequest } from '../../types';
+
+const LABEL: Record<ConversionRequest['status'], string> = { pending: 'À appeler', contacted: 'Contacté', done: 'Shahâda faite' };
+
+const AdminConversions = () => {
+  const { data, error, reload } = useAdminData(listConversionRequests);
+  const set = async (id: string, s: ConversionRequest['status']) => {
+    try {
+      await updateConversionStatus(id, s);
+      reload();
+    } catch (e: any) {
+      alert(e?.message || 'Erreur');
+    }
+  };
+  return (
+    <>
+      <AdminTitle title="Demandes de conversion" subtitle="Personnes souhaitant être accompagnées pour prononcer la shahâda. À rappeler rapidement." />
+      {error && <p className="mb-4 text-sm text-red-300">{error}</p>}
+      {data && data.length === 0 && <Empty>Aucune demande pour le moment.</Empty>}
+      <div className="space-y-4">
+        {(data || []).map((c) => (
+          <article key={c.id} className={`card p-5 ${c.status === 'pending' ? 'border-gold-400/30' : ''}`}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-bold text-cream-50">{c.name}</p>
+                <p className="text-sm text-sand-400">{c.location || 'Lieu non précisé'} · {c.method === 'video' ? 'Par appel / vidéo' : 'En personne'}</p>
+                <p className="text-xs text-sand-500">Reçu {fmtDateTime(c.createdAt)}</p>
+              </div>
+              <a href={`tel:${c.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 font-mono text-sm hover:bg-white/10"><Phone className="h-4 w-4" /> {c.phone}</a>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {(Object.keys(LABEL) as ConversionRequest['status'][]).map((s) => (
+                <button key={s} onClick={() => set(c.id, s)} className={`rounded-full px-4 py-2 text-sm font-bold ${c.status === s ? 'bg-brand-600 text-white' : 'bg-white/5 text-sand-400 hover:text-white'}`}>{LABEL[s]}</button>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+};
+
+export default AdminConversions;

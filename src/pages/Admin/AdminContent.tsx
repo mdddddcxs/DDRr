@@ -1,102 +1,69 @@
-
 import React, { useState } from 'react';
-import { MOCK_NEWS, MOCK_DEBATES, MOCK_CONVERSIONS } from '../../constants';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { AdminTitle, Empty, fmtDateTime, useAdminData } from '../../components/AdminLayout';
+import { Button, Notice } from '../../components/ui';
+import { deleteNews, listAllNews, saveNews } from '../../services/db';
+import type { NewsItem } from '../../types';
+
+type Draft = { id?: string; title: string; summary: string; body: string; imageUrl: string; category: NewsItem['category'] };
+const EMPTY: Draft = { title: '', summary: '', body: '', imageUrl: '', category: 'News' };
+const CAT: Record<NewsItem['category'], string> = { News: 'Actualité', Event: 'Événement', Announcement: 'Annonce' };
 
 const AdminContent = () => {
-  const [activeTab, setActiveTab] = useState<'news' | 'debates' | 'stories'>('news');
+  const { data, error, reload } = useAdminData(listAllNews);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState('');
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!draft) return;
+    if (draft.imageUrl && !/^https:\/\//.test(draft.imageUrl)) return setErr("L'image doit être une adresse https://");
+    setSaving(true);
+    setErr('');
+    try {
+      await saveNews(draft);
+      setDraft(null);
+      reload();
+    } catch (e: any) {
+      setErr(e?.message || 'Erreur');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
-       <div className="flex justify-between items-center pb-6 border-b border-gray-800">
-        <div>
-            <h1 className="text-3xl font-bold text-white">Gestion du Contenu</h1>
-            <p className="text-gray-500 mt-1">Publiez, modifiez ou supprimez les éléments du site.</p>
-        </div>
-        <button className="px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition transform">
-            + Créer Nouveau
-        </button>
+    <>
+      <AdminTitle title="Actualités" subtitle="Publiez les annonces, conférences et nouvelles de la DDR." action={!draft && <Button size="sm" onClick={() => setDraft({ ...EMPTY })}><Plus className="h-4 w-4" /> Nouvel article</Button>} />
+      {draft && (
+        <form onSubmit={save} className="card mb-8 space-y-4 p-6">
+          <div className="grid gap-4 md:grid-cols-[1fr_200px]">
+            <div><label className="label" htmlFor="n-title">Titre *</label><input id="n-title" required maxLength={200} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="input" /></div>
+            <div><label className="label" htmlFor="n-cat">Catégorie</label><select id="n-cat" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value as NewsItem['category'] })} className="input">{(Object.keys(CAT) as NewsItem['category'][]).map((k) => <option key={k} value={k} className="bg-night-900">{CAT[k]}</option>)}</select></div>
+          </div>
+          <div><label className="label" htmlFor="n-sum">Résumé (affiché dans la liste)</label><textarea id="n-sum" rows={2} maxLength={400} value={draft.summary} onChange={(e) => setDraft({ ...draft, summary: e.target.value })} className="input" /></div>
+          <div><label className="label" htmlFor="n-body">Texte complet</label><textarea id="n-body" rows={10} value={draft.body} onChange={(e) => setDraft({ ...draft, body: e.target.value })} className="input font-mono text-sm" placeholder="Astuce : **gras**, - liste, > citation" /></div>
+          <div><label className="label" htmlFor="n-img">Image (adresse https)</label><input id="n-img" value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} className="input" placeholder="https://…" /></div>
+          {err && <Notice tone="error">{err}</Notice>}
+          <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setDraft(null)}>Annuler</Button><Button type="submit" disabled={saving}>{saving ? 'Publication…' : draft.id ? 'Enregistrer' : 'Publier'}</Button></div>
+        </form>
+      )}
+      {error && <p className="mb-4 text-sm text-red-300">{error}</p>}
+      {data && data.length === 0 && !draft && <Empty>Aucun article. Cliquez sur « Nouvel article » pour commencer.</Empty>}
+      <div className="space-y-3">
+        {(data || []).map((n) => (
+          <article key={n.id} className="card flex items-center gap-4 p-4">
+            <div className="h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-night-800">{n.imageUrl && <img src={n.imageUrl} alt="" className="h-full w-full object-cover" />}</div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-bold text-cream-50">{n.title}</p>
+              <p className="text-xs text-sand-500">{CAT[n.category]} · {fmtDateTime(n.createdAt)}</p>
+            </div>
+            <button onClick={() => setDraft({ id: n.id, title: n.title, summary: n.content, body: n.body || '', imageUrl: n.imageUrl, category: n.category })} className="rounded-full p-2 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Modifier"><Pencil className="h-4 w-4" /></button>
+            <button onClick={async () => { if (confirm('Supprimer cet article ?')) { await deleteNews(n.id).catch((e) => alert(e.message)); reload(); } }} className="rounded-full p-2 text-red-300 hover:bg-red-500/10" aria-label="Supprimer"><Trash2 className="h-4 w-4" /></button>
+          </article>
+        ))}
       </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-gray-800">
-          <button 
-            onClick={() => setActiveTab('news')}
-            className={`px-6 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'news' ? 'border-brand-500 text-brand-500' : 'border-transparent text-gray-500 hover:text-white'}`}
-          >
-              Actualités ({MOCK_NEWS.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('debates')}
-            className={`px-6 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'debates' ? 'border-brand-500 text-brand-500' : 'border-transparent text-gray-500 hover:text-white'}`}
-          >
-              Débats & Vidéos ({MOCK_DEBATES.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('stories')}
-            className={`px-6 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'stories' ? 'border-brand-500 text-brand-500' : 'border-transparent text-gray-500 hover:text-white'}`}
-          >
-              Témoignages ({MOCK_CONVERSIONS.length})
-          </button>
-      </div>
-
-      {/* Content List */}
-      <div className="grid grid-cols-1 gap-4">
-          {activeTab === 'news' && MOCK_NEWS.map(item => (
-              <div key={item.id} className="bg-[#121214] border border-gray-800 p-4 rounded-xl flex gap-4 items-center group hover:border-brand-500/50 transition">
-                  <img src={item.imageUrl} className="w-24 h-24 object-cover rounded-lg bg-gray-900" alt="thumbnail" />
-                  <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                          <span className="bg-gray-800 text-gray-300 text-[10px] px-2 py-0.5 rounded uppercase font-bold">{item.category}</span>
-                          <span className="text-xs text-gray-500">{item.createdAt}</span>
-                      </div>
-                      <h3 className="font-bold text-white text-lg mb-1">{item.title}</h3>
-                      <p className="text-sm text-gray-400 line-clamp-1">{item.content}</p>
-                  </div>
-                  <div className="flex gap-2 opacity-50 group-hover:opacity-100 transition">
-                      <button className="p-2 hover:bg-brand-900/30 rounded text-brand-500">Modifier</button>
-                      <button className="p-2 hover:bg-red-900/30 rounded text-red-500">Supprimer</button>
-                  </div>
-              </div>
-          ))}
-
-          {activeTab === 'debates' && MOCK_DEBATES.map(item => (
-              <div key={item.id} className="bg-[#121214] border border-gray-800 p-4 rounded-xl flex gap-4 items-center group hover:border-brand-500/50 transition">
-                   <div className="w-32 h-20 bg-black rounded-lg relative overflow-hidden flex items-center justify-center">
-                       {/* Mock Thumbnail */}
-                       <img src={`https://img.youtube.com/vi/${item.id}/mqdefault.jpg`} className="w-full h-full object-cover opacity-60" alt="thumb" />
-                       <div className="absolute w-8 h-8 bg-red-600 rounded-full flex items-center justify-center shadow-lg">▶</div>
-                   </div>
-                   <div className="flex-1">
-                        <h3 className="font-bold text-white text-lg mb-1">{item.title}</h3>
-                        <p className="text-xs text-brand-500 font-bold uppercase">{item.speaker}</p>
-                        <p className="text-xs text-gray-500 mt-1">{item.location} • {item.date}</p>
-                   </div>
-                   <div className="flex gap-2 opacity-50 group-hover:opacity-100 transition">
-                      <button className="p-2 hover:bg-brand-900/30 rounded text-brand-500">Éditer</button>
-                  </div>
-              </div>
-          ))}
-
-          {activeTab === 'stories' && MOCK_CONVERSIONS.map(item => (
-              <div key={item.id} className="bg-[#121214] border border-gray-800 p-6 rounded-xl flex flex-col md:flex-row gap-6 group hover:border-brand-500/50 transition">
-                   <div className="flex items-center gap-4">
-                       <img src={item.mediaUrl} className="w-16 h-16 rounded-full border-2 border-gray-700 object-cover" alt="avatar" />
-                       <div>
-                           <h3 className="font-bold text-white">{item.name}</h3>
-                           <p className="text-xs text-gray-500">{item.date}</p>
-                       </div>
-                   </div>
-                   <div className="flex-1 bg-black/40 p-4 rounded-lg border border-gray-800/50 italic text-gray-300 text-sm">
-                       "{item.story}"
-                   </div>
-                   <div className="flex gap-2 opacity-50 group-hover:opacity-100 transition items-center">
-                      <button className="text-sm font-bold text-green-500 hover:underline">Publié</button>
-                      <button className="text-sm text-gray-500 hover:text-white">Retirer</button>
-                  </div>
-              </div>
-          ))}
-      </div>
-    </div>
+    </>
   );
 };
 

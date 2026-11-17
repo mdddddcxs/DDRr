@@ -1,150 +1,109 @@
+import React, { useEffect, useMemo, useState } from 'react';
 
-import React, { useState, useEffect } from 'react';
+type Timings = Record<'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha', string>;
+type Data = { timings: Timings; hijri: string; readable: string };
 
-interface PrayerData {
-  timings: {
-    Fajr: string;
-    Sunrise: string;
-    Dhuhr: string;
-    Asr: string;
-    Maghrib: string;
-    Isha: string;
-  };
-  date: {
-    readable: string;
-    hijri: {
-        date: string;
-        day: string;
-        month: { en: string; ar: string };
-        year: string;
-    }
-  };
-}
+const PRAYERS: { key: keyof Timings; fr: string; ar: string }[] = [
+  { key: 'Fajr', fr: 'Fajr', ar: 'الفجر' },
+  { key: 'Dhuhr', fr: 'Dhouhr', ar: 'الظهر' },
+  { key: 'Asr', fr: 'Asr', ar: 'العصر' },
+  { key: 'Maghrib', fr: 'Maghrib', ar: 'المغرب' },
+  { key: 'Isha', fr: 'Icha', ar: 'العشاء' },
+];
 
+const HIJRI_MONTHS_FR = ['Mouharram', 'Safar', 'Rabi al-awwal', 'Rabi ath-thani', 'Joumada al-oula', 'Joumada ath-thania', 'Rajab', 'Chaabane', 'Ramadan', 'Chawwal', 'Dhou al-qi’da', 'Dhou al-hijja'];
+
+const toMin = (t: string) => {
+  const [h, m] = t.split(' ')[0].split(':').map(Number);
+  return h * 60 + m;
+};
+
+/** Horaires de prière d'Abidjan (API Aladhan, méthode Ligue islamique mondiale), mis en cache pour la journée. */
 const PrayerTimes = React.memo(() => {
-  const [data, setData] = useState<PrayerData | null>(null);
-  const [nextPrayer, setNextPrayer] = useState<{ name: string; time: string; timeLeft: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Configuration par défaut : Abidjan
-  const CITY = "Abidjan";
-  const COUNTRY = "Ivory Coast";
+  const [data, setData] = useState<Data | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const fetchPrayerTimes = async () => {
-      try {
-        const today = new Date();
-        const response = await fetch(
-          `https://api.aladhan.com/v1/timingsByCity/${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}?city=${CITY}&country=${COUNTRY}&method=2`
-        );
-        const json = await response.json();
-        if (json.data) {
-          setData(json.data);
-          calculateNextPrayer(json.data.timings);
+    const d = new Date();
+    const key = `ddr_prayer_${d.toDateString()}`;
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached) return setData(JSON.parse(cached));
+    } catch {
+      /* stockage indisponible */
+    }
+    fetch(`https://api.aladhan.com/v1/timingsByCity/${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}?city=Abidjan&country=CI&method=3`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (!j?.data) throw new Error('vide');
+        const h = j.data.date.hijri;
+        const value: Data = {
+          timings: j.data.timings,
+          hijri: `${Number(h.day)} ${HIJRI_MONTHS_FR[Number(h.month.number) - 1] || h.month.en} ${h.year}`,
+          readable: d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }),
+        };
+        setData(value);
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+          /* ignore */
         }
-      } catch (error) {
-        console.error("Erreur API Prières:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrayerTimes();
+      })
+      .catch(() => setFailed(true));
   }, []);
 
   useEffect(() => {
-    if (!data) return;
+    const t = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(t);
+  }, []);
 
-    // Recalculer le temps restant chaque minute
-    const interval = setInterval(() => {
-      calculateNextPrayer(data.timings);
-    }, 60000);
+  const next = useMemo(() => {
+    if (!data) return null;
+    const cur = now.getHours() * 60 + now.getMinutes();
+    const found = PRAYERS.find((p) => toMin(data.timings[p.key]) > cur);
+    const p = found || PRAYERS[0];
+    let diff = toMin(data.timings[p.key]) - cur;
+    if (diff < 0) diff += 24 * 60;
+    return { ...p, left: diff >= 60 ? `${Math.floor(diff / 60)} h ${String(diff % 60).padStart(2, '0')}` : `${diff} min` };
+  }, [data, now]);
 
-    return () => clearInterval(interval);
-  }, [data]);
-
-  const calculateNextPrayer = (timings: any) => {
-      const now = new Date();
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-      
-      const prayers = [
-          { name: 'Fajr', time: timings.Fajr },
-          { name: 'Dhuhr', time: timings.Dhuhr },
-          { name: 'Asr', time: timings.Asr },
-          { name: 'Maghrib', time: timings.Maghrib },
-          { name: 'Isha', time: timings.Isha },
-      ];
-
-      for (const p of prayers) {
-          const [hours, minutes] = p.time.split(':').map(Number);
-          const prayerTime = hours * 60 + minutes;
-          
-          if (prayerTime > currentTime) {
-              const diff = prayerTime - currentTime;
-              const h = Math.floor(diff / 60);
-              const m = diff % 60;
-              setNextPrayer({
-                  name: p.name,
-                  time: p.time,
-                  timeLeft: `${h}h ${m}min`
-              });
-              return;
-          }
-      }
-
-      // Si toutes passées, c'est Fajr demain
-      setNextPrayer({ name: 'Fajr (Demain)', time: timings.Fajr, timeLeft: 'Demain' });
-  };
-
-  if (loading) return null;
+  if (failed) {
+    return <p className="card p-6 text-center text-sand-400">Les horaires de prière n'ont pas pu être chargés. Vérifiez votre connexion.</p>;
+  }
 
   return (
-    <div className="w-full bg-[#0a0a0a] border-y border-gray-800 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-5 pointer-events-none"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row items-center justify-between py-6 gap-6">
-                
-                {/* Left: Date & Location */}
-                <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-brand-900/30 border border-brand-500 flex items-center justify-center text-brand-500 animate-pulse">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold text-lg leading-none">Horaires de Prière</h3>
-                        <p className="text-gray-500 text-xs mt-1 font-mono uppercase tracking-wide">
-                            {CITY}, {data?.date.readable} • <span className="text-gold-500">{data?.date.hijri.day} {data?.date.hijri.month.en} {data?.date.hijri.year}</span>
-                        </p>
-                    </div>
-                </div>
-
-                {/* Center: Next Prayer Highlight */}
-                {nextPrayer && (
-                    <div className="bg-gradient-to-r from-brand-900/50 to-black border border-brand-500/30 px-6 py-2 rounded-full flex items-center gap-3 shadow-[0_0_15px_rgba(234,88,12,0.2)]">
-                        <span className="text-gray-400 text-sm">Prochaine:</span>
-                        <span className="text-xl font-bold text-white">{nextPrayer.name}</span>
-                        <span className="bg-brand-600 text-white text-xs font-bold px-2 py-1 rounded">dans {nextPrayer.timeLeft}</span>
-                    </div>
-                )}
-
-                {/* Right: Grid of Times */}
-                <div className="flex gap-2 md:gap-4 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-hide">
-                    {['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((p) => {
-                        const isActive = nextPrayer?.name === p;
-                        return (
-                            <div key={p} className={`flex flex-col items-center p-3 min-w-[70px] rounded-xl border transition-all ${isActive ? 'bg-gold-500 text-black border-gold-400 scale-110 shadow-lg font-bold' : 'bg-gray-900 text-gray-400 border-gray-800'}`}>
-                                <span className="text-[10px] uppercase tracking-wider opacity-80">{p}</span>
-                                <span className="text-sm font-mono mt-1">
-                                    {data?.timings[p as keyof typeof data.timings].split(' ')[0]}
-                                </span>
-                            </div>
-                        )
-                    })}
-                </div>
-
-            </div>
+    <div className="card relative overflow-hidden p-6 md:p-8">
+      <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-400/10 blur-3xl" aria-hidden />
+      <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-sand-500">Abidjan · {data?.readable || '…'}</p>
+          <p className="mt-1 font-serif text-lg text-gold-300">{data?.hijri || ' '}</p>
+          {next && (
+            <p className="mt-4 text-cream-100">
+              Prochaine prière : <span className="font-serif text-3xl font-semibold text-white">{next.fr}</span>
+              <span className="ml-3 rounded-full bg-brand-600 px-3 py-1 text-sm font-bold text-white">dans {next.left}</span>
+            </p>
+          )}
         </div>
+        <ol className="grid grid-cols-5 gap-2 md:gap-3">
+          {PRAYERS.map((p) => {
+            const active = next?.key === p.key;
+            return (
+              <li
+                key={p.key}
+                className={`flex min-w-0 flex-col items-center rounded-2xl border px-1.5 py-3 text-center transition md:min-w-[92px] md:px-3 md:py-4 ${
+                  active ? 'border-gold-300/60 bg-gradient-to-b from-gold-300/25 to-gold-500/5 text-white shadow-[0_10px_30px_-12px_rgba(220,180,74,0.6)]' : 'border-white/5 bg-black/20 text-cream-200'
+                }`}
+              >
+                <span className="font-arabic text-base leading-none text-gold-300/90 md:text-lg" lang="ar">{p.ar}</span>
+                <span className="mt-1.5 text-[11px] font-bold uppercase tracking-wide text-sand-400 md:text-xs">{p.fr}</span>
+                <span className={`mt-1 font-mono text-sm md:text-lg ${active ? 'font-bold' : ''}`}>{data ? data.timings[p.key].split(' ')[0] : '--:--'}</span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </div>
   );
 });

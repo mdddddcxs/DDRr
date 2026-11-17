@@ -59,7 +59,7 @@ const SOCIAL_LINKS = [
         bgClass: 'bg-[#1877F2]',
         borderClass: 'border-[#1877F2]',
         label: 'Rejoindre la communauté',
-        subLabel: 'Oustaz Diane Officiel'
+        subLabel: 'Oustaz Diané Officiel'
     },
     { 
         name: 'YouTube', 
@@ -244,13 +244,13 @@ const LearningCenter = React.memo(() => {
         return content.split('\n').map((line, i) => {
             if (line.trim().startsWith('**')) return <h4 key={i} className="text-white font-bold mt-4 mb-2">{line.replace(/\*\*/g, '')}</h4>;
             if (line.trim().startsWith('>')) return <blockquote key={i} className="border-l-2 border-brand-500 pl-4 italic text-brand-200 my-4 bg-brand-900/10 py-2 rounded-r">{line.replace('>', '')}</blockquote>;
-            if (line.trim().length > 0) return <p key={i} className="mb-2 text-gray-300 leading-relaxed">{line}</p>;
+            if (line.trim().length > 0) return <p key={i} className="mb-2 text-cream-200 leading-relaxed">{line}</p>;
             return null;
         });
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-gray-100 pb-20 relative overflow-x-hidden font-sans">
+        <div className="min-h-screen text-cream-100 pb-20 relative overflow-x-hidden">
             
             {/* ATMOSPHERIC BACKGROUND */}
             <div className="fixed inset-0 pointer-events-none z-0">
@@ -260,7 +260,7 @@ const LearningCenter = React.memo(() => {
 
             {/* TOAST NOTIFICATION */}
             {toast && (
-                <div className="fixed top-24 right-6 z-[110] animate-fade-in-up">
+                <div className="fixed top-24 right-6 z-[110] animate-fade-up">
                     <div className={`px-6 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl flex items-center gap-3 ${
                         toast.type === 'success' ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/50 text-red-400'
                     }`}>
@@ -272,16 +272,16 @@ const LearningCenter = React.memo(() => {
 
             {/* VIDEO MODAL */}
             {selectedVideo && (
-                <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur flex items-center justify-center p-4 animate-fade-in-up">
+                <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur flex items-center justify-center p-4 animate-fade-up">
                     <button 
                         onClick={() => setSelectedVideo(null)} 
-                        className="absolute top-4 right-4 text-gray-400 hover:text-white p-2"
+                        className="absolute top-4 right-4 text-sand-400 hover:text-white p-2"
                     >
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
-                    <div className="w-full max-w-4xl aspect-video bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl">
+                    <div className="w-full max-w-4xl aspect-video bg-night-950 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
                         <iframe 
-                            src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1`} 
+                            src={`https://www.youtube-nocookie.com/embed/${selectedVideo}?autoplay=1&rel=0`} 
                             title="Video Educative"
                             className="w-full h-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -292,26 +292,25 @@ const LearningCenter = React.memo(() => {
             )}
 
             {/* --- HERO SECTION & CAROUSEL --- */}
-            <div className="relative bg-black border-b border-white/5 pb-32 pt-40 px-4 overflow-hidden">
+            <div className="relative bg-night-950 border-b border-white/5 pb-32 pt-40 px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,_#1a1005_0%,_transparent_70%)] opacity-60"></div>
                 
                 <div className="max-w-7xl mx-auto text-center relative z-10 mb-20">
-                    <div className="inline-flex items-center gap-3 px-5 py-2 bg-white/5 border border-white/10 rounded-full mb-8 animate-fade-in-up backdrop-blur-md">
+                    <div className="inline-flex items-center gap-3 px-5 py-2 bg-white/5 border border-white/10 rounded-full mb-8 animate-fade-up backdrop-blur-md">
                         <span className="w-2 h-2 bg-brand-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(234,88,12,0.8)]"></span>
                         <span className="text-white font-bold tracking-[0.3em] uppercase text-[10px]">Markaz Al-Ilm • Centre du Savoir</span>
                     </div>
-                    <h1 className="text-6xl md:text-[10rem] font-black text-white mb-10 tracking-tighter leading-[0.85] animate-fade-in-up delay-100 uppercase">
-                        Éclairer <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-b from-brand-400 to-brand-700">L'Esprit</span>
+                    <h1 className="font-serif text-5xl md:text-8xl font-semibold text-cream-50 mb-8 leading-[1] animate-fade-up">
+                        Éclairer <span className="text-gradient-gold">l’esprit</span>
                     </h1>
-                    <p className="text-gray-400 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-in-up delay-200 font-light italic">
+                    <p className="text-sand-400 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-up delay-200 font-light italic">
                         "La recherche de la science est une obligation pour chaque musulman."
                     </p>
                 </div>
 
                 {/* --- CAROUSEL RAPPEL --- */}
-                <div className="max-w-5xl mx-auto relative z-20 animate-fade-in-up delay-300">
-                    <div className="bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-12 md:p-20 text-center shadow-2xl relative overflow-hidden group">
+                <div className="max-w-5xl mx-auto relative z-20 animate-fade-up delay-300">
+                    <div className="bg-night-900 border border-white/10 rounded-[3rem] p-12 md:p-20 text-center shadow-2xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-900/10 via-transparent to-gold-900/5"></div>
                         
                         {DAILY_REMINDERS.map((slide, idx) => (
@@ -322,8 +321,8 @@ const LearningCenter = React.memo(() => {
                                 <span className="text-brand-500 text-xs font-black uppercase tracking-[0.4em] mb-8">{slide.type}</span>
                                 <h3 className="text-4xl md:text-7xl text-white font-serif mb-10 leading-tight drop-shadow-2xl" style={{ direction: 'rtl' }}>{slide.arabic}</h3>
                                 <div className="h-px w-24 bg-gradient-to-r from-transparent via-brand-500 to-transparent mb-10"></div>
-                                <p className="text-gray-200 italic text-2xl md:text-3xl mb-6 font-light leading-relaxed max-w-3xl">"{slide.text}"</p>
-                                <p className="text-[11px] text-gray-500 font-black uppercase tracking-[0.3em]">{slide.ref}</p>
+                                <p className="text-cream-100 italic text-2xl md:text-3xl mb-6 font-light leading-relaxed max-w-3xl">"{slide.text}"</p>
+                                <p className="text-[11px] text-sand-500 font-black uppercase tracking-[0.3em]">{slide.ref}</p>
                             </div>
                         ))}
                         <div className="invisible">
@@ -352,10 +351,10 @@ const LearningCenter = React.memo(() => {
                     <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
                         <div className="max-w-xl">
                             <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Sagesse <span className="text-brand-500">Quotidienne</span></h2>
-                            <p className="text-gray-500 text-lg">Une nouvelle histoire ou sunnah chaque jour pour illuminer votre cœur et votre esprit.</p>
+                            <p className="text-sand-500 text-lg">Une nouvelle histoire ou sunnah chaque jour pour illuminer votre cœur et votre esprit.</p>
                         </div>
                         <div className="flex gap-2">
-                             <div className="px-4 py-2 bg-dark-900 border border-white/5 rounded-xl text-xs font-bold text-gray-400">
+                             <div className="px-4 py-2 bg-dark-900 border border-white/5 rounded-xl text-xs font-bold text-sand-400">
                                 {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                              </div>
                         </div>
@@ -379,12 +378,12 @@ const LearningCenter = React.memo(() => {
                                     
                                     <div className="grid grid-cols-2 gap-6 mb-12">
                                         <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                                            <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Source</p>
-                                            <p className="text-sm text-gray-200 font-bold">{dailyStory.source}</p>
+                                            <p className="text-[10px] text-sand-500 uppercase font-black mb-1">Source</p>
+                                            <p className="text-sm text-cream-100 font-bold">{dailyStory.source}</p>
                                         </div>
                                         <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                                            <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Lecture</p>
-                                            <p className="text-sm text-gray-200 font-bold">{dailyStory.readTime}</p>
+                                            <p className="text-[10px] text-sand-500 uppercase font-black mb-1">Lecture</p>
+                                            <p className="text-sm text-cream-100 font-bold">{dailyStory.readTime}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -394,21 +393,21 @@ const LearningCenter = React.memo(() => {
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Audience</p>
-                                        <p className="text-lg text-white font-black">{views.toLocaleString()} <span className="text-xs text-gray-500 font-normal">lecteurs</span></p>
+                                        <p className="text-xs text-sand-400 font-bold uppercase tracking-widest">Vos lectures</p>
+                                        <p className="text-lg text-white font-black">{views.toLocaleString()} <span className="text-xs text-sand-500 font-normal">lecteurs</span></p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right: Content */}
                             <div className="p-10 md:p-20 lg:w-3/5 bg-[#121215] relative">
-                                <div className="prose prose-invert prose-xl max-w-none font-light text-gray-300 leading-relaxed">
+                                <div className="prose prose-invert prose-xl max-w-none font-light text-cream-200 leading-relaxed">
                                     {renderStoryContent(dailyStory.content)}
                                 </div>
                                 
                                 <div className="mt-16 pt-10 border-t border-white/5">
                                     <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                                        <p className="text-sm text-gray-500 italic max-w-xs text-center sm:text-left">
+                                        <p className="text-sm text-sand-500 italic max-w-xs text-center sm:text-left">
                                             "Celui qui indique un bien a la même récompense que celui qui l'accomplit."
                                         </p>
                                         <div className="flex gap-4">
@@ -438,7 +437,7 @@ const LearningCenter = React.memo(() => {
                 <section>
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">Les 5 Piliers de l'Islam</h2>
-                        <p className="text-gray-500 text-lg">Les fondations sacrées sur lesquelles repose l'édifice de notre foi.</p>
+                        <p className="text-sand-500 text-lg">Les fondations sacrées sur lesquelles repose l'édifice de notre foi.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                         {FIVE_PILLARS.map((pillar) => (
@@ -448,7 +447,7 @@ const LearningCenter = React.memo(() => {
                                     <div className="text-6xl mb-6 group-hover:scale-125 transition-transform duration-500 drop-shadow-2xl">{pillar.icon}</div>
                                     <h3 className="text-xl font-black text-white mb-2">{pillar.title}</h3>
                                     <p className="text-[10px] text-brand-500 uppercase tracking-[0.2em] font-black mb-4">{pillar.trans}</p>
-                                    <p className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-500 absolute bottom-8 px-6 leading-relaxed">
+                                    <p className="text-xs text-sand-400 opacity-0 group-hover:opacity-100 transition-all duration-500 absolute bottom-8 px-6 leading-relaxed">
                                         {pillar.desc}
                                     </p>
                                 </div>
@@ -466,12 +465,12 @@ const LearningCenter = React.memo(() => {
                             <span className="text-red-400 font-bold text-xs uppercase tracking-widest">Armurerie du Débatteur</span>
                         </div>
                         <h2 className="text-4xl font-extrabold text-white">Le Choc des Textes</h2>
-                        <p className="text-gray-500 mt-2">Comparez les sources en temps réel pour dominer le débat.</p>
+                        <p className="text-sand-500 mt-2">Comparez les sources en temps réel pour dominer le débat.</p>
                     </div>
 
                     {/* SELECTEUR STYLISÉ */}
                     <div className="flex justify-center mb-12">
-                        <div className="flex gap-2 p-1.5 bg-gray-900 rounded-xl border border-gray-800 overflow-x-auto max-w-full">
+                        <div className="flex gap-2 p-1.5 bg-night-800 rounded-xl border border-white/10 overflow-x-auto max-w-full">
                             {COMPARISONS.map((topic, index) => (
                                 <button
                                     key={topic.id}
@@ -479,7 +478,7 @@ const LearningCenter = React.memo(() => {
                                     className={`px-5 py-3 rounded-lg text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap ${
                                         selectedTopic === index 
                                         ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/40' 
-                                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                        : 'text-sand-400 hover:text-white hover:bg-night-700'
                                     }`}
                                 >
                                     <span>{topic.icon}</span>
@@ -490,11 +489,11 @@ const LearningCenter = React.memo(() => {
                     </div>
 
                     {/* INTERFACE DE COMBAT (VERSUS) */}
-                    <div className="relative bg-black rounded-[2rem] border border-white/10 shadow-2xl overflow-hidden">
+                    <div className="relative bg-night-950 rounded-[2rem] border border-white/10 shadow-2xl overflow-hidden">
                         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/10">
                             
                             {/* COTÉ ISLAM */}
-                            <div key={`islam-${selectedTopic}`} className="p-12 relative group animate-fade-in-up">
+                            <div key={`islam-${selectedTopic}`} className="p-12 relative group animate-fade-up">
                                 <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <span className="text-8xl font-serif">☪️</span>
                                 </div>
@@ -505,13 +504,13 @@ const LearningCenter = React.memo(() => {
                                 <blockquote className="text-3xl md:text-4xl text-white font-serif leading-tight mb-12 relative z-10 italic">
                                     "{COMPARISONS[selectedTopic].islam.text}"
                                 </blockquote>
-                                <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest border-l border-green-500/50 pl-4 py-1">
+                                <div className="font-mono text-[10px] text-sand-500 uppercase tracking-widest border-l border-green-500/50 pl-4 py-1">
                                     Référence: {COMPARISONS[selectedTopic].islam.source}
                                 </div>
                             </div>
 
                             {/* COTÉ CHRISTIANISME */}
-                            <div key={`christianity-${selectedTopic}`} className="p-12 relative group animate-fade-in-up delay-100">
+                            <div key={`christianity-${selectedTopic}`} className="p-12 relative group animate-fade-up delay-100">
                                 <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <span className="text-8xl font-serif">✝️</span>
                                 </div>
@@ -522,14 +521,14 @@ const LearningCenter = React.memo(() => {
                                 <blockquote className="text-3xl md:text-4xl text-white font-serif leading-tight mb-12 relative z-10 italic">
                                     "{COMPARISONS[selectedTopic].christianity.text}"
                                 </blockquote>
-                                <div className="font-mono text-[10px] text-gray-500 uppercase tracking-widest border-l border-blue-500/50 pl-4 py-1">
+                                <div className="font-mono text-[10px] text-sand-500 uppercase tracking-widest border-l border-blue-500/50 pl-4 py-1">
                                     Référence: {COMPARISONS[selectedTopic].christianity.source}
                                 </div>
                             </div>
                         </div>
 
                         {/* VERDICT DDR */}
-                        <div key={`verdict-${selectedTopic}`} className="bg-white/5 border-t border-white/10 p-12 text-center animate-fade-in-up delay-200">
+                        <div key={`verdict-${selectedTopic}`} className="bg-white/5 border-t border-white/10 p-12 text-center animate-fade-up delay-200">
                             <div className="inline-flex items-center gap-3 mb-6 px-4 py-1 bg-brand-500/10 border border-brand-500/20 rounded-full">
                                 <span className="text-brand-500 font-black uppercase text-[10px] tracking-[0.3em]">Verdict Théologique</span>
                             </div>
@@ -559,7 +558,7 @@ const LearningCenter = React.memo(() => {
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-1">{link.name}</h3>
                                     <p className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">{link.label}</p>
-                                    <p className="text-sm text-gray-400">{link.subLabel}</p>
+                                    <p className="text-sm text-sand-400">{link.subLabel}</p>
                                     
                                     <span className="mt-4 px-4 py-2 bg-white/10 rounded-full text-xs font-bold text-white group-hover:bg-white group-hover:text-black transition-colors">
                                         S'abonner →
@@ -574,12 +573,12 @@ const LearningCenter = React.memo(() => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     {/* Tasbih Interactif (Large Card) */}
-                    <div className="lg:col-span-2 bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-12 flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl relative overflow-hidden group">
+                    <div className="lg:col-span-2 bg-night-900 border border-white/10 rounded-[2.5rem] p-12 flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-900/20 to-transparent opacity-50"></div>
                         
                         <div className="relative z-10 text-center md:text-left">
                             <h3 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter">Tasbih <span className="text-brand-500">Digital</span></h3>
-                            <p className="text-gray-400 text-lg max-w-xs mb-8">"L'évocation d'Allah est le repos des cœurs."</p>
+                            <p className="text-sand-400 text-lg max-w-xs mb-8">"L'évocation d'Allah est le repos des cœurs."</p>
                             <div className="flex gap-4 justify-center md:justify-start">
                                 <button 
                                     onClick={handleTasbih}
@@ -589,7 +588,7 @@ const LearningCenter = React.memo(() => {
                                 </button>
                                 <button 
                                     onClick={() => setTasbihCount(0)}
-                                    className="w-16 h-16 bg-white/5 hover:bg-white/10 text-gray-400 rounded-2xl font-bold flex items-center justify-center border border-white/10 transition-all"
+                                    className="w-16 h-16 bg-white/5 hover:bg-white/10 text-sand-400 rounded-2xl font-bold flex items-center justify-center border border-white/10 transition-all"
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                 </button>
@@ -597,7 +596,7 @@ const LearningCenter = React.memo(() => {
                         </div>
 
                         <div className="relative z-10">
-                            <div className="w-64 h-64 rounded-full border-[12px] border-white/5 flex items-center justify-center bg-black shadow-[inset_0_0_40px_rgba(0,0,0,1)] relative transition-transform duration-100 transform" style={{ transform: tasbihCount > 0 ? 'scale(0.98)' : 'scale(1)' }}>
+                            <div className="w-64 h-64 rounded-full border-[12px] border-white/5 flex items-center justify-center bg-night-950 shadow-[inset_0_0_40px_rgba(0,0,0,1)] relative transition-transform duration-100 transform" style={{ transform: tasbihCount > 0 ? 'scale(0.98)' : 'scale(1)' }}>
                                 <div className="absolute inset-0 rounded-full border border-brand-500/20 animate-ping opacity-20"></div>
                                 <span className="text-8xl font-mono text-brand-500 font-black tracking-tighter drop-shadow-[0_0_20px_rgba(234,88,12,0.5)]">{tasbihCount}</span>
                             </div>
@@ -605,7 +604,7 @@ const LearningCenter = React.memo(() => {
                     </div>
 
                     {/* Sunnas Checklist (Side Card) */}
-                    <div className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-10 flex flex-col shadow-2xl relative overflow-hidden">
+                    <div className="bg-night-900 border border-white/10 rounded-[2.5rem] p-10 flex flex-col shadow-2xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-5">
                             <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
                         </div>
@@ -618,7 +617,7 @@ const LearningCenter = React.memo(() => {
                                     </div>
                                     <div>
                                         <h4 className="text-white font-bold text-sm group-hover:text-brand-400 transition-colors">{sunna.title}</h4>
-                                        <p className="text-gray-500 text-[10px] leading-tight mt-0.5">{sunna.desc}</p>
+                                        <p className="text-sand-500 text-[10px] leading-tight mt-0.5">{sunna.desc}</p>
                                     </div>
                                 </div>
                             ))}
@@ -628,20 +627,20 @@ const LearningCenter = React.memo(() => {
 
                 {/* --- 5. ALPHABET ARABE --- */}
                 <section>
-                    <div className="flex justify-between items-end mb-8 border-b border-gray-800 pb-4">
+                    <div className="flex justify-between items-end mb-8 border-b border-white/10 pb-4">
                         <h2 className="text-2xl font-bold text-white">L'Alphabet Arabe</h2>
-                        <span className="text-xs text-gray-500">Sens de lecture : Droite à Gauche</span>
+                        <span className="text-xs text-sand-500">Sens de lecture : Droite à Gauche</span>
                     </div>
 
                     <div className="grid grid-cols-4 sm:grid-cols-7 gap-3 dir-rtl" style={{ direction: 'rtl' }}>
                         {ARABIC_LETTERS.map((item, index) => (
                             <div 
                                 key={index} 
-                                className="bg-[#18181b] hover:bg-brand-900/20 border border-gray-800 hover:border-brand-500/50 rounded-xl p-4 flex flex-col items-center justify-center transition-all duration-300 group cursor-default"
+                                className="bg-[#18181b] hover:bg-brand-900/20 border border-white/10 hover:border-brand-500/50 rounded-xl p-4 flex flex-col items-center justify-center transition-all duration-300 group cursor-default"
                             >
                                 <span className="text-3xl font-serif text-white mb-2 group-hover:scale-125 transition-transform duration-300">{item.char}</span>
-                                <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold group-hover:text-brand-400">{item.name}</span>
-                                <span className="text-[9px] text-gray-600 font-mono mt-1">/{item.sound}/</span>
+                                <span className="text-[10px] text-sand-500 uppercase tracking-wider font-bold group-hover:text-brand-400">{item.name}</span>
+                                <span className="text-[9px] text-sand-500 font-mono mt-1">/{item.sound}/</span>
                             </div>
                         ))}
                     </div>
