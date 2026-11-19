@@ -1,661 +1,397 @@
+// Centre du savoir — identité émeraude.
+// Sagesse du jour, piliers, histoire du jour, sunnas à vivre, Bible & Coran, alphabet, tasbih.
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, Clock, RefreshCw, RotateCcw, Share2, Sparkles, Trophy } from 'lucide-react';
+import RubriqueHero from '../components/RubriqueHero';
+import { Container } from '../components/ui';
+import { PROPHET_STORIES } from '../constants';
+import { LETTERS } from '../data/quiz/datasets';
+import { rubriqueVars } from '../lib/rubriques';
+import { useReveal } from '../lib/useReveal';
 
-import React, { useState, useEffect } from 'react';
-import { PROPHET_STORIES } from '../constants'; // Import des histoires
+/* ---------------- Données ---------------- */
 
-// --- DATA CONSTANTS ---
-
-const DAILY_REMINDERS = [
-    { type: 'Verset', arabic: 'وَقُل رَّبِّ زِدْنِي عِلْمًا', text: 'Et dis : "Ô mon Seigneur, accroît mes connaissances !"', ref: 'Sourate Taha, v.114' },
-    { type: 'Hadith', arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ', text: '"Le meilleur d\'entre vous est celui qui apprend le Coran et l\'enseigne."', ref: 'Rapporté par Al-Bukhari' },
-    { type: 'Sagesse', arabic: 'العلم نور', text: '"La science est une lumière que Dieu jette dans le cœur de qui Il veut."', ref: 'Imam Malik' }
+const SAGESSES = [
+  { type: 'Verset', arabic: 'وَقُل رَّبِّ زِدْنِي عِلْمًا', text: '« Et dis : Ô mon Seigneur, accroît mes connaissances ! »', ref: 'Coran, sourate Tâ-Hâ, 20:114' },
+  { type: 'Hadith', arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ', text: '« Le meilleur d’entre vous est celui qui apprend le Coran et l’enseigne. »', ref: 'Rapporté par Al-Bukhârî' },
+  { type: 'Verset', arabic: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', text: '« À côté de la difficulté est, certes, une facilité. »', ref: 'Coran, sourate Ash-Sharh, 94:5' },
+  { type: 'Hadith', arabic: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', text: '« Les actes ne valent que par les intentions. »', ref: 'Rapporté par Al-Bukhârî et Muslim' },
+  { type: 'Verset', arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', text: '« N’est-ce point par le rappel d’Allah que les cœurs s’apaisent ? »', ref: 'Coran, sourate Ar-Ra‘d, 13:28' },
 ];
 
-const FIVE_PILLARS = [
-    { num: 1, title: "La Shahada", trans: "L'Attestation de Foi", icon: "☝️", desc: "Témoigner qu'il n'y a de dieu qu'Allah et que Muhammad est Son messager." },
-    { num: 2, title: "La Salat", trans: "La Prière", icon: "🤲", desc: "Accomplir les 5 prières quotidiennes obligatoires." },
-    { num: 3, title: "La Zakat", trans: "L'Aumône", icon: "💰", desc: "Purifier ses biens en donnant une part aux nécessiteux." },
-    { num: 4, title: "Le Sawm", trans: "Le Jeûne", icon: "🌙", desc: "Jeûner le mois de Ramadan pour purifier l'âme." },
-    { num: 5, title: "Le Hajj", trans: "Le Pèlerinage", icon: "🕋", desc: "Se rendre à la Mecque au moins une fois dans sa vie si on en a les moyens." }
-];
-
-const ARABIC_LETTERS = [
-    { char: 'ا', name: 'Alif', sound: 'aa' },
-    { char: 'ب', name: 'Ba', sound: 'b' },
-    { char: 'ت', name: 'Ta', sound: 't' },
-    { char: 'ث', name: 'Tha', sound: 'th' },
-    { char: 'ج', name: 'Jim', sound: 'j' },
-    { char: 'ح', name: 'Ha', sound: 'h (dur)' },
-    { char: 'خ', name: 'Kha', sound: 'kh' },
-    { char: 'د', name: 'Dal', sound: 'd' },
-    { char: 'ذ', name: 'Dhal', sound: 'dh' },
-    { char: 'ر', name: 'Ra', sound: 'r' },
-    { char: 'ز', name: 'Zay', sound: 'z' },
-    { char: 'س', name: 'Sin', sound: 's' },
-    { char: 'ش', name: 'Shin', sound: 'sh' },
-    { char: 'ص', name: 'Sad', sound: 'S (emphatique)' },
-    { char: 'ض', name: 'Dad', sound: 'D (emphatique)' },
-    { char: 'ط', name: 'Ta', sound: 'T (emphatique)' },
-    { char: 'ظ', name: 'Zha', sound: 'Z (emphatique)' },
-    { char: 'ع', name: '\'Ayn', sound: '3' },
-    { char: 'غ', name: 'Ghayn', sound: 'gh' },
-    { char: 'ف', name: 'Fa', sound: 'f' },
-    { char: 'ق', name: 'Qaf', sound: 'q' },
-    { char: 'ك', name: 'Kaf', sound: 'k' },
-    { char: 'ل', name: 'Lam', sound: 'l' },
-    { char: 'م', name: 'Mim', sound: 'm' },
-    { char: 'ن', name: 'Nun', sound: 'n' },
-    { char: 'ه', name: 'Ha', sound: 'h (doux)' },
-    { char: 'و', name: 'Waw', sound: 'w / ou' },
-    { char: 'ي', name: 'Ya', sound: 'y / i' }
-];
-
-const SOCIAL_LINKS = [
-    { 
-        name: 'Facebook', 
-        icon: (
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.791-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-        ), 
-        url: 'https://www.facebook.com/ismaelAKAofficiel', 
-        bgClass: 'bg-[#1877F2]',
-        borderClass: 'border-[#1877F2]',
-        label: 'Rejoindre la communauté',
-        subLabel: 'Oustaz Diané et Ismaël Aka - DDR'
-    },
-    { 
-        name: 'YouTube', 
-        icon: (
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-        ), 
-        url: 'https://www.youtube.com/@ddrlavraiechaine', 
-        bgClass: 'bg-[#FF0000]',
-        borderClass: 'border-[#FF0000]',
-        label: 'Voir les débats & lives',
-        subLabel: 'DDR La Vraie Chaîne'
-    },
-    { 
-        name: 'TikTok', 
-        icon: (
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.49-3.35-3.98-5.6-.48-2.24-.08-4.62 1.09-6.64 1.19-2.05 3.29-3.56 5.6-4.05 1.58-.33 3.24-.18 4.79.46V11c-1.28-.65-2.73-.8-4.13-.39-1.27.37-2.33 1.25-2.94 2.42-.62 1.18-.63 2.61-.02 3.8.61 1.2 1.71 2.11 3.01 2.51 1.34.41 2.82.25 4.05-.44 1.24-.7 2.05-2 2.1-3.41.06-2.95.02-5.9.03-8.85h-.01c-.13-.01-.2.01-.53-.02-.85-.22-1.32-.87-1.6-1.58-.23-.6-.32-1.23-.32-1.85V3.06c0-.26.02-.51.05-.76.08-.72.4-1.37.94-1.87.53-.49 1.18-.76 1.91-.79h.03z"/></svg>
-        ), 
-        url: 'https://www.tiktok.com/@ddrofficiel', 
-        bgClass: 'bg-[#000000]',
-        borderClass: 'border-gray-600',
-        label: 'Shorts & Reels',
-        subLabel: '@ddrofficiel'
-    }
+const PILIERS = [
+  { n: 1, ar: 'الشهادة', title: 'La shahada', sub: 'L’attestation de foi', text: 'Attester qu’il n’y a de divinité qu’Allah et que Muhammad est Son messager. C’est la porte d’entrée de l’Islam.', detail: 'Elle se prononce avec sincérité, en comprenant son sens. Celui qui la prononce devient musulman.' },
+  { n: 2, ar: 'الصلاة', title: 'La salat', sub: 'La prière', text: 'Cinq prières par jour, tournées vers La Mecque : un rendez-vous régulier avec Dieu.', detail: 'Fajr, Dhouhr, ‘Asr, Maghrib et ‘Icha. Elle est précédée des ablutions (woudou).' },
+  { n: 3, ar: 'الزكاة', title: 'La zakat', sub: 'L’aumône obligatoire', text: 'Donner chaque année une part de ses biens (2,5 % de l’épargne) aux plus démunis.', detail: 'Elle purifie les biens et le cœur. Notre calculateur Zakat Smart vous aide à l’estimer.' },
+  { n: 4, ar: 'الصوم', title: 'Le sawm', sub: 'Le jeûne du Ramadan', text: 'Jeûner de l’aube au coucher du soleil pendant le mois de Ramadan.', detail: 'Les malades, les voyageurs et d’autres personnes en sont dispensés ou rattrapent plus tard.' },
+  { n: 5, ar: 'الحج', title: 'Le hajj', sub: 'Le pèlerinage', text: 'Se rendre à La Mecque une fois dans sa vie, pour qui en a les moyens physiques et financiers.', detail: 'Il a lieu chaque année pendant le mois de Dhou al-hijja.' },
 ];
 
 const SUNNAS = [
-    { title: 'Le Sourire', desc: 'Sourire à son frère est une aumône.' },
-    { title: 'Main Droite', desc: 'Manger et boire avec la main droite.' },
-    { title: 'Le Siwak', desc: 'Purifier sa bouche avant la prière.' },
-    { title: 'Le Salam', desc: 'Saluer celui qu\'on connaît et celui qu\'on ne connaît pas.' },
-    { title: 'Visiter le Malade', desc: 'Une cause de grande récompense.' }
+  { icon: '😊', title: 'Sourire', text: 'Sourire à son frère est une aumône.' },
+  { icon: '🤝', title: 'Saluer', text: 'Dire « as-salâmou ‘alaykoum » à ceux qu’on connaît et à ceux qu’on ne connaît pas.' },
+  { icon: '🍽️', title: 'Bismillah', text: 'Dire « Bismillah » avant de manger, et manger de la main droite.' },
+  { icon: '🪥', title: 'Le siwak', text: 'Se purifier la bouche, notamment avant la prière.' },
+  { icon: '💧', title: 'Ne pas gaspiller', text: 'Même pour les ablutions, utiliser l’eau avec mesure.' },
+  { icon: '🏥', title: 'Visiter un malade', text: 'Prendre des nouvelles d’un malade, une source de grande récompense.' },
 ];
 
-// --- DONNÉES DU COMPARATEUR ---
-const COMPARISONS = [
-    {
-        id: 'jesus',
-        title: 'Jésus (Issa)',
-        icon: '✝️ vs ☪️',
-        islam: {
-            source: 'Coran 4:171',
-            text: 'Le Messie Jésus, fils de Marie, n\'est qu\'un Messager d\'Allah, Sa parole qu\'Il envoya à Marie, et un souffle venant de Lui.'
-        },
-        christianity: {
-            source: 'Jean 3:16',
-            text: 'Car Dieu a tant aimé le monde qu\'il a donné son Fils unique, afin que quiconque croit en lui ne périsse point.'
-        },
-        verdict: 'L\'Islam honore Jésus comme un grand Prophète (né miraculeusement) mais rejette la Trinité. Dieu est Unique et sans enfant.'
-    },
-    {
-        id: 'wine',
-        title: 'Le Vin / Alcool',
-        icon: '🍷',
-        islam: {
-            source: 'Coran 5:90',
-            text: 'Le vin, le jeu de hasard... ne sont qu\'une abomination, œuvre du Diable. Écartez-vous en.'
-        },
-        christianity: {
-            source: 'Psaumes 104:15',
-            text: 'Le vin qui réjouit le cœur de l\'homme, Et fait plus que l\'huile resplendir son visage...'
-        },
-        verdict: 'Haram (Interdit) en Islam pour préserver la raison. Permis (avec modération) dans le Christianisme, symbole du sang du Christ.'
-    },
-    {
-        id: 'pork',
-        title: 'Le Porc',
-        icon: '🐖',
-        islam: {
-            source: 'Coran 2:173',
-            text: 'Certes, Il vous interdit la chair d\'une bête morte, le sang, la viande de porc...'
-        },
-        christianity: {
-            source: 'Marc 7:19',
-            text: '(Jésus) déclarait purs tous les aliments... Ce n\'est pas ce qui entre dans la bouche qui souille l\'homme.'
-        },
-        verdict: 'Considéré impur et interdit en Islam. Autorisé dans le Christianisme moderne qui se détache des lois alimentaires lévitiques.'
-    },
-    {
-        id: 'salvation',
-        title: 'Le Salut (Paradis)',
-        icon: '🗝️',
-        islam: {
-            source: 'Coran 103:3',
-            text: 'Sauf ceux qui croient et accomplissent les bonnes œuvres, s\'enjoignent mutuellement la vérité...'
-        },
-        christianity: {
-            source: 'Éphésiens 2:8',
-            text: 'Car c\'est par la grâce que vous êtes sauvés, par le moyen de la foi. Cela ne vient pas de vos œuvres.'
-        },
-        verdict: 'En Islam, le salut s\'obtient par la Foi ET les Œuvres. En Christianisme (Protestant), par la Foi seule (Sola Fide).'
-    }
+const COMPARAISONS = [
+  {
+    id: 'jesus', title: 'Jésus', emoji: '🕊️',
+    coran: { ref: 'Coran 4:171', text: 'Le Messie Jésus, fils de Marie, n’est qu’un messager d’Allah, Sa parole qu’Il envoya à Marie, et un souffle venant de Lui.' },
+    bible: { ref: 'Jean 3:16', text: 'Car Dieu a tant aimé le monde qu’il a donné son Fils unique, afin que quiconque croit en lui ne périsse point.' },
+    note: 'L’Islam honore Jésus comme un très grand prophète, né miraculeusement de Marie, mais enseigne que Dieu est unique et n’a pas d’enfant.',
+  },
+  {
+    id: 'unicite', title: 'Dieu unique', emoji: '☝️',
+    coran: { ref: 'Coran 112:1-4', text: 'Dis : Il est Allah, Unique. Allah, l’Absolu. Il n’a jamais engendré, n’a pas été engendré, et nul n’est égal à Lui.' },
+    bible: { ref: 'Deutéronome 6:4', text: 'Écoute, Israël ! L’Éternel, notre Dieu, est le seul Éternel.' },
+    note: 'Les deux écritures affirment l’unicité de Dieu ; c’est un point de départ commun pour le dialogue.',
+  },
+  {
+    id: 'vin', title: 'Le vin', emoji: '🍇',
+    coran: { ref: 'Coran 5:90', text: 'Le vin, le jeu de hasard, les pierres dressées et les flèches divinatoires ne sont qu’une abomination, œuvre du Diable. Écartez-vous-en.' },
+    bible: { ref: 'Proverbes 20:1', text: 'Le vin est moqueur, les boissons fortes sont tumultueuses ; quiconque en fait excès n’est pas sage.' },
+    note: 'L’Islam interdit l’alcool pour préserver la raison. La Bible met aussi en garde contre ses excès.',
+  },
+  {
+    id: 'porc', title: 'Le porc', emoji: '🥩',
+    coran: { ref: 'Coran 2:173', text: 'Certes, Il vous interdit la chair d’une bête morte, le sang, la viande de porc…' },
+    bible: { ref: 'Lévitique 11:7-8', text: 'Vous ne mangerez pas le porc… vous le regarderez comme impur.' },
+    note: 'L’interdiction du porc se trouve aussi dans la Torah ; la plupart des Églises chrétiennes ne l’appliquent plus.',
+  },
+  {
+    id: 'salut', title: 'Le salut', emoji: '🗝️',
+    coran: { ref: 'Coran 103:2-3', text: 'L’homme est certes en perdition, sauf ceux qui croient et accomplissent les bonnes œuvres, s’enjoignent la vérité et s’enjoignent l’endurance.' },
+    bible: { ref: 'Éphésiens 2:8-9', text: 'C’est par la grâce que vous êtes sauvés, par le moyen de la foi… ce n’est point par les œuvres.' },
+    note: 'En Islam, le salut repose sur la foi et les œuvres, par la miséricorde de Dieu.',
+  },
 ];
 
-const LearningCenter = React.memo(() => {
-    const [tasbihCount, setTasbihCount] = useState(0);
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [selectedTopic, setSelectedTopic] = useState(0); 
-    const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
-    
-    // NOUVEAU: ETATS POUR L'HISTOIRE DU JOUR
-    const [dailyStory, setDailyStory] = useState(() => {
-        const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-        const index = dayOfYear % PROPHET_STORIES.length;
-        return PROPHET_STORIES[index];
-    });
+const TASBIH = ['Soubhânallah', 'Alhamdoulillah', 'Allâhou akbar'];
+const TASBIH_AR = ['سُبْحَانَ اللهِ', 'الْحَمْدُ لِلَّهِ', 'اللهُ أَكْبَرُ'];
 
-    const [views, setViews] = useState(() => {
-        const viewsData = JSON.parse(localStorage.getItem('story_views') || '{}');
-        const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-        const index = dayOfYear % PROPHET_STORIES.length;
-        const storyId = PROPHET_STORIES[index].id;
-        return (viewsData[storyId] || 0) + 1;
-    });
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const dayOfYear = () => Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 864e5);
 
-    const updateViews = (storyId: string) => {
-        const viewsData = JSON.parse(localStorage.getItem('story_views') || '{}');
-        const currentViews = (viewsData[storyId] || 0) + 1; // Incrémente vue
-        viewsData[storyId] = currentViews;
-        localStorage.setItem('story_views', JSON.stringify(viewsData));
-        return currentViews;
-    };
+/* ---------------- Briques ---------------- */
 
-    // Carousel Auto-play
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % DAILY_REMINDERS.length);
-        }, 5000);
-        return () => clearInterval(timer);
-    }, []);
+const Kicker = ({ children }: { children: React.ReactNode }) => (
+  <p className="r-ink flex items-center gap-3 text-[12px] font-extrabold uppercase tracking-[0.24em]">
+    <span className="r-grad h-1 w-8 rounded-full" />
+    {children}
+  </p>
+);
+const H2 = ({ kicker, children, center = false }: { kicker: string; children: React.ReactNode; center?: boolean }) => (
+  <div className={`reveal mb-10 ${center ? 'mx-auto max-w-2xl text-center [&>p]:justify-center' : 'max-w-2xl'}`}>
+    <Kicker>{kicker}</Kicker>
+    <h2 className="mt-4 font-serif text-3xl font-semibold leading-tight text-ink-900 md:text-[2.7rem]">{children}</h2>
+  </div>
+);
 
-    // Mise à jour des vues au changement d'histoire
-    useEffect(() => {
-        const viewsData = JSON.parse(localStorage.getItem('story_views') || '{}');
-        if (viewsData[dailyStory.id] !== views) {
-            const newViews = updateViews(dailyStory.id);
-            setTimeout(() => setViews(newViews), 0);
-        }
-    }, [dailyStory.id, views]);
+/* ---------------- Sections ---------------- */
 
-    const handleTasbih = () => {
-        setTasbihCount(prev => prev + 1);
-        if (navigator.vibrate) navigator.vibrate(20);
-    };
-
-    // --- FONCTIONS ACTIVES ---
-    
-    const handleShare = async () => {
-        const text = `${dailyStory.title}\n\n"${dailyStory.content.substring(0, 100)}..."\n\nLisez la suite sur le site de La DDR : ${window.location.origin}/learning`;
-        
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: dailyStory.title,
-                    text: text,
-                    url: window.location.href
-                });
-            } catch {
-                console.log('Partage annulé');
-            }
-        } else {
-            try {
-                await navigator.clipboard.writeText(text);
-                setToast({ message: "✅ Texte copié ! Vous pouvez maintenant le coller sur WhatsApp ou Facebook.", type: 'success' });
-            } catch {
-                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
-            }
-            setTimeout(() => setToast(null), 3000);
-        }
-    };
-
-    const handleNextStory = () => {
-        let nextIndex;
-        // Choisir une histoire différente de l'actuelle
-        do {
-            nextIndex = Math.floor(Math.random() * PROPHET_STORIES.length);
-        } while (PROPHET_STORIES[nextIndex].id === dailyStory.id && PROPHET_STORIES.length > 1);
-        
-        const nextStory = PROPHET_STORIES[nextIndex];
-        setDailyStory(nextStory);
-        updateViews(nextStory.id);
-        window.scrollTo({ top: 400, behavior: 'smooth' }); // Scroll vers le début de l'histoire
-    };
-
-    const renderStoryContent = (content: string) => {
-        return content.split('\n').map((line, i) => {
-            if (line.trim().startsWith('**')) return <h4 key={i} className="text-ink-900 font-bold mt-4 mb-2">{line.replace(/\*\*/g, '')}</h4>;
-            if (line.trim().startsWith('>')) return <blockquote key={i} className="border-l-2 border-brand-500 pl-4 italic text-brand-800 my-4 bg-brand-900/10 py-2 rounded-r">{line.replace('>', '')}</blockquote>;
-            if (line.trim().length > 0) return <p key={i} className="mb-2 text-ink-700 leading-relaxed">{line}</p>;
-            return null;
-        });
-    };
-
-    return (
-        <div className="min-h-screen text-ink-800 pb-20 relative overflow-x-hidden">
-            
-            {/* ATMOSPHERIC BACKGROUND */}
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-brand-900/20 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gold-900/10 rounded-full blur-[150px] animate-pulse [animation-delay:2s]"></div>
+const SagesseDuJour = () => {
+  const [i, setI] = useState(dayOfYear() % SAGESSES.length);
+  useEffect(() => {
+    const t = setInterval(() => setI((x) => (x + 1) % SAGESSES.length), 8000);
+    return () => clearInterval(t);
+  }, []);
+  const s = SAGESSES[i];
+  return (
+    <section className="relative z-10 -mt-10">
+      <Container>
+        <div className="reveal relative overflow-hidden rounded-[2rem] bg-[#0f3d31] px-6 py-10 text-center text-white shadow-[0_40px_80px_-40px_rgba(18,93,71,0.9)] sm:px-12">
+          <div className="absolute inset-0 bg-pattern opacity-[0.09]" aria-hidden />
+          <div className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-[#3DBB8C]/30 blur-[80px] animate-drift" aria-hidden />
+          <p className="relative text-[12px] font-extrabold uppercase tracking-[0.24em] text-[#9de3c6]">{s.type} du jour</p>
+          <div key={i} className="relative animate-fade-up">
+            <p className="mt-5 font-arabic text-4xl leading-relaxed text-gold-200 md:text-5xl" lang="ar" dir="rtl">{s.arabic}</p>
+            <p className="mx-auto mt-4 max-w-2xl font-serif text-xl italic leading-relaxed md:text-2xl">{s.text}</p>
+            <p className="mt-3 text-sm font-semibold text-white/60">{s.ref}</p>
+          </div>
+          <div className="relative mt-7 flex items-center justify-center gap-3">
+            <button onClick={() => setI((i - 1 + SAGESSES.length) % SAGESSES.length)} aria-label="Précédent" className="grid h-10 w-10 place-items-center rounded-full bg-white/10 hover:bg-white/20"><ChevronLeft className="h-5 w-5" /></button>
+            <div className="flex gap-1.5">
+              {SAGESSES.map((_, k) => (
+                <button key={k} onClick={() => setI(k)} aria-label={`Sagesse ${k + 1}`} className={`h-2 rounded-full transition-all ${k === i ? 'w-7 bg-[#9de3c6]' : 'w-2 bg-white/30'}`} />
+              ))}
             </div>
-
-            {/* TOAST NOTIFICATION */}
-            {toast && (
-                <div className="fixed top-24 right-6 z-[110] animate-fade-up">
-                    <div className={`px-6 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl flex items-center gap-3 ${
-                        toast.type === 'success' ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/50 text-red-400'
-                    }`}>
-                        <span className="text-lg">{toast.type === 'success' ? '✅' : '❌'}</span>
-                        <p className="text-sm font-bold">{toast.message}</p>
-                    </div>
-                </div>
-            )}
-
-            {/* VIDEO MODAL */}
-            {selectedVideo && (
-                <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur flex items-center justify-center p-4 animate-fade-up">
-                    <button 
-                        onClick={() => setSelectedVideo(null)} 
-                        aria-label="Fermer la vidéo"
-                        className="absolute top-4 right-4 text-ink-500 hover:text-ink-900 p-2"
-                    >
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                    <div className="w-full max-w-4xl aspect-video bg-ivory-100 rounded-xl overflow-hidden border border-ink-900/10 shadow-2xl">
-                        <iframe 
-                            src={`https://www.youtube-nocookie.com/embed/${selectedVideo}?autoplay=1&rel=0`} 
-                            title="Video Educative"
-                            className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowFullScreen
-                        ></iframe>
-                    </div>
-                </div>
-            )}
-
-            {/* --- HERO SECTION & CAROUSEL --- */}
-            <div className="relative bg-ivory-100 border-b border-ink-900/5 pb-32 pt-40 px-4 overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,_#1a1005_0%,_transparent_70%)] opacity-60"></div>
-                
-                <div className="max-w-7xl mx-auto text-center relative z-10 mb-20">
-                    <div className="inline-flex items-center gap-3 px-5 py-2 bg-ink-900/5 border border-ink-900/10 rounded-full mb-8 animate-fade-up backdrop-blur-md">
-                        <span className="w-2 h-2 bg-brand-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(234,88,12,0.8)]"></span>
-                        <span className="text-ink-900 font-bold tracking-[0.3em] uppercase text-[10px]">Markaz Al-Ilm • Centre du Savoir</span>
-                    </div>
-                    <h1 className="font-serif text-5xl md:text-8xl font-semibold text-ink-900 mb-8 leading-[1] animate-fade-up">
-                        Éclairer <span className="text-gradient-gold">l’esprit</span>
-                    </h1>
-                    <p className="text-ink-500 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed animate-fade-up delay-200 font-light italic">
-                        "La recherche de la science est une obligation pour chaque musulman."
-                    </p>
-                </div>
-
-                {/* --- CAROUSEL RAPPEL --- */}
-                <div className="max-w-5xl mx-auto relative z-20 animate-fade-up delay-300">
-                    <div className="bg-ivory-50 border border-ink-900/10 rounded-[3rem] p-12 md:p-20 text-center shadow-2xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/10 via-transparent to-gold-900/5"></div>
-                        
-                        {DAILY_REMINDERS.map((slide, idx) => (
-                            <div 
-                                key={idx} 
-                                className={`transition-all duration-1000 absolute inset-0 flex flex-col items-center justify-center p-12 ${idx === currentSlide ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-8 pointer-events-none'}`}
-                            >
-                                <span className="text-brand-500 text-xs font-black uppercase tracking-[0.4em] mb-8">{slide.type}</span>
-                                <h3 className="text-4xl md:text-7xl text-ink-900 font-serif mb-10 leading-tight drop-shadow-2xl" style={{ direction: 'rtl' }}>{slide.arabic}</h3>
-                                <div className="h-px w-24 bg-gradient-to-r from-transparent via-brand-500 to-transparent mb-10"></div>
-                                <p className="text-ink-800 italic text-2xl md:text-3xl mb-6 font-light leading-relaxed max-w-3xl">"{slide.text}"</p>
-                                <p className="text-[11px] text-ink-400 font-black uppercase tracking-[0.3em]">{slide.ref}</p>
-                            </div>
-                        ))}
-                        <div className="invisible">
-                            <h3 className="text-7xl mb-10">Placeholder</h3>
-                            <p className="text-3xl mb-6">Placeholder text long enough for sizing</p>
-                            <p className="text-sm">Ref</p>
-                        </div>
-
-                        <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-4">
-                            {DAILY_REMINDERS.map((_, idx) => (
-                                <button 
-                                    key={idx} 
-                                    onClick={() => setCurrentSlide(idx)}
-                                    aria-label={`Verset ${idx + 1}`}
-                                    className={`h-1 rounded-full transition-all duration-700 ${idx === currentSlide ? 'bg-brand-500 w-16' : 'bg-ink-900/10 w-6 hover:bg-ink-900/30'}`}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-32">
-
-                {/* --- 0. HISTOIRES & SUNNAH DU JOUR --- */}
-                <section>
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-                        <div className="max-w-xl">
-                            <h2 className="text-4xl md:text-5xl font-black text-ink-900 mb-4 tracking-tight">Sagesse <span className="text-brand-500">Quotidienne</span></h2>
-                            <p className="text-ink-400 text-lg">Une nouvelle histoire ou sunnah chaque jour pour illuminer votre cœur et votre esprit.</p>
-                        </div>
-                        <div className="flex gap-2">
-                             <div className="px-4 py-2 bg-ivory-50 border border-ink-900/5 rounded-xl text-xs font-bold text-ink-500">
-                                {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                             </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-[#0e0e10] border border-ink-900/5 rounded-[3rem] overflow-hidden shadow-2xl relative group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/5 to-transparent"></div>
-                        
-                        <div className="flex flex-col lg:flex-row">
-                            {/* Left: Metadata & Visual */}
-                            <div className="lg:w-2/5 p-10 md:p-16 border-b lg:border-b-0 lg:border-r border-ink-900/5 flex flex-col justify-between relative overflow-hidden">
-                                <div className="absolute -top-20 -left-20 w-64 h-64 bg-brand-500/10 rounded-full blur-[100px]"></div>
-                                
-                                <div className="relative z-10">
-                                    <span className="inline-block bg-brand-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] mb-8">
-                                        {dailyStory.category}
-                                    </span>
-                                    <h3 className="text-4xl md:text-5xl font-black text-ink-900 font-serif mb-8 leading-[1.1] tracking-tighter">
-                                        {dailyStory.title}
-                                    </h3>
-                                    
-                                    <div className="grid grid-cols-2 gap-6 mb-12">
-                                        <div className="p-4 bg-ink-900/5 rounded-2xl border border-ink-900/5">
-                                            <p className="text-[10px] text-ink-400 uppercase font-black mb-1">Source</p>
-                                            <p className="text-sm text-ink-800 font-bold">{dailyStory.source}</p>
-                                        </div>
-                                        <div className="p-4 bg-ink-900/5 rounded-2xl border border-ink-900/5">
-                                            <p className="text-[10px] text-ink-400 uppercase font-black mb-1">Lecture</p>
-                                            <p className="text-sm text-ink-800 font-bold">{dailyStory.readTime}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="relative z-10 flex items-center gap-4 p-4 bg-brand-500/5 border border-brand-500/20 rounded-2xl">
-                                    <div className="w-10 h-10 bg-brand-600 rounded-full flex items-center justify-center text-white">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-ink-500 font-bold uppercase tracking-widest">Vos lectures</p>
-                                        <p className="text-lg text-ink-900 font-black">{views.toLocaleString()} <span className="text-xs text-ink-400 font-normal">lecteurs</span></p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right: Content */}
-                            <div className="p-10 md:p-20 lg:w-3/5 bg-[#121215] relative">
-                                <div className="prose prose-invert prose-xl max-w-none font-light text-ink-700 leading-relaxed">
-                                    {renderStoryContent(dailyStory.content)}
-                                </div>
-                                
-                                <div className="mt-16 pt-10 border-t border-ink-900/5">
-                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                                        <p className="text-sm text-ink-400 italic max-w-xs text-center sm:text-left">
-                                            "Celui qui indique un bien a la même récompense que celui qui l'accomplit."
-                                        </p>
-                                        <div className="flex gap-4">
-                                            <button 
-                                                onClick={handleShare}
-                                                className="px-6 py-3 bg-ivory-200 hover:bg-ivory-300 text-ink-900 rounded-2xl text-sm font-bold transition-all flex items-center gap-3 border border-ink-900/5"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-                                                Partager
-                                            </button>
-                                            <button 
-                                                onClick={handleNextStory}
-                                                className="px-8 py-3 bg-brand-600 hover:bg-brand-500 text-white rounded-2xl text-sm font-bold transition-all shadow-xl shadow-brand-900/40 flex items-center gap-3"
-                                            >
-                                                Lire une autre
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- 1. LES 5 PILIERS --- */}
-                <section>
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-black text-ink-900 mb-4 tracking-tight">Les 5 Piliers de l'Islam</h2>
-                        <p className="text-ink-400 text-lg">Les fondations sacrées sur lesquelles repose l'édifice de notre foi.</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-                        {FIVE_PILLARS.map((pillar) => (
-                            <div key={pillar.num} className="group relative h-80 perspective-1000">
-                                <div className="absolute inset-0 bg-[#0e0e10] border border-ink-900/5 rounded-[2rem] p-8 flex flex-col items-center justify-center text-center transition-all duration-700 transform group-hover:bg-brand-900/20 group-hover:border-brand-500/50 shadow-2xl group-hover:-translate-y-4">
-                                    <div className="text-[10px] font-black text-gray-700 absolute top-6 left-6 tracking-widest">0{pillar.num}</div>
-                                    <div className="text-6xl mb-6 group-hover:scale-125 transition-transform duration-500 drop-shadow-2xl">{pillar.icon}</div>
-                                    <h3 className="text-xl font-black text-ink-900 mb-2">{pillar.title}</h3>
-                                    <p className="text-[10px] text-brand-500 uppercase tracking-[0.2em] font-black mb-4">{pillar.trans}</p>
-                                    <p className="text-xs text-ink-500 opacity-0 group-hover:opacity-100 transition-all duration-500 absolute bottom-8 px-6 leading-relaxed">
-                                        {pillar.desc}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                {/* --- 2. COMPARATEUR THÉOLOGIQUE --- */}
-                <section className="relative">
-                    {/* Header dynamique */}
-                    <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-900/40 to-black rounded-full border border-red-500/30 mb-4 animate-pulse">
-                            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                            <span className="text-red-400 font-bold text-xs uppercase tracking-widest">Armurerie du Débatteur</span>
-                        </div>
-                        <h2 className="text-4xl font-extrabold text-ink-900">Le Choc des Textes</h2>
-                        <p className="text-ink-400 mt-2">Comparez les sources en temps réel pour dominer le débat.</p>
-                    </div>
-
-                    {/* SELECTEUR STYLISÉ */}
-                    <div className="flex justify-center mb-12">
-                        <div className="flex gap-2 p-1.5 bg-ivory-200 rounded-xl border border-ink-900/10 overflow-x-auto max-w-full">
-                            {COMPARISONS.map((topic, index) => (
-                                <button
-                                    key={topic.id}
-                                    onClick={() => setSelectedTopic(index)}
-                                    className={`px-5 py-3 rounded-lg text-sm font-bold flex items-center gap-2 transition-all duration-300 whitespace-nowrap ${
-                                        selectedTopic === index 
-                                        ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/40' 
-                                        : 'text-ink-500 hover:text-ink-900 hover:bg-ivory-300'
-                                    }`}
-                                >
-                                    <span>{topic.icon}</span>
-                                    {topic.title}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* INTERFACE DE COMBAT (VERSUS) */}
-                    <div className="relative bg-ivory-100 rounded-[2rem] border border-ink-900/10 shadow-2xl overflow-hidden">
-                        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-ink-900/10">
-                            
-                            {/* COTÉ ISLAM */}
-                            <div key={`islam-${selectedTopic}`} className="p-12 relative group animate-fade-up">
-                                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                                    <span className="text-8xl font-serif">☪️</span>
-                                </div>
-                                <div className="flex items-center gap-4 mb-10">
-                                    <div className="h-1.5 w-12 bg-green-500 rounded-full"></div>
-                                    <h3 className="text-green-500 font-black uppercase tracking-[0.3em] text-xs">Source Islamique</h3>
-                                </div>
-                                <blockquote className="text-3xl md:text-4xl text-ink-900 font-serif leading-tight mb-12 relative z-10 italic">
-                                    "{COMPARISONS[selectedTopic].islam.text}"
-                                </blockquote>
-                                <div className="font-mono text-[10px] text-ink-400 uppercase tracking-widest border-l border-green-500/50 pl-4 py-1">
-                                    Référence: {COMPARISONS[selectedTopic].islam.source}
-                                </div>
-                            </div>
-
-                            {/* COTÉ CHRISTIANISME */}
-                            <div key={`christianity-${selectedTopic}`} className="p-12 relative group animate-fade-up delay-100">
-                                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                                    <span className="text-8xl font-serif">✝️</span>
-                                </div>
-                                <div className="flex items-center gap-4 mb-10">
-                                    <div className="h-1.5 w-12 bg-blue-500 rounded-full"></div>
-                                    <h3 className="text-blue-500 font-black uppercase tracking-[0.3em] text-xs">Source Biblique</h3>
-                                </div>
-                                <blockquote className="text-3xl md:text-4xl text-ink-900 font-serif leading-tight mb-12 relative z-10 italic">
-                                    "{COMPARISONS[selectedTopic].christianity.text}"
-                                </blockquote>
-                                <div className="font-mono text-[10px] text-ink-400 uppercase tracking-widest border-l border-blue-500/50 pl-4 py-1">
-                                    Référence: {COMPARISONS[selectedTopic].christianity.source}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* VERDICT DDR */}
-                        <div key={`verdict-${selectedTopic}`} className="bg-ink-900/5 border-t border-ink-900/10 p-12 text-center animate-fade-up delay-200">
-                            <div className="inline-flex items-center gap-3 mb-6 px-4 py-1 bg-brand-500/10 border border-brand-500/20 rounded-full">
-                                <span className="text-brand-500 font-black uppercase text-[10px] tracking-[0.3em]">Verdict Théologique</span>
-                            </div>
-                            <p className="text-2xl md:text-3xl text-ink-900 font-light max-w-4xl mx-auto leading-relaxed italic">
-                                {COMPARISONS[selectedTopic].verdict}
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- 3. RESEAUX SOCIAUX OFFICIELS --- */}
-                <section>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {SOCIAL_LINKS.map((link) => (
-                            <a 
-                                key={link.name} 
-                                href={link.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className={`group relative p-6 rounded-2xl border ${link.borderClass} bg-opacity-10 hover:bg-opacity-20 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl overflow-hidden`}
-                                style={{ backgroundColor: link.name === 'Facebook' ? 'rgba(24, 119, 242, 0.1)' : link.name === 'YouTube' ? 'rgba(255, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)' }}
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-ink-900/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                                <div className="flex flex-col items-center text-center relative z-10">
-                                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${link.bgClass} text-ink-900 shadow-lg`}>
-                                        {link.icon}
-                                    </div>
-                                    <h3 className="text-xl font-bold text-ink-900 mb-1">{link.name}</h3>
-                                    <p className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">{link.label}</p>
-                                    <p className="text-sm text-ink-500">{link.subLabel}</p>
-                                    
-                                    <span className="mt-4 px-4 py-2 bg-ink-900/10 rounded-full text-xs font-bold text-ink-900 group-hover:bg-white group-hover:text-black transition-colors">
-                                        S'abonner →
-                                    </span>
-                                </div>
-                            </a>
-                        ))}
-                    </div>
-                </section>
-
-                {/* --- 4. TASBIH & SUNNAS (BENTO GRID) --- */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    
-                    {/* Tasbih Interactif (Large Card) */}
-                    <div className="lg:col-span-2 bg-ivory-50 border border-ink-900/10 rounded-[2.5rem] p-12 flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-brand-900/20 to-transparent opacity-50"></div>
-                        
-                        <div className="relative z-10 text-center md:text-left">
-                            <h3 className="text-3xl font-black text-ink-900 mb-4 uppercase tracking-tighter">Tasbih <span className="text-brand-500">Digital</span></h3>
-                            <p className="text-ink-500 text-lg max-w-xs mb-8">"L'évocation d'Allah est le repos des cœurs."</p>
-                            <div className="flex gap-4 justify-center md:justify-start">
-                                <button 
-                                    onClick={handleTasbih}
-                                    className="px-10 py-5 bg-brand-600 hover:bg-brand-500 text-white rounded-2xl font-black text-xl shadow-[0_0_30px_rgba(234,88,12,0.4)] active:scale-95 transition-all uppercase tracking-widest"
-                                >
-                                    Zikr
-                                </button>
-                                <button 
-                                    onClick={() => setTasbihCount(0)}
-                                    aria-label="Remettre le compteur à zéro"
-                                    className="w-16 h-16 bg-ink-900/5 hover:bg-ink-900/10 text-ink-500 rounded-2xl font-bold flex items-center justify-center border border-ink-900/10 transition-all"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="relative z-10">
-                            <div className="w-64 h-64 rounded-full border-[12px] border-ink-900/5 flex items-center justify-center bg-ivory-100 shadow-[inset_0_0_40px_rgba(0,0,0,1)] relative transition-transform duration-100 transform" style={{ transform: tasbihCount > 0 ? 'scale(0.98)' : 'scale(1)' }}>
-                                <div className="absolute inset-0 rounded-full border border-brand-500/20 animate-ping opacity-20"></div>
-                                <span className="text-8xl font-mono text-brand-500 font-black tracking-tighter drop-shadow-[0_0_20px_rgba(234,88,12,0.5)]">{tasbihCount}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Sunnas Checklist (Side Card) */}
-                    <div className="bg-ivory-50 border border-ink-900/10 rounded-[2.5rem] p-10 flex flex-col shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-                        </div>
-                        <h3 className="text-2xl font-black text-ink-900 mb-8 uppercase tracking-tighter relative z-10">Sunnas <span className="text-gold-500">D'Or</span></h3>
-                        <div className="space-y-4 relative z-10">
-                            {SUNNAS.map((sunna, i) => (
-                                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-ink-900/5 border border-ink-900/5 hover:border-brand-500/30 transition-all group cursor-default">
-                                    <div className="h-10 w-10 rounded-xl bg-brand-500/10 flex items-center justify-center text-brand-500 font-black text-xs group-hover:bg-brand-500 group-hover:text-white transition-all">
-                                        {i + 1}
-                                    </div>
-                                    <div>
-                                        <h4 className="text-ink-900 font-bold text-sm group-hover:text-brand-600 transition-colors">{sunna.title}</h4>
-                                        <p className="text-ink-400 text-[10px] leading-tight mt-0.5">{sunna.desc}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* --- 5. ALPHABET ARABE --- */}
-                <section>
-                    <div className="flex justify-between items-end mb-8 border-b border-ink-900/10 pb-4">
-                        <h2 className="text-2xl font-bold text-ink-900">L'Alphabet Arabe</h2>
-                        <span className="text-xs text-ink-400">Sens de lecture : Droite à Gauche</span>
-                    </div>
-
-                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-3 dir-rtl" style={{ direction: 'rtl' }}>
-                        {ARABIC_LETTERS.map((item, index) => (
-                            <div 
-                                key={index} 
-                                className="bg-[#18181b] hover:bg-brand-900/20 border border-ink-900/10 hover:border-brand-500/50 rounded-xl p-4 flex flex-col items-center justify-center transition-all duration-300 group cursor-default"
-                            >
-                                <span className="text-3xl font-serif text-ink-900 mb-2 group-hover:scale-125 transition-transform duration-300">{item.char}</span>
-                                <span className="text-[10px] text-ink-400 uppercase tracking-wider font-bold group-hover:text-brand-600">{item.name}</span>
-                                <span className="text-[9px] text-ink-400 font-mono mt-1">/{item.sound}/</span>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-            </div>
+            <button onClick={() => setI((i + 1) % SAGESSES.length)} aria-label="Suivant" className="grid h-10 w-10 place-items-center rounded-full bg-white/10 hover:bg-white/20"><ChevronRight className="h-5 w-5" /></button>
+          </div>
         </div>
-    );
-});
+      </Container>
+    </section>
+  );
+};
+
+const Sommaire = () => (
+  <nav aria-label="Sommaire" className="sticky top-[70px] z-30 mt-12 border-y border-ink-900/[0.06] bg-ivory-100/90 backdrop-blur-xl">
+    <Container className="no-scrollbar flex gap-2 overflow-x-auto py-3">
+      {[
+        ['piliers', 'Les 5 piliers'], ['histoire', 'Histoire du jour'], ['sunnas', 'Sunnas à vivre'], ['ecritures', 'Bible & Coran'], ['alphabet', 'Alphabet'], ['tasbih', 'Tasbih'],
+      ].map(([id, label]) => (
+        <a key={id} href={`#${id}`} className="r-soft r-ink shrink-0 rounded-full px-4 py-2 text-sm font-bold transition hover:bg-[var(--r-to)] hover:text-white">{label}</a>
+      ))}
+    </Container>
+  </nav>
+);
+
+const Piliers = () => {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <section id="piliers" className="scroll-mt-36 py-16 md:py-24">
+      <Container>
+        <H2 kicker="Les fondations">Les cinq piliers de l’Islam</H2>
+        <div className="grid gap-4 md:grid-cols-5">
+          {PILIERS.map((p, i) => (
+            <button
+              key={p.n}
+              onClick={() => setOpen(open === p.n ? null : p.n)}
+              aria-expanded={open === p.n}
+              style={{ '--d': `${i * 80}ms` } as React.CSSProperties}
+              className={`reveal group relative overflow-hidden rounded-3xl p-6 text-left transition duration-500 ${open === p.n ? 'r-grad text-white shadow-[0_30px_60px_-30px_var(--r-to)]' : 'bg-white shadow-[0_18px_40px_-30px_rgba(20,36,74,0.5)] ring-1 ring-ink-900/[0.06] hover:-translate-y-1'}`}
+            >
+              <span className={`font-display text-5xl font-bold ${open === p.n ? 'text-white/30' : 'r-ink opacity-20'}`}>{p.n}</span>
+              <p className={`mt-1 font-arabic text-2xl ${open === p.n ? 'text-white' : 'r-ink'}`} lang="ar">{p.ar}</p>
+              <h3 className={`mt-1 font-serif text-xl font-semibold ${open === p.n ? 'text-white' : 'text-ink-900'}`}>{p.title}</h3>
+              <p className={`text-sm font-semibold ${open === p.n ? 'text-white/80' : 'text-ink-500'}`}>{p.sub}</p>
+              <p className={`mt-3 text-[15px] leading-relaxed ${open === p.n ? 'text-white/90' : 'text-ink-500'}`}>{p.text}</p>
+              {open === p.n && <p className="mt-3 border-t border-white/25 pt-3 text-sm leading-relaxed text-white/90 animate-fade-up">{p.detail}</p>}
+              {open !== p.n && <span className="r-ink mt-3 inline-flex items-center gap-1 text-sm font-bold">En savoir plus <ArrowRight className="h-4 w-4" /></span>}
+            </button>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+};
+
+const HistoireDuJour = () => {
+  const [idx, setIdx] = useState(dayOfYear() % PROPHET_STORIES.length);
+  const [copied, setCopied] = useState(false);
+  const story = PROPHET_STORIES[idx];
+  const next = () => {
+    let n = idx;
+    while (n === idx && PROPHET_STORIES.length > 1) n = Math.floor(Math.random() * PROPHET_STORIES.length);
+    setIdx(n);
+    document.getElementById('histoire')?.scrollIntoView({ behavior: 'smooth' });
+  };
+  const share = async () => {
+    const text = `${story.title}\n\n${story.content.replace(/[*>#]/g, '').slice(0, 220)}…\n\nÀ lire sur le site de la DDR : ${window.location.origin}/learning#histoire`;
+    if (navigator.share) return navigator.share({ title: story.title, text }).catch(() => {});
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+  const lines = useMemo(() => story.content.split('\n').filter((l) => l.trim()), [story]);
+  return (
+    <section id="histoire" className="scroll-mt-36 bg-[#e0f5ec]/60 py-16 md:py-24">
+      <Container>
+        <H2 kicker="Histoire du jour">Les récits du Prophète ﷺ</H2>
+        <article key={story.id} className="reveal is-visible mx-auto max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-[0_30px_70px_-40px_rgba(18,93,71,0.6)] animate-fade-up">
+          <div className="r-grad relative px-7 py-8 text-white sm:px-10">
+            <div className="absolute inset-0 bg-pattern opacity-20 mix-blend-overlay" aria-hidden />
+            <p className="relative flex flex-wrap items-center gap-3 text-[12px] font-extrabold uppercase tracking-[0.2em] text-white/85">
+              <span>{story.category}</span> <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {story.readTime}</span>
+            </p>
+            <h3 className="relative mt-2 font-serif text-3xl font-semibold leading-tight md:text-4xl">{story.title}</h3>
+          </div>
+          <div className="px-7 py-8 text-[17px] leading-relaxed text-ink-700 sm:px-10">
+            {lines.map((line, i) =>
+              line.trim().startsWith('**') ? (
+                <h4 key={i} className="mb-2 mt-5 font-serif text-xl font-semibold text-ink-900">{line.replace(/\*\*/g, '')}</h4>
+              ) : line.trim().startsWith('>') ? (
+                <blockquote key={i} className="r-soft my-4 rounded-2xl border-l-4 border-[var(--r-to)] px-5 py-3 font-serif italic text-ink-800">{line.replace(/^>\s?/, '')}</blockquote>
+              ) : (
+                <p key={i} className="mb-3">{line}</p>
+              ),
+            )}
+            <p className="mt-6 text-sm font-semibold text-ink-400">Source : {story.source}</p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              <button onClick={next} className="r-grad inline-flex items-center gap-2 rounded-full px-5 py-3 font-bold text-white shadow-md"><RefreshCw className="h-4 w-4" /> Une autre histoire</button>
+              <button onClick={share} className="inline-flex items-center gap-2 rounded-full border border-ink-900/15 px-5 py-3 font-bold text-ink-900"><Share2 className="h-4 w-4" /> {copied ? 'Ouverture de WhatsApp…' : 'Partager'}</button>
+            </div>
+          </div>
+        </article>
+      </Container>
+    </section>
+  );
+};
+
+const Sunnas = () => {
+  const [done, setDone] = useState<string[]>(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem('ddr_sunnas') || '{}');
+      return s.day === todayKey() ? s.done : [];
+    } catch {
+      return [];
+    }
+  });
+  const toggle = (t: string) => {
+    const next = done.includes(t) ? done.filter((x) => x !== t) : [...done, t];
+    setDone(next);
+    try {
+      localStorage.setItem('ddr_sunnas', JSON.stringify({ day: todayKey(), done: next }));
+    } catch {
+      /* stockage indisponible */
+    }
+    if (!done.includes(t)) navigator.vibrate?.(20);
+  };
+  return (
+    <section id="sunnas" className="scroll-mt-36 py-16 md:py-24">
+      <Container>
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <H2 kicker="À vivre aujourd’hui">Six sunnas pour embellir la journée</H2>
+          <div className="reveal mb-10 flex items-center gap-3 rounded-2xl bg-white px-5 py-3 shadow-sm ring-1 ring-ink-900/[0.06]">
+            <span className="r-ink font-display text-3xl font-bold">{done.length}/6</span>
+            <span className="text-sm font-semibold text-ink-500">{done.length === 6 ? 'Mâ shâ Allah, toutes réalisées !' : 'réalisées aujourd’hui'}</span>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {SUNNAS.map((s, i) => {
+            const on = done.includes(s.title);
+            return (
+              <button key={s.title} onClick={() => toggle(s.title)} aria-pressed={on} style={{ '--d': `${(i % 3) * 80}ms` } as React.CSSProperties} className={`reveal flex items-start gap-4 rounded-3xl p-5 text-left transition duration-300 ${on ? 'r-soft ring-2 ring-[var(--r-from)]' : 'bg-white shadow-[0_14px_30px_-24px_rgba(20,36,74,0.5)] ring-1 ring-ink-900/[0.06] hover:-translate-y-0.5'}`}>
+                <span className="text-3xl" aria-hidden>{s.icon}</span>
+                <span className="flex-1">
+                  <span className="block font-serif text-xl font-semibold text-ink-900">{s.title}</span>
+                  <span className="mt-0.5 block text-[15px] text-ink-500">{s.text}</span>
+                </span>
+                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 transition ${on ? 'r-grad border-transparent text-white' : 'border-ink-900/15 text-transparent'}`}><Check className="h-4 w-4" /></span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="reveal mt-4 text-sm text-ink-500">Cochez ce que vous avez fait : votre liste repart à zéro chaque jour.</p>
+      </Container>
+    </section>
+  );
+};
+
+const Ecritures = () => {
+  const [sel, setSel] = useState(0);
+  const c = COMPARAISONS[sel];
+  return (
+    <section id="ecritures" className="scroll-mt-36 relative overflow-hidden bg-[#0f3d31] py-16 text-white md:py-24">
+      <div className="absolute inset-0 bg-pattern opacity-[0.07]" aria-hidden />
+      <Container className="relative">
+        <div className="reveal mb-10 max-w-2xl">
+          <p className="flex items-center gap-3 text-[12px] font-extrabold uppercase tracking-[0.24em] text-[#9de3c6]"><span className="h-1 w-8 rounded-full bg-[#9de3c6]" /> La méthode de la DDR</p>
+          <h2 className="mt-4 font-serif text-3xl font-semibold leading-tight md:text-[2.7rem]">La Bible et le Coran, côte à côte</h2>
+          <p className="mt-3 text-white/70">Comparer les écritures avec respect : lisez, vérifiez les références, faites-vous votre propre idée.</p>
+        </div>
+        <div className="reveal no-scrollbar mb-6 flex gap-2 overflow-x-auto">
+          {COMPARAISONS.map((x, i) => (
+            <button key={x.id} onClick={() => setSel(i)} className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-bold transition ${i === sel ? 'bg-white text-[#125D47]' : 'bg-white/10 text-white hover:bg-white/20'}`}>
+              <span aria-hidden>{x.emoji}</span> {x.title}
+            </button>
+          ))}
+        </div>
+        <div key={c.id} className="grid gap-4 animate-fade-up md:grid-cols-2">
+          <div className="rounded-3xl bg-white/[0.07] p-6 ring-1 ring-white/10 md:p-8">
+            <p className="text-[12px] font-extrabold uppercase tracking-[0.2em] text-[#9de3c6]">Le Coran · {c.coran.ref}</p>
+            <p className="mt-4 font-serif text-xl italic leading-relaxed md:text-2xl">« {c.coran.text} »</p>
+          </div>
+          <div className="rounded-3xl bg-white/[0.07] p-6 ring-1 ring-white/10 md:p-8">
+            <p className="text-[12px] font-extrabold uppercase tracking-[0.2em] text-gold-300">La Bible · {c.bible.ref}</p>
+            <p className="mt-4 font-serif text-xl italic leading-relaxed md:text-2xl">« {c.bible.text} »</p>
+          </div>
+        </div>
+        <p key={c.id + 'n'} className="mt-4 rounded-2xl bg-[#9de3c6]/15 p-5 text-[15px] leading-relaxed text-white/90 animate-fade-up">{c.note}</p>
+        <Link to="/debates" className="mt-6 inline-flex items-center gap-2 font-bold text-[#9de3c6] hover:text-white">Voir les débats de la DDR <ArrowRight className="h-4 w-4" /></Link>
+      </Container>
+    </section>
+  );
+};
+
+const Alphabet = () => {
+  const [sel, setSel] = useState<number | null>(null);
+  return (
+    <section id="alphabet" className="scroll-mt-36 py-16 md:py-24">
+      <Container>
+        <H2 kicker="Premiers pas en arabe">L’alphabet arabe</H2>
+        <div className="reveal grid grid-cols-4 gap-2 sm:grid-cols-7" dir="rtl">
+          {LETTERS.map((l, i) => (
+            <button key={l.name} onClick={() => setSel(i)} className={`group flex aspect-square flex-col items-center justify-center rounded-2xl transition duration-300 ${sel === i ? 'r-grad scale-105 text-white shadow-lg' : 'bg-white ring-1 ring-ink-900/[0.06] hover:-translate-y-1 hover:shadow-md'}`}>
+              <span className={`font-arabic text-4xl leading-none ${sel === i ? 'text-white' : 'text-ink-900'}`}>{l.ar}</span>
+              <span className={`mt-1 text-xs font-bold ${sel === i ? 'text-white/90' : 'text-ink-500'}`} dir="ltr">{l.name}</span>
+            </button>
+          ))}
+        </div>
+        <p className="reveal mt-4 text-sm text-ink-500">L’arabe se lit de droite à gauche. Touchez une lettre, puis entraînez-vous dans le <Link to="/apprendre/quiz" className="r-ink font-bold underline">Grand Quiz</Link>.</p>
+      </Container>
+    </section>
+  );
+};
+
+const Tasbih = () => {
+  const [count, setCount] = useState(0);
+  const round = Math.floor(count / 33) % 3;
+  const inRound = count % 33;
+  const total = count;
+  const tap = () => {
+    setCount((c) => c + 1);
+    navigator.vibrate?.((count + 1) % 33 === 0 ? [40, 60, 40] : 12);
+  };
+  const pct = (inRound / 33) * 100;
+  return (
+    <section id="tasbih" className="scroll-mt-36 bg-[#e0f5ec]/60 py-16 md:py-24">
+      <Container>
+        <H2 kicker="Le rappel d’Allah" center>Votre tasbih</H2>
+        <div className="reveal mx-auto flex max-w-sm flex-col items-center">
+          <button
+            onClick={tap}
+            aria-label={`Compter : ${TASBIH[round]}, ${inRound} sur 33`}
+            className="relative grid h-64 w-64 place-items-center rounded-full bg-white shadow-[0_40px_80px_-40px_rgba(18,93,71,0.8)] transition active:scale-95"
+            style={{ background: `conic-gradient(var(--r-from) ${pct}%, #e0f5ec ${pct}% 100%)` }}
+          >
+            <span className="grid h-[14.5rem] w-[14.5rem] place-items-center rounded-full bg-white">
+              <span>
+                <span className="block font-arabic text-3xl text-ink-900" lang="ar">{TASBIH_AR[round]}</span>
+                <span className="r-ink mt-1 block text-sm font-bold">{TASBIH[round]}</span>
+                <span className="mt-2 block font-display text-6xl font-bold tabular-nums text-ink-900">{inRound}</span>
+                <span className="block text-xs font-semibold text-ink-400">sur 33 · total {total}</span>
+              </span>
+            </span>
+          </button>
+          <p className="mt-6 text-center text-sm text-ink-500">Touchez le cercle à chaque invocation : 33 fois chacune, après la prière.</p>
+          <button onClick={() => setCount(0)} className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-ink-500 hover:text-ink-900"><RotateCcw className="h-4 w-4" /> Remettre à zéro</button>
+        </div>
+      </Container>
+    </section>
+  );
+};
+
+const LearningCenter = () => {
+  useReveal();
+  return (
+    <div style={rubriqueVars('savoir')}>
+      <RubriqueHero k="savoir" icon={BookOpen} title="Centre du savoir" arabic="اقْرَأْ" subtitle="Les fondations de l’Islam, les récits du Prophète ﷺ, la Bible et le Coran côte à côte, et de petits gestes à vivre chaque jour." />
+      <SagesseDuJour />
+      <Sommaire />
+      <Piliers />
+      <HistoireDuJour />
+      <Sunnas />
+      <Ecritures />
+      <Alphabet />
+      <Tasbih />
+      <section className="py-16">
+        <Container>
+          <Link to="/apprendre/quiz" className="reveal group flex flex-col items-center gap-4 rounded-[2rem] bg-white p-8 text-center shadow-[0_20px_50px_-30px_rgba(18,93,71,0.6)] ring-1 ring-ink-900/[0.06] sm:flex-row sm:text-left">
+            <span className="r-grad grid h-16 w-16 shrink-0 place-items-center rounded-2xl text-white"><Trophy className="h-8 w-8" /></span>
+            <span className="flex-1">
+              <span className="block font-serif text-2xl font-semibold text-ink-900">Testez ce que vous avez appris</span>
+              <span className="block text-ink-500">Le Grand Quiz infini : des centaines de questions, pour tous les niveaux.</span>
+            </span>
+            <span className="r-ink inline-flex items-center gap-2 font-bold">Jouer <Sparkles className="h-5 w-5 transition group-hover:rotate-12" /></span>
+          </Link>
+        </Container>
+      </section>
+    </div>
+  );
+};
 
 export default LearningCenter;

@@ -38,7 +38,6 @@ const Chat = lazyPage(() => import('./pages/Chat'));
 const Shahada = lazyPage(() => import('./pages/Shahada'));
 const LearningCenter = lazyPage(() => import('./pages/LearningCenter'));
 const Kids = lazyPage(() => import('./pages/Kids'));
-const Tools = lazyPage(() => import('./pages/Tools'));
 const Khatma = lazyPage(() => import('./pages/Khatma'));
 const Donations = lazyPage(() => import('./pages/Donations'));
 const News = lazyPage(() => import('./pages/News'));
@@ -53,6 +52,8 @@ const Decouvrir = lazyPage(() => import('./pages/Rubriques').then((m) => ({ defa
 const Agenda = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Agenda })));
 const Apprendre = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Apprendre })));
 const QuizInfini = lazyPage(() => import('./pages/QuizInfini'));
+const ZakatSmart = lazyPage(() => import('./pages/ZakatSmart'));
+const StudioDawa = lazyPage(() => import('./pages/StudioDawa'));
 const Rejoindre = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Rejoindre })));
 
 const AdminLogin = lazyPage(() => import('./pages/Admin/AdminLogin'));
@@ -140,7 +141,10 @@ const AppRoutes = () => {
                   <Route path="/shahada" element={<Shahada />} />
                   <Route path="/learning" element={<LearningCenter />} />
                   <Route path="/enfants" element={<Kids />} />
-                  <Route path="/tools" element={<Tools />} />
+                  <Route path="/tools" element={<Navigate to="/outils/zakat" replace />} />
+                  <Route path="/outils" element={<Navigate to="/outils/zakat" replace />} />
+                  <Route path="/outils/zakat" element={<ZakatSmart />} />
+                  <Route path="/outils/studio" element={<StudioDawa />} />
                   <Route path="/khatma" element={<Khatma />} />
                   <Route path="/donations" element={<Donations />} />
                   <Route path="/news" element={<News />} />

@@ -260,3 +260,11 @@
 @keyframes confetti {
   to { transform: translateY(110vh) rotate(720deg); opacity: 0.9; }
 }
+@keyframes lueur {
+  from { transform: translateY(0); }
+  to { transform: translateY(-115vh); }
+}
+@keyframes onde {
+  from { transform: scaleY(0.4); }
+  to { transform: scaleY(1); }
+}

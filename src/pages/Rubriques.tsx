@@ -4,7 +4,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, BookOpen, CalendarDays, Camera, Compass, Heart, Info, Megaphone, MessageCircleHeart, Newspaper, Phone,
-  PlayCircle, Sparkles, Truck, UserPlus, Users, Wrench, HandHeart, GraduationCap, Baby, Trophy, Lightbulb, RefreshCw,
+  PlayCircle, Sparkles, Truck, UserPlus, Users, Wrench, HandHeart, GraduationCap, Baby, Trophy, Lightbulb, RefreshCw, Calculator, Palette,
 } from 'lucide-react';
 import RubriqueHero from '../components/RubriqueHero';
 import NextRappel from '../components/NextRappel';
@@ -383,12 +383,13 @@ export const Apprendre = () => {
           <H2 k="apprendre" kicker="Pour tous les âges">Tous les espaces pour apprendre</H2>
           <Tiles
             k="apprendre"
-            cols="lg:grid-cols-2"
+            cols="lg:grid-cols-3"
             items={[
               { to: '/khatma', icon: BookOpen, title: 'Le Coran', text: 'Lire et écouter le Coran, juz par juz, avec la traduction.' },
               { to: '/learning', icon: GraduationCap, title: 'Centre du savoir', text: 'Les piliers, la sunnah et les histoires des prophètes.' },
               { to: '/enfants', icon: Baby, title: 'Espace enfants', text: 'Des jeux et des quiz adaptés aux plus petits.' },
-              { to: '/tools', icon: Wrench, title: 'Outils du croyant', text: 'Calculer sa zakat, partager des cartes de rappel.' },
+              { to: '/outils/zakat', icon: Calculator, title: 'Zakat Smart', text: 'Calculer sa zakat en quelques gestes, avec explications.' },
+              { to: '/outils/studio', icon: Palette, title: 'Studio Da’wa', text: 'Créer une belle carte de rappel à partager.' },
             ]}
           />
         </Container>

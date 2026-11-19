@@ -111,8 +111,23 @@ export interface InboxMessage {
     content: string; // Texte ou Base64 Audio URL
     audioDuration?: string; // Pour l'affichage "0:15"
     receivedAt: number; // Timestamp
-    expiresAt: number; // Timestamp + 24h
+    expiresAt: number; // Infinity si conservé
     isRead: boolean;
+    consentPublish: boolean;
+    published: boolean;
+    displayName?: string;
+    city?: string;
+}
+
+/** Témoignage publié, tel qu'il est visible par le public (sans téléphone). */
+export interface PublicTestimony {
+    id: string;
+    type: 'text' | 'audio';
+    displayName: string;
+    city?: string;
+    content: string;
+    audioDuration?: string;
+    publishedAt: string;
 }
 
 // Interface pour le générateur de cartes

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Baby, BookOpen, CalendarDays, Trophy, ChevronDown, Compass, GraduationCap, HandHeart, Heart, Info, Menu, MessageCircleHeart, Newspaper, PlayCircle, Sparkles, Users, Wrench, X, Phone, Mail, MapPin, UserPlus, Mic,
+  Baby, BookOpen, CalendarDays, Trophy, Calculator, Palette, ChevronDown, Compass, GraduationCap, HandHeart, Heart, Info, Menu, MessageCircleHeart, Newspaper, PlayCircle, Sparkles, Users, Wrench, X, Phone, Mail, MapPin, UserPlus, Mic,
 } from 'lucide-react';
 import RadioPlayer from './RadioPlayer';
 import Logo from './Logo';
@@ -14,7 +14,7 @@ import type { Debate } from '../types';
 import { telHref, useSite } from '../lib/site';
 import { rubriqueVars, type RubriqueKey } from '../lib/rubriques';
 
-type NavItem = { name: string; path: string; desc?: string; icon?: React.ComponentType<{ className?: string }> };
+type NavItem = { name: string; path: string; desc?: string; k?: RubriqueKey; icon?: React.ComponentType<{ className?: string }> };
 type NavGroup = { name: string; k: RubriqueKey; items: NavItem[] };
 
 /** Architecture du site : une rubrique = un besoin du visiteur. */
@@ -25,7 +25,7 @@ export const NAV: (NavItem | NavGroup)[] = [
     items: [
       { name: 'Qui sommes-nous', path: '/la-ddr', desc: 'Notre histoire, notre mission', icon: Info },
       { name: 'Nos intervenants', path: '/la-ddr/intervenants', desc: 'Les voix de la DDR', icon: Mic },
-      { name: 'Actualités', path: '/news', desc: 'La vie de l’association', icon: Newspaper },
+      { name: 'Actualités', path: '/news', desc: 'Le journal de la DDR', k: 'actualites', icon: Newspaper },
     ],
   },
   {
@@ -44,9 +44,10 @@ export const NAV: (NavItem | NavGroup)[] = [
       { name: 'Apprendre l’Islam', path: '/apprendre', desc: 'La leçon du jour, tous les espaces', icon: GraduationCap },
       { name: 'Le Grand Quiz', path: '/apprendre/quiz', desc: 'Des questions sans fin, pour tous', icon: Trophy },
       { name: 'Le Coran', path: '/khatma', desc: 'Lire et écouter, juz par juz', icon: BookOpen },
-      { name: 'Centre du savoir', path: '/learning', desc: 'Piliers, sunnah, histoires', icon: GraduationCap },
+      { name: 'Centre du savoir', path: '/learning', desc: 'Piliers, histoires, Bible & Coran', k: 'savoir', icon: GraduationCap },
       { name: 'Espace enfants', path: '/enfants', desc: 'Quiz et jeux pour les petits', icon: Baby },
-      { name: 'Outils du croyant', path: '/tools', desc: 'Zakat, cartes de rappel', icon: Wrench },
+      { name: 'Zakat Smart', path: '/outils/zakat', desc: 'Calculer sa zakat simplement', k: 'zakat', icon: Calculator },
+      { name: 'Studio Da’wa', path: '/outils/studio', desc: 'Créer une carte de rappel', k: 'studio', icon: Palette },
     ],
   },
   {
@@ -54,7 +55,7 @@ export const NAV: (NavItem | NavGroup)[] = [
     k: 'mediatheque',
     items: [
       { name: 'Débats & directs', path: '/debates', desc: 'Les directs et replays', icon: PlayCircle },
-      { name: 'Témoignages', path: '/conversions', desc: 'Ils ont trouvé la paix', icon: Users },
+      { name: 'Témoignages', path: '/conversions', desc: 'Ils ont trouvé la paix', k: 'temoignages', icon: Users },
     ],
   },
   { name: 'Agenda', path: '/agenda', icon: CalendarDays },
@@ -134,7 +135,7 @@ const Dropdown = ({ group, active }: { group: NavGroup; active: boolean }) => {
           {group.items.map((it) => {
             const Icon = it.icon || Sparkles;
             return (
-              <Link key={it.path} to={it.path} className="group flex items-start gap-3 rounded-2xl p-3 transition hover:bg-[var(--r-soft)]">
+              <Link key={it.path} to={it.path} style={it.k ? rubriqueVars(it.k) : undefined} className="group flex items-start gap-3 rounded-2xl p-3 transition hover:bg-[var(--r-soft)]">
                 <span className="r-soft r-ink grid h-10 w-10 shrink-0 place-items-center rounded-xl transition group-hover:bg-[var(--r-to)] group-hover:text-white">
                   <Icon className="h-5 w-5" />
                 </span>
@@ -206,7 +207,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path));
   // Rubriques à en-tête coloré : tant qu'on n'a pas défilé, la barre passe en blanc pour rester lisible.
-  const onColor = !scrolled && (['/la-ddr', '/decouvrir', '/agenda', '/rejoindre'].some((p) => location.pathname.startsWith(p)) || location.pathname === '/apprendre');
+  const onColor = !scrolled && (['/la-ddr', '/decouvrir', '/agenda', '/rejoindre', '/learning', '/outils', '/conversions'].some((p) => location.pathname.startsWith(p)) || ['/apprendre', '/news'].includes(location.pathname));
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory-100 text-ink-800">
@@ -280,7 +281,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {n.items.map((it) => {
                       const Icon = it.icon || Sparkles;
                       return (
-                        <Link key={it.path} to={it.path} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[16px] font-semibold ${isActive(it.path) ? 'bg-brand-100 text-brand-800' : 'text-ink-900'}`}>
+                        <Link key={it.path} to={it.path} style={it.k ? rubriqueVars(it.k) : undefined} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[16px] font-semibold ${isActive(it.path) ? 'bg-brand-100 text-brand-800' : 'text-ink-900'}`}>
                           <span className="r-soft r-ink grid h-9 w-9 place-items-center rounded-xl"><Icon className="h-[18px] w-[18px]" /></span> {it.name}
                         </Link>
                       );
@@ -364,6 +365,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <FooterLink to="/learning">Centre du savoir</FooterLink>
               <FooterLink to="/enfants">Espace enfants</FooterLink>
               <FooterLink to="/debates">Débats & directs</FooterLink>
+              <FooterLink to="/conversions">Témoignages</FooterLink>
+              <FooterLink to="/outils/zakat">Zakat Smart</FooterLink>
+              <FooterLink to="/outils/studio">Studio Da’wa</FooterLink>
             </FooterCol>
 
             <div>

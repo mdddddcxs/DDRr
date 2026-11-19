@@ -242,7 +242,7 @@ const Rubriques = () => (
 const PILLARS: { icon: React.ComponentType<{ className?: string }>; k: RubriqueKey; title: string; text: string }[] = [
   { icon: BookOpen, k: 'apprendre', title: 'Le savoir', text: 'Les écritures en main : la Bible et le Coran sont lus, cités et comparés devant tous, pour que chacun puisse vérifier par lui-même.' },
   { icon: Scale, k: 'decouvrir', title: 'Le respect', text: 'On débat des idées, jamais des personnes. Chaque contradicteur est écouté et reçoit une réponse posée.' },
-  { icon: Heart, k: 'mediatheque', title: 'La fraternité', text: 'Ceux qui embrassent l’Islam ne restent pas seuls : la DDR les accueille et les accompagne dans leurs premiers pas.' },
+  { icon: Heart, k: 'temoignages', title: 'La fraternité', text: 'Ceux qui embrassent l’Islam ne restent pas seuls : la DDR les accueille et les accompagne dans leurs premiers pas.' },
 ];
 
 const Demarche = () => (
