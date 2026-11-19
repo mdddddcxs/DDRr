@@ -72,7 +72,7 @@ const Rosette = ({ className = '' }: { className?: string }) => (
 
 const INTENTS = [
   { to: '/decouvrir', k: 'decouvrir' as const, icon: Compass, title: 'Je découvre l’Islam', text: 'Les bases, avec douceur' },
-  { to: '/learning', k: 'apprendre' as const, icon: GraduationCap, title: 'Je veux apprendre', text: 'Coran, savoir, enfants' },
+  { to: '/apprendre', k: 'apprendre' as const, icon: GraduationCap, title: 'Je veux apprendre', text: 'Coran, quiz, enfants' },
   { to: '/rejoindre', k: 'rejoindre' as const, icon: HandHeart, title: 'Je veux aider', text: 'Bénévolat et soutien' },
 ];
 
@@ -190,7 +190,7 @@ const Marquee = () => (
 const RUBRIQUES: { to: string; k: RubriqueKey; title: string; text: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { to: '/la-ddr', k: 'ddr', title: 'La DDR', text: 'Notre histoire, notre mission et les voix qui portent la da’wah.', icon: Info },
   { to: '/decouvrir', k: 'decouvrir', title: 'Découvrir l’Islam', text: 'Les bases expliquées simplement, Jésus dans l’Islam, vos questions.', icon: Compass },
-  { to: '/learning', k: 'apprendre', title: 'Apprendre', text: 'Le Coran, le Centre du savoir et un espace de jeux pour les enfants.', icon: GraduationCap },
+  { to: '/apprendre', k: 'apprendre', title: 'Apprendre', text: 'Le Coran, un grand quiz infini et un espace de jeux pour les enfants.', icon: GraduationCap },
   { to: '/debates', k: 'mediatheque', title: 'Médiathèque', text: 'Les directs, les débats et les témoignages en vidéo.', icon: PlayCircle },
   { to: '/agenda', k: 'agenda', title: 'Agenda', text: 'Le rappel du jeudi, les conférences et les tournées.', icon: CalendarDays },
   { to: '/rejoindre', k: 'rejoindre', title: 'Rejoindre la DDR', text: 'Devenir bénévole ou membre et servir la da’wah avec nous.', icon: UserPlus },

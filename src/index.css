@@ -248,3 +248,15 @@
 ::-webkit-scrollbar-track { background: var(--color-ivory-100); }
 ::-webkit-scrollbar-thumb { background: var(--color-ivory-400); border-radius: 10px; border: 2px solid var(--color-ivory-100); }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-brand-700); }
+
+/* Animations utilisées directement (quiz) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+@keyframes confetti {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0.9; }
+}

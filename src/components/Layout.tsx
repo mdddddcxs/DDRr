@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Baby, BookOpen, CalendarDays, ChevronDown, Compass, GraduationCap, HandHeart, Heart, Info, Menu, MessageCircleHeart, Newspaper, PlayCircle, Sparkles, Users, Wrench, X, Phone, Mail, MapPin, UserPlus, Mic,
+  Baby, BookOpen, CalendarDays, Trophy, ChevronDown, Compass, GraduationCap, HandHeart, Heart, Info, Menu, MessageCircleHeart, Newspaper, PlayCircle, Sparkles, Users, Wrench, X, Phone, Mail, MapPin, UserPlus, Mic,
 } from 'lucide-react';
 import RadioPlayer from './RadioPlayer';
 import Logo from './Logo';
@@ -41,6 +41,8 @@ export const NAV: (NavItem | NavGroup)[] = [
     name: 'Apprendre',
     k: 'apprendre',
     items: [
+      { name: 'Apprendre l’Islam', path: '/apprendre', desc: 'La leçon du jour, tous les espaces', icon: GraduationCap },
+      { name: 'Le Grand Quiz', path: '/apprendre/quiz', desc: 'Des questions sans fin, pour tous', icon: Trophy },
       { name: 'Le Coran', path: '/khatma', desc: 'Lire et écouter, juz par juz', icon: BookOpen },
       { name: 'Centre du savoir', path: '/learning', desc: 'Piliers, sunnah, histoires', icon: GraduationCap },
       { name: 'Espace enfants', path: '/enfants', desc: 'Quiz et jeux pour les petits', icon: Baby },
@@ -77,6 +79,27 @@ const LiveBanner = () => {
       <span className="mr-2 inline-block h-2 w-2 rounded-full bg-white animate-pulse-ring align-middle" />
       EN DIRECT maintenant : <span className="font-semibold opacity-90">{live.title}</span> — Regarder →
     </Link>
+  );
+};
+
+/** Bandeau discret quand la connexion internet est coupée. */
+const OfflineBanner = () => {
+  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  useEffect(() => {
+    const up = () => setOnline(true);
+    const down = () => setOnline(false);
+    window.addEventListener('online', up);
+    window.addEventListener('offline', down);
+    return () => {
+      window.removeEventListener('online', up);
+      window.removeEventListener('offline', down);
+    };
+  }, []);
+  if (online) return null;
+  return (
+    <div role="status" className="bg-ink-900 px-4 py-2 text-center text-sm font-semibold text-white">
+      Vous êtes hors ligne. Les pages déjà ouvertes restent consultables ; le reste reviendra avec la connexion.
+    </div>
   );
 };
 
@@ -183,7 +206,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path));
   // Rubriques à en-tête coloré : tant qu'on n'a pas défilé, la barre passe en blanc pour rester lisible.
-  const onColor = !scrolled && ['/la-ddr', '/decouvrir', '/agenda', '/rejoindre'].some((p) => location.pathname.startsWith(p));
+  const onColor = !scrolled && (['/la-ddr', '/decouvrir', '/agenda', '/rejoindre'].some((p) => location.pathname.startsWith(p)) || location.pathname === '/apprendre');
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory-100 text-ink-800">
@@ -191,6 +214,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-white">
         Aller au contenu
       </a>
+      <OfflineBanner />
       <LiveBanner />
 
       <nav className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? 'border-b border-ink-900/[0.07] bg-ivory-100/85 shadow-[0_10px_30px_-24px_rgba(20,36,74,0.5)] backdrop-blur-xl' : 'border-b border-transparent bg-transparent'}`}>
@@ -335,6 +359,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <FooterCol title="Découvrir & apprendre">
               <FooterLink to="/decouvrir">L’Islam en douceur</FooterLink>
               <FooterLink to="/shahada">Devenir musulman</FooterLink>
+              <FooterLink to="/apprendre/quiz">Le Grand Quiz</FooterLink>
               <FooterLink to="/khatma">Le Coran</FooterLink>
               <FooterLink to="/learning">Centre du savoir</FooterLink>
               <FooterLink to="/enfants">Espace enfants</FooterLink>

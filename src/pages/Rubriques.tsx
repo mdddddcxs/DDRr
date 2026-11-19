@@ -4,7 +4,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, BookOpen, CalendarDays, Camera, Compass, Heart, Info, Megaphone, MessageCircleHeart, Newspaper, Phone,
-  PlayCircle, Sparkles, Truck, UserPlus, Users, Wrench, HandHeart, GraduationCap,
+  PlayCircle, Sparkles, Truck, UserPlus, Users, Wrench, HandHeart, GraduationCap, Baby, Trophy, Lightbulb, RefreshCw,
 } from 'lucide-react';
 import RubriqueHero from '../components/RubriqueHero';
 import NextRappel from '../components/NextRappel';
@@ -12,6 +12,9 @@ import { Avatar, Container } from '../components/ui';
 import { telHref, useSite, waHref } from '../lib/site';
 import { rubriqueVars, type RubriqueKey } from '../lib/rubriques';
 import { useReveal } from '../lib/useReveal';
+import { LETTERS, NAMES, SURAHS } from '../data/quiz/datasets';
+import { BANK } from '../data/quiz/bank';
+import { QUESTION_COUNT } from '../data/quiz/engine';
 
 /* Briques communes ------------------------------------------------- */
 
@@ -284,3 +287,112 @@ export const Rejoindre = () => {
   );
 };
 
+
+/* Apprendre -------------------------------------------------------- */
+
+const dayIndex = (mod: number, salt = 0) => {
+  const d = new Date();
+  return (Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000) * 7 + salt) % mod;
+};
+
+export const Apprendre = () => {
+  useReveal();
+  const name = NAMES[dayIndex(NAMES.length)];
+  const letter = LETTERS[dayIndex(LETTERS.length, 3)];
+  const surah = SURAHS[dayIndex(SURAHS.length, 11)];
+  const [fact, setFact] = React.useState(() => Math.floor(Math.random() * BANK.length));
+  const f = BANK[fact];
+  return (
+    <>
+      <RubriqueHero k="apprendre" icon={GraduationCap} title="Apprendre l’Islam" arabic="العلم نور" subtitle="« Le savoir est lumière. » Le Coran, les bases de la religion, des jeux pour les enfants et un grand quiz pour progresser chaque jour." />
+
+      {/* Le Grand Quiz, mis en avant */}
+      <section style={rubriqueVars('apprendre')} className="relative z-10 -mt-10">
+        <Container>
+          <Link to="/apprendre/quiz" className="reveal group relative block overflow-hidden rounded-[2rem] bg-ink-900 p-7 text-white shadow-[0_40px_80px_-40px_rgba(20,36,74,0.9)] sm:p-10">
+            <div className="absolute inset-0 bg-pattern opacity-[0.08]" aria-hidden />
+            <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-gold-400/30 blur-[80px] animate-drift" aria-hidden />
+            <div className="relative grid items-center gap-8 md:grid-cols-[1.4fr_1fr]">
+              <div>
+                <p className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[0.22em] text-gold-300"><Trophy className="h-4 w-4" /> Nouveau · Jeu</p>
+                <h2 className="mt-3 font-serif text-4xl font-semibold leading-tight md:text-5xl">Le Grand Quiz <span className="text-gradient-gold italic">infini</span></h2>
+                <p className="mt-4 max-w-lg text-lg text-white/75">Plus de {Math.floor(QUESTION_COUNT / 50) * 50} questions sur le Coran, les prophètes, la prière, les noms d’Allah et l’alphabet arabe. Marathon, défi 60 secondes ou entraînement : la partie ne s’arrête jamais.</p>
+                <span className="r-grad mt-7 inline-flex items-center gap-2 rounded-full px-7 py-4 text-lg font-bold text-white shadow-lg transition group-hover:brightness-110">
+                  Jouer maintenant <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
+                </span>
+              </div>
+              <div className="relative hidden md:block" aria-hidden>
+                <div className="mx-auto w-72 rotate-3 rounded-3xl bg-white p-5 text-ink-900 shadow-2xl transition duration-700 group-hover:rotate-0">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-600">✍️ Lettres arabes</p>
+                  <p className="mt-2 font-serif text-lg font-semibold">Comment s’appelle cette lettre ?</p>
+                  <p className="my-3 rounded-xl bg-ivory-100 py-3 text-center font-arabic text-5xl">{letter.ar}</p>
+                  <div className="grid gap-1.5 text-sm font-semibold">
+                    <span className="rounded-xl border-2 border-emerald-500 bg-emerald-50 px-3 py-2 text-emerald-900">✓ {letter.name}</span>
+                    <span className="rounded-xl border-2 border-ink-900/10 px-3 py-2 opacity-60">{LETTERS[(LETTERS.indexOf(letter) + 5) % 28].name}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </Container>
+      </section>
+
+      {/* Chaque jour, quelque chose à apprendre */}
+      <Section>
+        <H2 k="apprendre" kicker="Chaque jour">Votre leçon du jour</H2>
+        <div style={rubriqueVars('apprendre')} className="grid gap-4 md:grid-cols-3">
+          <article className="reveal card relative overflow-hidden p-6 text-center">
+            <span className="r-grad absolute inset-x-0 top-0 h-1.5" />
+            <p className="r-ink text-[11px] font-extrabold uppercase tracking-[0.2em]">Nom d’Allah du jour</p>
+            <p className="mt-4 font-arabic text-5xl leading-tight text-ink-900" lang="ar">{name.ar}</p>
+            <p className="mt-3 font-serif text-xl font-semibold text-ink-900">{name.tr}</p>
+            <p className="text-ink-500">{name.fr}</p>
+          </article>
+          <article style={{ '--d': '100ms' } as React.CSSProperties} className="reveal card relative overflow-hidden p-6 text-center">
+            <span className="r-grad absolute inset-x-0 top-0 h-1.5" />
+            <p className="r-ink text-[11px] font-extrabold uppercase tracking-[0.2em]">Lettre du jour</p>
+            <p className="mt-4 font-arabic text-6xl leading-tight text-ink-900" lang="ar">{letter.ar}</p>
+            <p className="mt-3 font-serif text-xl font-semibold text-ink-900">{letter.name}</p>
+            <p className="text-ink-500">{LETTERS.indexOf(letter) + 1}ᵉ lettre de l’alphabet</p>
+          </article>
+          <article style={{ '--d': '200ms' } as React.CSSProperties} className="reveal card relative overflow-hidden p-6 text-center">
+            <span className="r-grad absolute inset-x-0 top-0 h-1.5" />
+            <p className="r-ink text-[11px] font-extrabold uppercase tracking-[0.2em]">Sourate du jour</p>
+            <p className="mt-4 font-display text-5xl font-bold text-ink-900">{surah.n}</p>
+            <p className="mt-3 font-serif text-xl font-semibold text-ink-900">{surah.name}</p>
+            <p className="text-ink-500">« {surah.fr} » · {surah.ayat} versets · {surah.medine ? 'médinoise' : 'mecquoise'}</p>
+            <Link to="/khatma" className="r-ink mt-3 inline-flex items-center gap-1 text-sm font-bold">Lire le Coran <ArrowRight className="h-4 w-4" /></Link>
+          </article>
+        </div>
+
+        <div style={rubriqueVars('apprendre')} className="reveal r-soft mt-6 flex flex-col gap-4 rounded-3xl p-6 sm:flex-row sm:items-center">
+          <span className="r-grad grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white"><Lightbulb className="h-6 w-6" /></span>
+          <div className="flex-1">
+            <p className="r-ink text-[11px] font-extrabold uppercase tracking-[0.2em]">Le saviez-vous ?</p>
+            <p key={fact} className="mt-1 font-semibold text-ink-900 animate-fade-up">{f[2]} <span className="r-ink">{f[3]}.</span></p>
+            <p className="text-[15px] text-ink-700">{f[5]}</p>
+          </div>
+          <button onClick={() => setFact(Math.floor(Math.random() * BANK.length))} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-ink-900 shadow-sm">
+            <RefreshCw className="h-4 w-4" /> Un autre
+          </button>
+        </div>
+      </Section>
+
+      <section className="bg-[#fbf0d2]/50 py-16 md:py-24">
+        <Container>
+          <H2 k="apprendre" kicker="Pour tous les âges">Tous les espaces pour apprendre</H2>
+          <Tiles
+            k="apprendre"
+            cols="lg:grid-cols-2"
+            items={[
+              { to: '/khatma', icon: BookOpen, title: 'Le Coran', text: 'Lire et écouter le Coran, juz par juz, avec la traduction.' },
+              { to: '/learning', icon: GraduationCap, title: 'Centre du savoir', text: 'Les piliers, la sunnah et les histoires des prophètes.' },
+              { to: '/enfants', icon: Baby, title: 'Espace enfants', text: 'Des jeux et des quiz adaptés aux plus petits.' },
+              { to: '/tools', icon: Wrench, title: 'Outils du croyant', text: 'Calculer sa zakat, partager des cartes de rappel.' },
+            ]}
+          />
+        </Container>
+      </section>
+    </>
+  );
+};
