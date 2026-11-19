@@ -57,7 +57,7 @@ const LiveAssistant = () => {
         className="fixed bottom-5 left-4 z-40 flex items-center gap-2 rounded-full bg-brand-600 py-2 pl-2 pr-4 text-sm font-bold text-white shadow-[0_15px_40px_-10px_rgba(234,88,12,0.8)] transition hover:bg-brand-500"
         aria-label="Ouvrir le Compagnon DDR"
       >
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-white/15">
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-ink-900/15">
           <MessageCircleHeart className="h-5 w-5" />
         </span>
         <span className="hidden sm:inline">Une question ?</span>
@@ -66,20 +66,20 @@ const LiveAssistant = () => {
   }
 
   return (
-    <div className="fixed bottom-5 left-4 z-50 flex h-[min(560px,calc(100dvh-6rem))] w-[calc(100vw-2rem)] max-w-[400px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-night-900/95 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.95)] backdrop-blur-xl animate-fade-up" role="dialog" aria-label="Compagnon DDR">
-      <header className="flex items-center justify-between border-b border-white/5 px-4 py-3">
+    <div className="fixed bottom-5 left-4 z-50 flex h-[min(560px,calc(100dvh-6rem))] w-[calc(100vw-2rem)] max-w-[400px] flex-col overflow-hidden rounded-3xl border border-ink-900/10 bg-ivory-50/95 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.95)] backdrop-blur-xl animate-fade-up" role="dialog" aria-label="Compagnon DDR">
+      <header className="flex items-center justify-between border-b border-ink-900/5 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <LogoMark className="h-9 w-9" />
           <div>
-            <p className="font-bold leading-tight text-cream-50">Compagnon DDR</p>
-            <p className="text-[11px] text-sand-400">{voice === 'on' ? '🎙️ Je vous écoute…' : 'Posez votre question'}</p>
+            <p className="font-bold leading-tight text-ink-900">Compagnon DDR</p>
+            <p className="text-[11px] text-ink-500">{voice === 'on' ? '🎙️ Je vous écoute…' : 'Posez votre question'}</p>
           </div>
         </div>
         <div className="flex items-center">
-          <Link to="/chat" onClick={() => setOpen(false)} className="rounded-full p-2 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Ouvrir en plein écran">
+          <Link to="/chat" onClick={() => setOpen(false)} className="rounded-full p-2 text-ink-500 hover:bg-ink-900/5 hover:text-ink-900" aria-label="Ouvrir en plein écran">
             <Maximize2 className="h-4 w-4" />
           </Link>
-          <button onClick={() => setOpen(false)} className="rounded-full p-2 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Fermer">
+          <button onClick={() => setOpen(false)} className="rounded-full p-2 text-ink-500 hover:bg-ink-900/5 hover:text-ink-900" aria-label="Fermer">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -93,7 +93,7 @@ const LiveAssistant = () => {
         <div ref={endRef} />
       </div>
 
-      {error && <p className="mx-4 mb-2 rounded-xl bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</p>}
+      {error && <p className="mx-4 mb-2 rounded-xl bg-red-500/10 px-3 py-2 text-xs text-red-700">{error}</p>}
 
       <form
         onSubmit={(e) => {
@@ -101,12 +101,12 @@ const LiveAssistant = () => {
           send(input);
           setInput('');
         }}
-        className="flex items-center gap-2 border-t border-white/5 p-3"
+        className="flex items-center gap-2 border-t border-ink-900/5 p-3"
       >
         <button
           type="button"
           onClick={toggleVoice}
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full transition ${voice === 'on' ? 'bg-red-600 text-white animate-pulse-ring' : 'bg-white/5 text-cream-200 hover:bg-white/10'}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full transition ${voice === 'on' ? 'bg-red-600 text-white animate-pulse-ring' : 'bg-ink-900/5 text-ink-700 hover:bg-ink-900/10'}`}
           aria-label={voice === 'on' ? 'Arrêter la voix' : 'Parler au Compagnon'}
           disabled={voice === 'connecting'}
         >

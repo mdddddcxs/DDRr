@@ -122,8 +122,8 @@ const Conversions = () => {
           {status === 'sent' ? (
             <div className="card p-10 text-center">
               <CheckCircle2 className="mx-auto h-16 w-16 text-emerald-400" />
-              <h2 className="mt-6 font-serif text-3xl font-semibold text-cream-50">Merci, qu’Allah vous récompense</h2>
-              <p className="mt-3 text-sand-400">Votre témoignage a bien été transmis à l’équipe de la DDR. Nous pourrons vous recontacter avant toute publication.</p>
+              <h2 className="mt-6 font-serif text-3xl font-semibold text-ink-900">Merci, qu’Allah vous récompense</h2>
+              <p className="mt-3 text-ink-500">Votre témoignage a bien été transmis à l’équipe de la DDR. Nous pourrons vous recontacter avant toute publication.</p>
               <ButtonLink to="/" className="mt-8">Retour à l’accueil</ButtonLink>
             </div>
           ) : (
@@ -137,7 +137,7 @@ const Conversions = () => {
                     role="tab"
                     aria-selected={mode === m}
                     onClick={() => setMode(m)}
-                    className={`flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-bold transition ${mode === m ? 'bg-brand-600 text-white' : 'text-sand-400 hover:text-white'}`}
+                    className={`flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-bold transition ${mode === m ? 'bg-brand-600 text-white' : 'text-ink-500 hover:text-ink-900'}`}
                   >
                     {m === 'text' ? <Keyboard className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     {m === 'text' ? 'Écrire' : 'Message vocal'}
@@ -160,10 +160,10 @@ const Conversions = () => {
                 <div>
                   <label htmlFor="t-text" className="label">Votre témoignage *</label>
                   <textarea id="t-text" rows={7} maxLength={4000} value={text} onChange={(e) => setText(e.target.value)} className="input resize-y" placeholder="Racontez-nous votre chemin…" />
-                  <p className="mt-1 text-right text-xs text-sand-500">{text.length}/4000</p>
+                  <p className="mt-1 text-right text-xs text-ink-400">{text.length}/4000</p>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-white/10 bg-black/25 p-6 text-center">
+                <div className="rounded-3xl border border-ink-900/10 bg-ink-900/5 p-6 text-center">
                   {!recorder.blob ? (
                     <>
                       <button
@@ -174,8 +174,8 @@ const Conversions = () => {
                       >
                         {recorder.recording ? <Square className="h-7 w-7" /> : <Mic className="h-8 w-8" />}
                       </button>
-                      <p className="mt-4 font-mono text-2xl text-cream-50">{fmt(recorder.seconds)}</p>
-                      <p className="text-sm text-sand-400">{recorder.recording ? 'Enregistrement… appuyez pour arrêter' : `Appuyez pour parler (3 minutes maximum)`}</p>
+                      <p className="mt-4 font-mono text-2xl text-ink-900">{fmt(recorder.seconds)}</p>
+                      <p className="text-sm text-ink-500">{recorder.recording ? 'Enregistrement… appuyez pour arrêter' : `Appuyez pour parler (3 minutes maximum)`}</p>
                     </>
                   ) : (
                     <div className="flex items-center justify-center gap-4">
@@ -193,17 +193,17 @@ const Conversions = () => {
                       >
                         {playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 translate-x-0.5" />}
                       </button>
-                      <span className="font-mono text-lg text-cream-50">{fmt(recorder.seconds)}</span>
-                      <button type="button" onClick={recorder.reset} className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-bold text-red-300 hover:bg-red-500/10">
+                      <span className="font-mono text-lg text-ink-900">{fmt(recorder.seconds)}</span>
+                      <button type="button" onClick={recorder.reset} className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-500/10">
                         <Trash2 className="h-4 w-4" /> Recommencer
                       </button>
                     </div>
                   )}
-                  {recorder.error && <p className="mt-4 text-sm text-red-300">{recorder.error}</p>}
+                  {recorder.error && <p className="mt-4 text-sm text-red-600">{recorder.error}</p>}
                 </div>
               )}
 
-              <label className="flex items-start gap-3 text-sm text-sand-400">
+              <label className="flex items-start gap-3 text-sm text-ink-500">
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-4 w-4 accent-brand-600" />
                 J’accepte que la DDR me recontacte au sujet de mon témoignage. Rien ne sera publié sans mon accord.
               </label>

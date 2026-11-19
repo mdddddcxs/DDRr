@@ -21,7 +21,7 @@ const RECITERS = [
 ];
 
 const THEMES = [
-    { id: 'dark', name: 'Nuit', bg: 'bg-night-900', text: 'text-cream-200', accent: 'text-gold-500' },
+    { id: 'dark', name: 'Nuit', bg: 'bg-ivory-50', text: 'text-ink-700', accent: 'text-gold-500' },
     { id: 'sepia', name: 'Parchemin', bg: 'bg-[#f5e6d3]', text: 'text-[#5c4b37]', accent: 'text-[#8c7b5d]' },
     { id: 'light', name: 'Lumière', bg: 'bg-white', text: 'text-gray-800', accent: 'text-brand-600' }
 ];
@@ -236,11 +236,11 @@ const Khatma = () => {
   const level = getLevel();
 
   return (
-    <div className="min-h-screen bg-night-950 text-white pb-20 relative font-sans selection:bg-gold-500 selection:text-black">
+    <div className="min-h-screen bg-ivory-100 text-ink-900 pb-20 relative font-sans selection:bg-gold-500 selection:text-black">
       
       {/* --- FOND D'ÉCRAN SPIRITUEL --- */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-night-950"></div>
+          <div className="absolute inset-0 bg-ivory-100"></div>
           {/* Ciel étoilé subtil */}
           <div className="absolute inset-0 bg-pattern opacity-[0.04]"></div>
           {/* Arabesque de fond */}
@@ -257,14 +257,14 @@ const Khatma = () => {
                 <div className="max-w-4xl mx-auto px-4 pt-24 flex justify-center gap-4">
                     <button 
                         onClick={() => setView('reader')}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'reader' ? 'bg-gold-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]' : 'bg-night-800 text-sand-400 hover:bg-night-700'}`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'reader' ? 'bg-gold-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]' : 'bg-ivory-200 text-ink-500 hover:bg-ivory-300'}`}
                     >
                         <BookOpen size={20} />
                         Lecture
                     </button>
                     <button 
                         onClick={() => setView('preche')}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'preche' ? 'bg-brand-500 text-white shadow-[0_0_20px_rgba(234,88,12,0.3)]' : 'bg-night-800 text-sand-400 hover:bg-night-700'}`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'preche' ? 'bg-brand-500 text-white shadow-[0_0_20px_rgba(234,88,12,0.3)]' : 'bg-ivory-200 text-ink-500 hover:bg-ivory-300'}`}
                     >
                         <Calendar size={20} />
                         Prêche Place Figayo
@@ -274,7 +274,7 @@ const Khatma = () => {
                 {view === 'reader' ? (
                     <>
                         {/* --- HEADER NOOR (LUMIÈRE) --- */}
-                        <div className="relative pt-12 pb-16 px-4 text-center overflow-hidden border-b border-white/5">
+                        <div className="relative pt-12 pb-16 px-4 text-center overflow-hidden border-b border-ink-900/5">
                             <div className="max-w-4xl mx-auto relative z-10">
                                 <div className="flex justify-center gap-4 mb-6">
                                     <span className="inline-block py-1 px-3 rounded-full border border-gold-500/30 bg-gold-500/10 text-gold-500 text-xs font-bold uppercase tracking-widest animate-fade-up">
@@ -289,7 +289,7 @@ const Khatma = () => {
                                     Le Saint Coran
                                 </h1>
                                 
-                                <p className="text-sand-400 text-lg max-w-2xl mx-auto font-light leading-relaxed animate-fade-up delay-200">
+                                <p className="text-ink-500 text-lg max-w-2xl mx-auto font-light leading-relaxed animate-fade-up delay-200">
                                     "Une guidée et une miséricorde pour les croyants."
                                     <br/>
                                     <span className="text-sm text-brand-500 font-bold mt-2 block">Lisez à votre rythme, méditez chaque mot.</span>
@@ -299,18 +299,18 @@ const Khatma = () => {
 
                         {/* PROGRESS DASHBOARD */}
                         <div className="max-w-5xl mx-auto px-4 -mt-8 mb-12 relative z-20">
-                            <div className="bg-night-900 border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div className="bg-ivory-50 border border-ink-900/10 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
                                 <div className="flex items-center gap-6 w-full md:w-auto">
                                     <div className="relative w-20 h-20 flex items-center justify-center">
                                         <svg className="w-full h-full transform -rotate-90">
                                             <circle cx="40" cy="40" r="36" stroke="#333" strokeWidth="6" fill="transparent" />
                                             <circle cx="40" cy="40" r="36" stroke="#d4af37" strokeWidth="6" fill="transparent" strokeDasharray="226" strokeDashoffset={226 - (226 * progressPercentage) / 100} className="transition-all duration-1000 ease-out" />
                                         </svg>
-                                        <span className="absolute text-white font-bold text-lg">{progressPercentage}%</span>
+                                        <span className="absolute text-ink-900 font-bold text-lg">{progressPercentage}%</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-white font-bold text-lg">Votre Progression</h3>
-                                        <p className="text-sand-500 text-sm">Vous avez lu {completedJuzs.length} Juz sur 30.</p>
+                                        <h3 className="text-ink-900 font-bold text-lg">Votre Progression</h3>
+                                        <p className="text-ink-400 text-sm">Vous avez lu {completedJuzs.length} Juz sur 30.</p>
                                     </div>
                                 </div>
                                 
@@ -320,15 +320,15 @@ const Khatma = () => {
                                             <Star size={16} fill="currentColor" />
                                             <span className="text-2xl font-black">{noorPoints}</span>
                                         </div>
-                                        <span className="text-[10px] text-sand-500 uppercase tracking-widest font-bold">Points de Noor</span>
+                                        <span className="text-[10px] text-ink-400 uppercase tracking-widest font-bold">Points de Noor</span>
                                     </div>
-                                    <div className="w-px h-12 bg-night-700 hidden md:block"></div>
+                                    <div className="w-px h-12 bg-ivory-300 hidden md:block"></div>
                                     <div className="flex flex-col items-center">
                                         <div className="flex items-center gap-2 text-orange-500 mb-1">
                                             <Flame size={16} fill="currentColor" />
                                             <span className="text-2xl font-black">{streak}</span>
                                         </div>
-                                        <span className="text-[10px] text-sand-500 uppercase tracking-widest font-bold">Jours de suite</span>
+                                        <span className="text-[10px] text-ink-400 uppercase tracking-widest font-bold">Jours de suite</span>
                                     </div>
                                 </div>
                             </div>
@@ -336,7 +336,7 @@ const Khatma = () => {
 
                         {/* GRID DES 30 JUZ */}
                         <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-up delay-200">
-                            <h2 className="text-2xl font-bold text-white mb-8 border-l-4 border-gold-500 pl-4">Sélectionnez un Juz</h2>
+                            <h2 className="text-2xl font-bold text-ink-900 mb-8 border-l-4 border-gold-500 pl-4">Sélectionnez un Juz</h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
                                 {Array.from({ length: 30 }, (_, i) => i + 1).map((juzNum) => {
                                     const isCompleted = completedJuzs.includes(juzNum);
@@ -347,7 +347,7 @@ const Khatma = () => {
                                             className={`group relative p-6 rounded-2xl border transition-all duration-300 h-40 flex flex-col items-center justify-center hover:-translate-y-1 overflow-hidden ${
                                                 isCompleted 
                                                     ? 'bg-green-900/10 border-green-500/30' 
-                                                    : 'bg-night-900 border-white/10 hover:border-gold-500/50 hover:bg-night-800'
+                                                    : 'bg-ivory-50 border-ink-900/10 hover:border-gold-500/50 hover:bg-ivory-200'
                                             }`}
                                         >
                                             {/* Icone Arrière Plan */}
@@ -355,7 +355,7 @@ const Khatma = () => {
                                                 {juzNum}
                                             </div>
                                             
-                                            <span className={`text-3xl font-serif mb-2 transition-colors z-10 ${isCompleted ? 'text-green-500' : 'text-white group-hover:text-gold-400'}`}>
+                                            <span className={`text-3xl font-serif mb-2 transition-colors z-10 ${isCompleted ? 'text-green-500' : 'text-ink-900 group-hover:text-gold-400'}`}>
                                                 Juz {juzNum}
                                             </span>
                                             
@@ -365,7 +365,7 @@ const Khatma = () => {
                                                     Terminé
                                                 </span>
                                             ) : (
-                                                <span className="text-[10px] text-sand-500 font-bold uppercase tracking-wider group-hover:text-sand-400">Lire</span>
+                                                <span className="text-[10px] text-ink-400 font-bold uppercase tracking-wider group-hover:text-ink-500">Lire</span>
                                             )}
                                         </button>
                                     )
@@ -381,8 +381,8 @@ const Khatma = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="text-center mb-12"
                         >
-                            <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Le Grand <span className="text-brand-500">Prêche Hebdomadaire</span></h2>
-                            <p className="text-sand-400">Un moment de partage, de questions et de rapprochement pour toute la communauté.</p>
+                            <h2 className="text-4xl font-black text-ink-900 mb-4 uppercase tracking-tighter">Le Grand <span className="text-brand-500">Prêche Hebdomadaire</span></h2>
+                            <p className="text-ink-500">Un moment de partage, de questions et de rapprochement pour toute la communauté.</p>
                         </motion.div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -390,34 +390,34 @@ const Khatma = () => {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-night-900 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-brand-500/50 transition-all"
+                                className="bg-ivory-50 border border-ink-900/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-brand-500/50 transition-all"
                             >
                                 <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
                                     <MapPin size={80} className="text-brand-500" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+                                <h3 className="text-2xl font-bold text-ink-900 mb-4 flex items-center gap-3">
                                     <MapPin className="text-brand-500" />
                                     Lieu
                                 </h3>
-                                <p className="text-cream-200 text-lg font-serif">Place Figayo, Yopougon</p>
-                                <p className="text-sand-500 text-sm mt-2">Un espace ouvert pour accueillir tout le monde dans la fraternité.</p>
+                                <p className="text-ink-700 text-lg font-serif">Place Figayo, Yopougon</p>
+                                <p className="text-ink-400 text-sm mt-2">Un espace ouvert pour accueillir tout le monde dans la fraternité.</p>
                             </motion.div>
 
                             <motion.div 
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="bg-night-900 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-gold-500/50 transition-all"
+                                className="bg-ivory-50 border border-ink-900/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-gold-500/50 transition-all"
                             >
                                 <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
                                     <Clock size={80} className="text-gold-500" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+                                <h3 className="text-2xl font-bold text-ink-900 mb-4 flex items-center gap-3">
                                     <Clock className="text-gold-500" />
                                     Horaire
                                 </h3>
-                                <p className="text-cream-200 text-lg font-serif">Chaque Jeudi à 16h00</p>
-                                <p className="text-sand-500 text-sm mt-2">Marquez vos calendriers pour ce rendez-vous spirituel incontournable.</p>
+                                <p className="text-ink-700 text-lg font-serif">Chaque Jeudi à 16h00</p>
+                                <p className="text-ink-400 text-sm mt-2">Marquez vos calendriers pour ce rendez-vous spirituel incontournable.</p>
                             </motion.div>
                         </div>
 
@@ -428,14 +428,14 @@ const Khatma = () => {
                             className="bg-brand-900/10 border border-brand-500/30 rounded-[2.5rem] p-10 text-center mb-12"
                         >
                             <MessageCircle className="w-12 h-12 text-brand-500 mx-auto mb-6" />
-                            <h3 className="text-2xl font-bold text-white mb-4">Posez vos Questions</h3>
-                            <p className="text-cream-200 mb-8 leading-relaxed">
+                            <h3 className="text-2xl font-bold text-ink-900 mb-4">Posez vos Questions</h3>
+                            <p className="text-ink-700 mb-8 leading-relaxed">
                                 Le prêche est interactif. C'est l'occasion idéale pour poser vos questions sur la foi, la pratique et la vie quotidienne. Nos imams et savants sont là pour vous éclairer.
                             </p>
                             <div className="flex flex-wrap justify-center gap-4">
-                                <span className="px-4 py-2 bg-black/40 rounded-full text-brand-400 text-xs font-bold uppercase tracking-widest border border-brand-500/20">Questions & Réponses</span>
-                                <span className="px-4 py-2 bg-black/40 rounded-full text-brand-400 text-xs font-bold uppercase tracking-widest border border-brand-500/20">Méditation Collective</span>
-                                <span className="px-4 py-2 bg-black/40 rounded-full text-brand-400 text-xs font-bold uppercase tracking-widest border border-brand-500/20">Fraternité</span>
+                                <span className="px-4 py-2 bg-black/40 rounded-full text-brand-600 text-xs font-bold uppercase tracking-widest border border-brand-500/20">Questions & Réponses</span>
+                                <span className="px-4 py-2 bg-black/40 rounded-full text-brand-600 text-xs font-bold uppercase tracking-widest border border-brand-500/20">Méditation Collective</span>
+                                <span className="px-4 py-2 bg-black/40 rounded-full text-brand-600 text-xs font-bold uppercase tracking-widest border border-brand-500/20">Fraternité</span>
                             </div>
                         </motion.div>
 
@@ -443,12 +443,12 @@ const Khatma = () => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 0.4 }}
-                            className="bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-[2.5rem] p-12 text-center relative overflow-hidden"
+                            className="bg-gradient-to-br from-gray-900 to-black border border-ink-900/10 rounded-[2.5rem] p-12 text-center relative overflow-hidden"
                         >
                             <div className="absolute inset-0 bg-pattern opacity-[0.04]"></div>
                             <Users className="w-16 h-16 text-gold-500 mx-auto mb-6 relative z-10" />
-                            <h3 className="text-3xl font-black text-white mb-4 relative z-10">Rejoignez le Live !</h3>
-                            <p className="text-sand-400 mb-8 max-w-xl mx-auto relative z-10">
+                            <h3 className="text-3xl font-black text-ink-900 mb-4 relative z-10">Rejoignez le Live !</h3>
+                            <p className="text-ink-500 mb-8 max-w-xl mx-auto relative z-10">
                                 Vous ne pouvez pas vous déplacer ? Suivez nos sessions en direct et participez à la discussion où que vous soyez. Votre présence renforce notre communauté.
                             </p>
                             <button 
@@ -461,20 +461,20 @@ const Khatma = () => {
 
                         {/* STATS SECTION (REUSED) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-                            <div className="bg-night-800/50 border border-white/5 p-6 rounded-3xl text-center">
+                            <div className="bg-ivory-200/50 border border-ink-900/5 p-6 rounded-3xl text-center">
                                 <Award className="w-8 h-8 text-gold-500 mx-auto mb-3" />
-                                <h4 className="text-white font-bold mb-1">Niveau {level.name}</h4>
-                                <p className="text-sand-500 text-sm">Prochain rang à {noorPoints < 500 ? '500' : noorPoints < 1500 ? '1500' : '3000'} pts</p>
+                                <h4 className="text-ink-900 font-bold mb-1">Niveau {level.name}</h4>
+                                <p className="text-ink-400 text-sm">Prochain rang à {noorPoints < 500 ? '500' : noorPoints < 1500 ? '1500' : '3000'} pts</p>
                             </div>
-                            <div className="bg-night-800/50 border border-white/5 p-6 rounded-3xl text-center">
+                            <div className="bg-ivory-200/50 border border-ink-900/5 p-6 rounded-3xl text-center">
                                 <Star className="w-8 h-8 text-brand-500 mx-auto mb-3" />
-                                <h4 className="text-white font-bold mb-1">{noorPoints} Points</h4>
-                                <p className="text-sand-500 text-sm">Accumulés ce mois</p>
+                                <h4 className="text-ink-900 font-bold mb-1">{noorPoints} Points</h4>
+                                <p className="text-ink-400 text-sm">Accumulés ce mois</p>
                             </div>
-                            <div className="bg-night-800/50 border border-white/5 p-6 rounded-3xl text-center">
+                            <div className="bg-ivory-200/50 border border-ink-900/5 p-6 rounded-3xl text-center">
                                 <Flame className="w-8 h-8 text-orange-500 mx-auto mb-3" />
-                                <h4 className="text-white font-bold mb-1">{streak} Jours</h4>
-                                <p className="text-sand-500 text-sm">Série de lecture</p>
+                                <h4 className="text-ink-900 font-bold mb-1">{streak} Jours</h4>
+                                <p className="text-ink-400 text-sm">Série de lecture</p>
                             </div>
                         </div>
                     </div>
@@ -487,7 +487,7 @@ const Khatma = () => {
             <div className={`fixed inset-0 z-50 flex flex-col animate-fade-up ${currentTheme.bg}`}>
                 
                 {/* 1. TOP BAR (SETTINGS) */}
-                <div className={`border-b px-4 py-3 flex flex-col md:flex-row justify-between items-center shadow-sm shrink-0 z-30 transition-colors ${currentTheme.id === 'dark' ? 'border-white/10 bg-night-900' : 'border-gray-300 bg-white/50 backdrop-blur'}`}>
+                <div className={`border-b px-4 py-3 flex flex-col md:flex-row justify-between items-center shadow-sm shrink-0 z-30 transition-colors ${currentTheme.id === 'dark' ? 'border-ink-900/10 bg-ivory-50' : 'border-gray-300 bg-ink-900/50 backdrop-blur'}`}>
                     <div className="flex items-center justify-between w-full md:w-auto gap-4">
                         <button 
                             onClick={closeReader}
@@ -533,7 +533,7 @@ const Khatma = () => {
 
                 {/* 2. AUDIO PLAYER BAR (STICKY) */}
                 {!loading && (
-                    <div className={`border-b p-3 flex items-center justify-between gap-4 shrink-0 z-20 transition-colors ${currentTheme.id === 'dark' ? 'bg-[#1a1a1c] border-white/10' : 'bg-gray-100 border-gray-300'}`}>
+                    <div className={`border-b p-3 flex items-center justify-between gap-4 shrink-0 z-20 transition-colors ${currentTheme.id === 'dark' ? 'bg-[#1a1a1c] border-ink-900/10' : 'bg-gray-100 border-gray-300'}`}>
                         <audio 
                             ref={audioRef} 
                             src={currentAudioSrc || ""} 
@@ -553,7 +553,7 @@ const Khatma = () => {
                             </button>
                             <div className="hidden sm:block">
                                 <p className={`text-xs font-bold ${currentTheme.text}`}>Récitation Audio</p>
-                                <p className="text-[10px] text-sand-500">{RECITERS.find(r => r.id === selectedReciter)?.name}</p>
+                                <p className="text-[10px] text-ink-400">{RECITERS.find(r => r.id === selectedReciter)?.name}</p>
                             </div>
                         </div>
                         
@@ -596,8 +596,8 @@ const Khatma = () => {
                                     return (
                                         <div key={index} id={`verse-${index}`} className={`relative transition-all duration-500 ${isActive ? 'scale-[1.02]' : ''}`}>
                                             {isNewSurah && (
-                                                <div className={`my-16 pt-8 border-t text-center ${currentTheme.id === 'dark' ? 'border-white/10' : 'border-gray-300'}`}>
-                                                    <span className={`inline-block px-4 py-1 rounded-full text-xs uppercase tracking-widest font-bold mb-4 ${currentTheme.id === 'dark' ? 'bg-night-800 text-sand-400' : 'bg-gray-200 text-sand-500'}`}>
+                                                <div className={`my-16 pt-8 border-t text-center ${currentTheme.id === 'dark' ? 'border-ink-900/10' : 'border-gray-300'}`}>
+                                                    <span className={`inline-block px-4 py-1 rounded-full text-xs uppercase tracking-widest font-bold mb-4 ${currentTheme.id === 'dark' ? 'bg-ivory-200 text-ink-500' : 'bg-gray-200 text-ink-400'}`}>
                                                         Sourate
                                                     </span>
                                                     <h3 className={`text-4xl font-serif mb-8 ${currentTheme.text}`}>{verse.surahName}</h3>
@@ -608,7 +608,7 @@ const Khatma = () => {
                                                 className={`p-6 md:p-8 rounded-2xl border transition-all duration-300 cursor-pointer group ${
                                                     isActive 
                                                         ? 'border-brand-500 shadow-[0_0_30px_rgba(234,88,12,0.15)] bg-brand-500/5' 
-                                                        : `hover:border-gold-500/30 ${currentTheme.id === 'dark' ? 'bg-night-900/60 border-white/5' : 'bg-white/60 border-gray-200'}`
+                                                        : `hover:border-gold-500/30 ${currentTheme.id === 'dark' ? 'bg-ivory-50/60 border-ink-900/5' : 'bg-ink-900/60 border-gray-200'}`
                                                 }`}
                                                 onClick={() => playAudio(index)}
                                             >
@@ -628,7 +628,7 @@ const Khatma = () => {
                                                     {verse.text}
                                                 </p>
 
-                                                <p className={`font-light leading-relaxed ${currentTheme.id === 'dark' ? 'text-sand-400' : 'text-sand-500'}`} style={{ fontSize: `${Math.max(16, fontSize * 0.6)}px` }}>
+                                                <p className={`font-light leading-relaxed ${currentTheme.id === 'dark' ? 'text-ink-500' : 'text-ink-400'}`} style={{ fontSize: `${Math.max(16, fontSize * 0.6)}px` }}>
                                                     {verse.translation}
                                                 </p>
                                             </div>
@@ -655,14 +655,14 @@ const Khatma = () => {
         {/* SUCCESS MODAL */}
         {showSuccess && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-up">
-                <div className="bg-night-900 border border-gold-500/40 rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
+                <div className="bg-ivory-50 border border-gold-500/40 rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
                     <div className="absolute inset-0 bg-pattern opacity-[0.04]"></div>
                     <div className="relative z-10">
                         <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/50 animate-bounce">
                             <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
                         </div>
-                        <h2 className="text-3xl font-serif font-bold text-white mb-2">MachaAllah !</h2>
-                        <p className="text-sand-400 mb-6">Qu'Allah accepte votre lecture et illumine votre cœur.</p>
+                        <h2 className="text-3xl font-serif font-bold text-ink-900 mb-2">MachaAllah !</h2>
+                        <p className="text-ink-500 mb-6">Qu'Allah accepte votre lecture et illumine votre cœur.</p>
                         <p className="text-xs text-gold-500 uppercase tracking-widest font-bold">Progression sauvegardée</p>
                     </div>
                 </div>

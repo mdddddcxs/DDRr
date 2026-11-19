@@ -20,7 +20,8 @@ export type SpeakerInfo = {
 export type SiteContent = {
   contact: { phones: string[]; whatsapp: string; email: string; address: string };
   social: { youtube: string; tiktok: string; facebook: string; instagram: string };
-  preche: { day: string; time: string; place: string; mapsQuery: string };
+  /** Rappel hebdomadaire. start/end au format HH:MM servent au compte à rebours et à l'ajout à l'agenda. */
+  preche: { day: string; time: string; start: string; end: string; place: string; mapsQuery: string; title: string; theme: string };
   speakers: SpeakerInfo[];
 };
 
@@ -37,7 +38,16 @@ export const DEFAULT_SITE: SiteContent = {
     facebook: 'https://www.facebook.com/ismaelAKAofficiel',
     instagram: '',
   },
-  preche: { day: 'jeudi', time: '16 h', place: 'Place Ficgayo, Yopougon', mapsQuery: 'Ficgayo Yopougon Abidjan' },
+  preche: {
+    day: 'jeudi',
+    time: '16 h – 18 h',
+    start: '16:00',
+    end: '18:00',
+    place: 'Yopougon, quartier Millionnaire',
+    mapsQuery: 'Quartier Millionnaire Yopougon Abidjan',
+    title: 'Rappel hebdomadaire de la DDR',
+    theme: 'Confrontation des écritures, échanges, débat dans le respect.',
+  },
   speakers: [
     {
       id: 'diane',
@@ -59,6 +69,14 @@ export const DEFAULT_SITE: SiteContent = {
       facebook: 'https://www.facebook.com/ismaelAKAofficiel',
       tiktok: 'https://www.tiktok.com/@ismael.aka.ddr',
       whatsapp: '2250768973405',
+    },
+    {
+      id: 'ouattara',
+      name: 'Ibrahim Ouattara',
+      role: 'Intervenant de la DDR',
+      bio: 'Ibrahim Ouattara intervient aux côtés d’Oustaz Diané et d’Ismaël Aka lors du rappel hebdomadaire de la DDR à Yopougon.',
+      photoUrl: '/images/ibrahim-ouattara.jpg',
+      photoCredit: 'Photo : La DDR',
     },
   ],
 };
@@ -88,6 +106,10 @@ export function mergeSite(raw: any): SiteContent {
       time: str(preche.time, DEFAULT_SITE.preche.time),
       place: str(preche.place, DEFAULT_SITE.preche.place),
       mapsQuery: str(preche.mapsQuery, DEFAULT_SITE.preche.mapsQuery),
+      start: /^\d{1,2}:\d{2}$/.test(preche.start) ? preche.start : DEFAULT_SITE.preche.start,
+      end: /^\d{1,2}:\d{2}$/.test(preche.end) ? preche.end : DEFAULT_SITE.preche.end,
+      title: str(preche.title, DEFAULT_SITE.preche.title),
+      theme: str(preche.theme, DEFAULT_SITE.preche.theme),
     },
     speakers: Array.isArray(raw.speakers)
       ? raw.speakers.slice(0, 12).map((s: any, i: number) => ({
@@ -139,3 +161,21 @@ export const SiteProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useSite = () => useContext(SiteCtx).site;
 export const useSiteReload = () => useContext(SiteCtx).reload;
+
+const WEEKDAYS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+
+/** Prochaine occurrence du rappel (heure d'Abidjan = UTC+0). Renvoie début et fin. */
+export function nextPreche(p: SiteContent['preche'], now = new Date()): { start: Date; end: Date; live: boolean } {
+  const wd = Math.max(0, WEEKDAYS.indexOf(p.day.trim().toLowerCase()));
+  const [sh, sm] = p.start.split(':').map(Number);
+  const [eh, em] = p.end.split(':').map(Number);
+  const make = (offsetDays: number) => {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + offsetDays, sh, sm));
+    const e = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + offsetDays, eh, em));
+    return { start: d, end: e };
+  };
+  let delta = (wd - now.getUTCDay() + 7) % 7;
+  let r = make(delta);
+  if (r.end <= now) r = make(delta + 7);
+  return { ...r, live: r.start <= now && now < r.end };
+}

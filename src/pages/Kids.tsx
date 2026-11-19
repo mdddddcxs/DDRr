@@ -73,15 +73,15 @@ const Quiz = () => {
     const stars = score >= 7 ? 3 : score >= 5 ? 2 : score >= 3 ? 1 : 0;
     return (
       <div className="text-center">
-        <Trophy className="mx-auto h-16 w-16 text-gold-300" />
-        <p className="mt-4 font-serif text-4xl font-semibold text-cream-50">{score} / {qs.length}</p>
+        <Trophy className="mx-auto h-16 w-16 text-gold-600" />
+        <p className="mt-4 font-serif text-4xl font-semibold text-ink-900">{score} / {qs.length}</p>
         <div className="mt-3 flex justify-center gap-1">
           {[0, 1, 2].map((s) => (
-            <Star key={s} className={`h-9 w-9 ${s < stars ? 'fill-gold-300 text-gold-300' : 'text-white/15'}`} />
+            <Star key={s} className={`h-9 w-9 ${s < stars ? 'fill-gold-300 text-gold-600' : 'text-ink-900/15'}`} />
           ))}
         </div>
-        <p className="mt-4 text-lg text-cream-200">{score >= 7 ? 'Machâ’Allah, bravo champion !' : score >= 4 ? 'Très bien ! Encore un petit effort.' : 'Ce n’est pas grave, on apprend en jouant !'}</p>
-        <p className="mt-1 text-sm text-sand-400">Ton meilleur score : {Math.max(best, score)} / 8</p>
+        <p className="mt-4 text-lg text-ink-700">{score >= 7 ? 'Machâ’Allah, bravo champion !' : score >= 4 ? 'Très bien ! Encore un petit effort.' : 'Ce n’est pas grave, on apprend en jouant !'}</p>
+        <p className="mt-1 text-sm text-ink-500">Ton meilleur score : {Math.max(best, score)} / 8</p>
         <button onClick={restart} className="mt-6 inline-flex items-center gap-2 rounded-full bg-sky-500 px-6 py-3 font-bold text-white hover:bg-sky-400">
           <RotateCcw className="h-5 w-5" /> Rejouer
         </button>
@@ -91,15 +91,15 @@ const Quiz = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between text-sm font-bold text-sand-400">
+      <div className="flex items-center justify-between text-sm font-bold text-ink-500">
         <span>Question {i + 1} / {qs.length}</span>
-        <span className="flex items-center gap-1 text-gold-300"><Star className="h-4 w-4 fill-current" /> {score}</span>
+        <span className="flex items-center gap-1 text-gold-600"><Star className="h-4 w-4 fill-current" /> {score}</span>
       </div>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-ink-900/10">
         <div className="h-full rounded-full bg-sky-400 transition-all" style={{ width: `${(i / qs.length) * 100}%` }} />
       </div>
       <p className="mt-6 text-5xl" aria-hidden>{q.emoji}</p>
-      <h3 className="mt-3 font-serif text-2xl font-semibold leading-snug text-cream-50 md:text-3xl">{q.q}</h3>
+      <h3 className="mt-3 font-serif text-2xl font-semibold leading-snug text-ink-900 md:text-3xl">{q.q}</h3>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {q.choices.map((c, k) => {
           const isRight = picked !== null && k === q.answer;
@@ -110,7 +110,7 @@ const Quiz = () => {
               onClick={() => choose(k)}
               disabled={picked !== null}
               className={`flex items-center justify-between rounded-2xl border-2 px-5 py-4 text-left text-lg font-bold transition ${
-                isRight ? 'border-emerald-400 bg-emerald-500/20 text-emerald-100' : isWrong ? 'border-red-400 bg-red-500/15 text-red-100' : 'border-white/10 bg-white/[0.03] text-cream-100 hover:border-sky-400/60 hover:bg-sky-500/10'
+                isRight ? 'border-emerald-400 bg-emerald-500/20 text-emerald-100' : isWrong ? 'border-red-400 bg-red-500/15 text-red-100' : 'border-ink-900/10 bg-ink-900/[0.03] text-ink-800 hover:border-sky-400/60 hover:bg-sky-500/10'
               }`}
             >
               {c}
@@ -121,9 +121,9 @@ const Quiz = () => {
         })}
       </div>
       {picked !== null && (
-        <div className="mt-6 animate-fade-up rounded-2xl border border-white/10 bg-black/25 p-5">
-          <p className="font-bold text-cream-50">{picked === q.answer ? '🎉 Bonne réponse !' : '💡 Presque ! La bonne réponse est : ' + q.choices[q.answer]}</p>
-          <p className="mt-1 text-cream-200">{q.why}</p>
+        <div className="mt-6 animate-fade-up rounded-2xl border border-ink-900/10 bg-ink-900/5 p-5">
+          <p className="font-bold text-ink-900">{picked === q.answer ? '🎉 Bonne réponse !' : '💡 Presque ! La bonne réponse est : ' + q.choices[q.answer]}</p>
+          <p className="mt-1 text-ink-700">{q.why}</p>
           <button
             onClick={() => {
               setI(i + 1);
@@ -181,15 +181,15 @@ const Memory = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between text-sm font-bold text-sand-400">
+      <div className="flex items-center justify-between text-sm font-bold text-ink-500">
         <span>Paires trouvées : {found.length} / 6</span>
         <span>Coups : {moves}</span>
       </div>
       {won ? (
         <div className="py-10 text-center">
           <p className="text-6xl" aria-hidden>🏆</p>
-          <p className="mt-4 font-serif text-3xl font-semibold text-cream-50">Bravo, tu as tout trouvé !</p>
-          <p className="mt-2 text-sand-400">En {moves} coups. Peux-tu faire mieux ?</p>
+          <p className="mt-4 font-serif text-3xl font-semibold text-ink-900">Bravo, tu as tout trouvé !</p>
+          <p className="mt-2 text-ink-500">En {moves} coups. Peux-tu faire mieux ?</p>
           <button onClick={restart} className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-3 font-bold text-white hover:bg-emerald-400"><RotateCcw className="h-5 w-5" /> Nouvelle partie</button>
         </div>
       ) : (
@@ -202,13 +202,13 @@ const Memory = () => {
                 onClick={() => flip(c)}
                 aria-label={visible ? c.face : 'Carte cachée'}
                 className={`grid aspect-square place-items-center rounded-2xl border-2 transition-all duration-300 ${
-                  found.includes(c.pair) ? 'border-emerald-400/60 bg-emerald-500/15' : visible ? 'border-gold-300/60 bg-gold-400/10' : 'border-white/10 bg-gradient-to-br from-emerald-600/40 to-night-800 hover:scale-[1.03]'
+                  found.includes(c.pair) ? 'border-emerald-400/60 bg-emerald-500/15' : visible ? 'border-gold-300/60 bg-gold-400/10' : 'border-ink-900/10 bg-gradient-to-br from-emerald-600/40 to-ivory-200 hover:scale-[1.03]'
                 }`}
               >
                 {visible ? (
-                  <span className={c.isLetter ? 'font-arabic text-5xl text-cream-50' : 'text-xl font-extrabold text-cream-50'} lang={c.isLetter ? 'ar' : undefined}>{c.face}</span>
+                  <span className={c.isLetter ? 'font-arabic text-5xl text-ink-900' : 'text-xl font-extrabold text-ink-900'} lang={c.isLetter ? 'ar' : undefined}>{c.face}</span>
                 ) : (
-                  <Sparkles className="h-7 w-7 text-emerald-200/70" />
+                  <Sparkles className="h-7 w-7 text-emerald-700/70" />
                 )}
               </button>
             );
@@ -240,23 +240,23 @@ const PrayerOrder = () => {
 
   return (
     <div>
-      <p className="text-cream-200">Touche les prières dans l’ordre de la journée, de l’aube jusqu’à la nuit.</p>
+      <p className="text-ink-700">Touche les prières dans l’ordre de la journée, de l’aube jusqu’à la nuit.</p>
       <ol className="mt-5 grid grid-cols-5 gap-2">
         {PRAYERS_ORDER.map((p, k) => (
-          <li key={p.name} className={`grid h-20 place-items-center rounded-2xl border-2 border-dashed text-center ${chosen[k] ? 'border-gold-300/70 bg-gold-400/15' : 'border-white/15'}`}>
+          <li key={p.name} className={`grid h-20 place-items-center rounded-2xl border-2 border-dashed text-center ${chosen[k] ? 'border-gold-300/70 bg-gold-400/15' : 'border-ink-900/15'}`}>
             {chosen[k] ? (
-              <span><span className="block text-2xl" aria-hidden>{p.emoji}</span><span className="text-xs font-bold text-cream-50 sm:text-sm">{p.name}</span></span>
+              <span><span className="block text-2xl" aria-hidden>{p.emoji}</span><span className="text-xs font-bold text-ink-900 sm:text-sm">{p.name}</span></span>
             ) : (
-              <span className="text-lg font-bold text-white/20">{k + 1}</span>
+              <span className="text-lg font-bold text-ink-900/20">{k + 1}</span>
             )}
           </li>
         ))}
       </ol>
       {done ? (
         <div className="mt-8 text-center">
-          <p className="font-serif text-3xl font-semibold text-cream-50">Machâ’Allah, parfait ! 🎉</p>
-          <p className="mt-2 text-sand-400">Fajr, Dhouhr, Asr, Maghrib et Icha : tu connais les 5 prières.</p>
-          <button onClick={() => { setPool(shuffle(PRAYERS_ORDER)); setChosen([]); }} className="mt-6 inline-flex items-center gap-2 rounded-full bg-gold-400 px-6 py-3 font-bold text-night-950"><RotateCcw className="h-5 w-5" /> Rejouer</button>
+          <p className="font-serif text-3xl font-semibold text-ink-900">Machâ’Allah, parfait ! 🎉</p>
+          <p className="mt-2 text-ink-500">Fajr, Dhouhr, Asr, Maghrib et Icha : tu connais les 5 prières.</p>
+          <button onClick={() => { setPool(shuffle(PRAYERS_ORDER)); setChosen([]); }} className="mt-6 inline-flex items-center gap-2 rounded-full bg-gold-400 px-6 py-3 font-bold text-ivory-100"><RotateCcw className="h-5 w-5" /> Rejouer</button>
         </div>
       ) : (
         <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -264,10 +264,10 @@ const PrayerOrder = () => {
             <button
               key={p.name}
               onClick={() => pick(p.name)}
-              className={`rounded-2xl border-2 px-5 py-3 text-lg font-bold transition ${wrong === p.name ? 'translate-x-1 border-red-400 bg-red-500/15 text-red-100' : 'border-white/10 bg-white/[0.04] text-cream-50 hover:border-gold-300/60'}`}
+              className={`rounded-2xl border-2 px-5 py-3 text-lg font-bold transition ${wrong === p.name ? 'translate-x-1 border-red-400 bg-red-500/15 text-red-100' : 'border-ink-900/10 bg-ink-900/[0.04] text-ink-900 hover:border-gold-300/60'}`}
             >
               {p.name}
-              <span className="block text-xs font-medium text-sand-400">{p.hint}</span>
+              <span className="block text-xs font-medium text-ink-500">{p.hint}</span>
             </button>
           ))}
         </div>
@@ -297,24 +297,24 @@ const Deeds = () => {
   return (
     <div>
       <div className="flex items-center justify-between rounded-2xl bg-pink-500/10 p-4">
-        <span className="font-bold text-cream-50">Aujourd’hui : {state.done.length} / {GOOD_DEEDS.length}</span>
-        <span className="flex items-center gap-1 font-bold text-gold-300"><Star className="h-5 w-5 fill-current" /> {state.total} étoiles au total</span>
+        <span className="font-bold text-ink-900">Aujourd’hui : {state.done.length} / {GOOD_DEEDS.length}</span>
+        <span className="flex items-center gap-1 font-bold text-gold-600"><Star className="h-5 w-5 fill-current" /> {state.total} étoiles au total</span>
       </div>
       <ul className="mt-4 grid gap-3 sm:grid-cols-2">
         {GOOD_DEEDS.map((d) => {
           const on = state.done.includes(d.id);
           return (
             <li key={d.id}>
-              <button onClick={() => toggle(d.id)} aria-pressed={on} className={`flex w-full items-center gap-3 rounded-2xl border-2 p-4 text-left font-semibold transition ${on ? 'border-pink-300/70 bg-pink-500/15 text-cream-50' : 'border-white/10 text-cream-200 hover:border-pink-300/40'}`}>
+              <button onClick={() => toggle(d.id)} aria-pressed={on} className={`flex w-full items-center gap-3 rounded-2xl border-2 p-4 text-left font-semibold transition ${on ? 'border-pink-300/70 bg-pink-500/15 text-ink-900' : 'border-ink-900/10 text-ink-700 hover:border-pink-300/40'}`}>
                 <span className="text-2xl" aria-hidden>{d.emoji}</span>
                 <span className="flex-1">{d.label}</span>
-                <span className={`grid h-7 w-7 place-items-center rounded-full border-2 ${on ? 'border-gold-300 bg-gold-300 text-night-950' : 'border-white/20'}`}>{on && <Star className="h-4 w-4 fill-current" />}</span>
+                <span className={`grid h-7 w-7 place-items-center rounded-full border-2 ${on ? 'border-gold-300 bg-gold-300 text-ivory-100' : 'border-ink-900/20'}`}>{on && <Star className="h-4 w-4 fill-current" />}</span>
               </button>
             </li>
           );
         })}
       </ul>
-      {state.done.length === GOOD_DEEDS.length && <p className="mt-5 text-center font-serif text-2xl text-gold-200">Quelle belle journée ! Qu’Allah te récompense 🤲</p>}
+      {state.done.length === GOOD_DEEDS.length && <p className="mt-5 text-center font-serif text-2xl text-gold-700">Quelle belle journée ! Qu’Allah te récompense 🤲</p>}
     </div>
   );
 };
@@ -330,8 +330,8 @@ const Kids = () => {
       <Container className="relative pb-10 pt-12 md:pt-16">
         <header className="text-center">
           <p className="text-5xl" aria-hidden>🌙⭐📚</p>
-          <h1 className="mt-4 font-serif text-4xl font-semibold text-cream-50 md:text-6xl">L’espace des petits musulmans</h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-sand-400">Apprendre l’Islam en s’amusant : quiz, jeux de lettres arabes et bonnes actions du jour.</p>
+          <h1 className="mt-4 font-serif text-4xl font-semibold text-ink-900 md:text-6xl">L’espace des petits musulmans</h1>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-ink-500">Apprendre l’Islam en s’amusant : quiz, jeux de lettres arabes et bonnes actions du jour.</p>
         </header>
 
         <div className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4" role="tablist" aria-label="Jeux">
@@ -341,18 +341,18 @@ const Kids = () => {
               role="tab"
               aria-selected={game === g.id}
               onClick={() => setGame(g.id)}
-              className={`rounded-3xl border bg-gradient-to-br p-4 text-left transition md:p-5 ${g.color} ${game === g.id ? 'scale-[1.02] ring-2 ring-white/40' : 'opacity-80 hover:opacity-100'}`}
+              className={`rounded-3xl border bg-gradient-to-br p-4 text-left transition md:p-5 ${g.color} ${game === g.id ? 'scale-[1.02] ring-2 ring-ink-900/40' : 'opacity-80 hover:opacity-100'}`}
             >
               <span className={`block text-3xl ${g.id === 'memory' ? 'font-arabic' : ''}`} aria-hidden>{g.emoji}</span>
-              <span className="mt-2 block font-extrabold text-cream-50">{g.title}</span>
-              <span className="block text-xs text-cream-200/80 md:text-sm">{g.text}</span>
+              <span className="mt-2 block font-extrabold text-ink-900">{g.title}</span>
+              <span className="block text-xs text-ink-700/80 md:text-sm">{g.text}</span>
             </button>
           ))}
         </div>
 
         <section className="card mx-auto mt-8 max-w-3xl p-6 md:p-10" role="tabpanel" aria-label={current.title}>
-          <h2 className="mb-6 flex items-center gap-2 font-serif text-2xl font-semibold text-cream-50">
-            <Brain className="h-6 w-6 text-sky-300" /> {current.title}
+          <h2 className="mb-6 flex items-center gap-2 font-serif text-2xl font-semibold text-ink-900">
+            <Brain className="h-6 w-6 text-sky-700" /> {current.title}
           </h2>
           {game === 'quiz' && <Quiz />}
           {game === 'memory' && <Memory />}
@@ -360,7 +360,7 @@ const Kids = () => {
           {game === 'deeds' && <Deeds />}
         </section>
 
-        <p className="mx-auto mt-8 max-w-xl text-center text-sm text-sand-500">
+        <p className="mx-auto mt-8 max-w-xl text-center text-sm text-ink-400">
           Parents : tout se passe sur cet appareil, sans compte ni publicité. Pour aller plus loin, lisez ensemble les histoires du Prophète ﷺ dans le Centre du savoir.
         </p>
       </Container>

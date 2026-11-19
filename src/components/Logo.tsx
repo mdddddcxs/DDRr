@@ -1,37 +1,46 @@
 import React from 'react';
 
-/** Emblème DDR : arche (mihrab) + croissant, dégradé orange → or. */
-export const LogoMark: React.FC<{ className?: string }> = ({ className = 'h-11 w-11' }) => (
-  <svg viewBox="0 0 48 48" className={className} aria-hidden>
-    <defs>
-      <linearGradient id="ddr-g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#fdba74" />
-        <stop offset="0.5" stopColor="#f97316" />
-        <stop offset="1" stopColor="#c2410c" />
-      </linearGradient>
-      <linearGradient id="ddr-gold" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#f3dfa2" />
-        <stop offset="1" stopColor="#dcb44a" />
-      </linearGradient>
-    </defs>
-    <rect x="1" y="1" width="46" height="46" rx="14" fill="url(#ddr-g)" />
-    <path d="M14 38V24c0-6 4.5-11 10-13 5.5 2 10 7 10 13v14z" fill="#120e0b" opacity="0.92" />
-    <path d="M18.5 38V26c0-3.6 2.4-6.6 5.5-7.8 3.1 1.2 5.5 4.2 5.5 7.8v12" fill="none" stroke="url(#ddr-gold)" strokeWidth="1.4" />
-    <path d="M26.6 27.6a3.6 3.6 0 1 1-3.4-5.2 2.9 2.9 0 1 0 3.4 5.2z" fill="url(#ddr-gold)" />
-    <path d="M24 6.5l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#fff7ed" />
-  </svg>
-);
+/**
+ * Emblème officiel de La DDR (redessiné en vectoriel d'après le logo de l'association) :
+ * croissant et étoile, toit, mosquée aux deux portes en arche.
+ * `tone="light"` pour les fonds sombres (toit en blanc).
+ */
+export const LogoMark: React.FC<{ className?: string; tone?: 'dark' | 'light'; title?: string }> = ({ className = 'h-12 w-auto', tone = 'dark', title }) => {
+  const id = React.useId().replace(/:/g, '');
+  return (
+    <svg viewBox="238 0 320 440" className={className} role={title ? 'img' : undefined} aria-hidden={title ? undefined : true} aria-label={title}>
+      <defs>
+        <linearGradient id={`o${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FDB022" />
+          <stop offset="1" stopColor="#EE7A0C" />
+        </linearGradient>
+        <mask id={`m${id}`}>
+          <rect x="200" y="0" width="400" height="200" fill="#fff" />
+          <circle cx="425" cy="56" r="52" fill="#000" />
+        </mask>
+      </defs>
+      <circle cx="398" cy="76" r="60" fill={`url(#o${id})`} mask={`url(#m${id})`} />
+      <path d="M428 42l8 16.2 17.9 2.6-13 12.6 3.1 17.8-16-8.4-16 8.4 3.1-17.8-13-12.6 17.9-2.6z" fill={`url(#o${id})`} />
+      <path d="M258 241L398 150L538 241V278L398 187L258 278Z" fill={tone === 'light' ? '#FFFFFF' : '#14244A'} />
+      <path d="M258 298L398 207L538 298V405H494V336A21 21 0 0 0 452 336V405L398 434L344 405V336A21 21 0 0 0 302 336V405H258Z" fill={`url(#o${id})`} />
+    </svg>
+  );
+};
 
-const Logo: React.FC<{ className?: string; showArabic?: boolean }> = ({ className = '', showArabic = true }) => (
-  <span className={`flex items-center gap-3 ${className}`}>
-    <LogoMark className="h-11 w-11 shrink-0 drop-shadow-[0_6px_18px_rgba(249,115,22,0.35)]" />
+/** Logo complet : emblème + « DDR » + nom de l'association. */
+const Logo: React.FC<{ className?: string; showArabic?: boolean; tone?: 'dark' | 'light'; size?: 'sm' | 'md' }> = ({
+  className = '',
+  showArabic = true,
+  tone = 'dark',
+  size = 'md',
+}) => (
+  <span className={`flex items-center gap-2.5 ${className}`}>
+    <LogoMark tone={tone} className={`${size === 'sm' ? 'h-10' : 'h-12'} w-auto shrink-0`} />
     <span className="flex flex-col leading-none">
-      <span className="font-serif text-[22px] font-semibold tracking-tight text-cream-50">
-        La <span className="text-brand-400">DDR</span>
-      </span>
-      <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.24em] text-sand-400">Dawah dans la rue</span>
+      <span className={`font-display font-extrabold tracking-tight ${size === 'sm' ? 'text-[22px]' : 'text-[26px]'} ${tone === 'light' ? 'text-white' : 'text-ink-900'}`}>DDR</span>
+      <span className="mt-0.5 font-serif text-[12.5px] font-semibold text-brand-600 whitespace-nowrap">La Da’awah Dans la Rue</span>
       {showArabic && (
-        <span className="mt-0.5 font-arabic text-[13px] text-gold-300/80" lang="ar" dir="rtl">
+        <span className={`mt-0.5 font-arabic text-[13px] ${tone === 'light' ? 'text-white/80' : 'text-ink-700'}`} lang="ar" dir="rtl">
           الدعوة في الشارع
         </span>
       )}

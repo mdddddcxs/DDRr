@@ -19,7 +19,7 @@ const Field = ({ id, label, value, onChange, placeholder, area = false }: { id: 
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="card space-y-4 p-6">
-    <h2 className="font-serif text-xl font-semibold text-cream-50">{title}</h2>
+    <h2 className="font-serif text-xl font-semibold text-ink-900">{title}</h2>
     {children}
   </section>
 );
@@ -78,11 +78,11 @@ const AdminSite = () => {
           {s.contact.phones.map((p, i) => (
             <div key={i} className="flex items-end gap-2">
               <div className="flex-1"><Field id={`ph${i}`} label={`Téléphone ${i + 1}`} value={p} onChange={(v) => set({ contact: { ...s.contact, phones: s.contact.phones.map((x, k) => (k === i ? v : x)) } })} /></div>
-              <button type="button" onClick={() => set({ contact: { ...s.contact, phones: s.contact.phones.filter((_, k) => k !== i) } })} className="mb-1 rounded-full p-2.5 text-red-300 hover:bg-red-500/10" aria-label="Retirer ce numéro"><Trash2 className="h-4 w-4" /></button>
+              <button type="button" onClick={() => set({ contact: { ...s.contact, phones: s.contact.phones.filter((_, k) => k !== i) } })} className="mb-1 rounded-full p-2.5 text-red-600 hover:bg-red-500/10" aria-label="Retirer ce numéro"><Trash2 className="h-4 w-4" /></button>
             </div>
           ))}
           {s.contact.phones.length < 5 && (
-            <button type="button" onClick={() => set({ contact: { ...s.contact, phones: [...s.contact.phones, ''] } })} className="flex items-center gap-1.5 text-sm font-bold text-brand-300"><Plus className="h-4 w-4" /> Ajouter un numéro</button>
+            <button type="button" onClick={() => set({ contact: { ...s.contact, phones: [...s.contact.phones, ''] } })} className="flex items-center gap-1.5 text-sm font-bold text-brand-700"><Plus className="h-4 w-4" /> Ajouter un numéro</button>
           )}
           <Field id="wa" label="Numéro WhatsApp principal (chiffres, avec 225)" value={s.contact.whatsapp} onChange={(v) => set({ contact: { ...s.contact, whatsapp: v } })} placeholder="2250747320455" />
           <Field id="email" label="Email" value={s.contact.email} onChange={(v) => set({ contact: { ...s.contact, email: v } })} />
@@ -103,12 +103,18 @@ const AdminSite = () => {
             </div>
             <Field id="pplace" label="Lieu" value={s.preche.place} onChange={(v) => set({ preche: { ...s.preche, place: v } })} />
             <Field id="pmap" label="Recherche Google Maps" value={s.preche.mapsQuery} onChange={(v) => set({ preche: { ...s.preche, mapsQuery: v } })} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field id="pstart" label="Début (HH:MM, pour le compte à rebours)" value={s.preche.start} onChange={(v) => set({ preche: { ...s.preche, start: v } })} />
+              <Field id="pend" label="Fin (HH:MM)" value={s.preche.end} onChange={(v) => set({ preche: { ...s.preche, end: v } })} />
+            </div>
+            <Field id="ptitle" label="Titre" value={s.preche.title} onChange={(v) => set({ preche: { ...s.preche, title: v } })} />
+            <Field id="ptheme" label="Thème / description" value={s.preche.theme} onChange={(v) => set({ preche: { ...s.preche, theme: v } })} />
           </Section>
         </div>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <h2 className="font-serif text-2xl font-semibold text-cream-50">Intervenants</h2>
+        <h2 className="font-serif text-2xl font-semibold text-ink-900">Intervenants</h2>
         <Button size="sm" variant="ghost" onClick={() => set({ speakers: [...s.speakers, { id: `s${Date.now()}`, name: 'Nouvel intervenant', role: '', bio: '', photoUrl: '' }] })}>
           <Plus className="h-4 w-4" /> Ajouter
         </Button>
@@ -117,11 +123,11 @@ const AdminSite = () => {
         {s.speakers.map((sp, i) => (
           <section key={sp.id} className="card space-y-4 p-6">
             <div className="flex items-center justify-between">
-              <p className="font-bold text-cream-50">{sp.name || 'Sans nom'}</p>
+              <p className="font-bold text-ink-900">{sp.name || 'Sans nom'}</p>
               <div className="flex">
-                <button type="button" disabled={i === 0} onClick={() => moveSpeaker(i, -1)} className="rounded-full p-2 text-sand-400 hover:bg-white/5 disabled:opacity-30" aria-label="Monter"><ArrowUp className="h-4 w-4" /></button>
-                <button type="button" disabled={i === s.speakers.length - 1} onClick={() => moveSpeaker(i, 1)} className="rounded-full p-2 text-sand-400 hover:bg-white/5 disabled:opacity-30" aria-label="Descendre"><ArrowDown className="h-4 w-4" /></button>
-                <button type="button" onClick={() => confirm(`Retirer ${sp.name} ?`) && set({ speakers: s.speakers.filter((_, k) => k !== i) })} className="rounded-full p-2 text-red-300 hover:bg-red-500/10" aria-label="Retirer"><Trash2 className="h-4 w-4" /></button>
+                <button type="button" disabled={i === 0} onClick={() => moveSpeaker(i, -1)} className="rounded-full p-2 text-ink-500 hover:bg-ink-900/5 disabled:opacity-30" aria-label="Monter"><ArrowUp className="h-4 w-4" /></button>
+                <button type="button" disabled={i === s.speakers.length - 1} onClick={() => moveSpeaker(i, 1)} className="rounded-full p-2 text-ink-500 hover:bg-ink-900/5 disabled:opacity-30" aria-label="Descendre"><ArrowDown className="h-4 w-4" /></button>
+                <button type="button" onClick={() => confirm(`Retirer ${sp.name} ?`) && set({ speakers: s.speakers.filter((_, k) => k !== i) })} className="rounded-full p-2 text-red-600 hover:bg-red-500/10" aria-label="Retirer"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
             <ImageField id={`photo-${sp.id}`} label="Photo officielle" value={sp.photoUrl} onChange={(url) => setSpeaker(i, { photoUrl: url })} upload={(f) => uploadMedia(f, 'speakers')} round />

@@ -20,7 +20,7 @@ export const PhoneField = ({
   <div className="flex gap-2">
     <select aria-label="Indicatif pays" value={country} onChange={(e) => onCountry(e.target.value)} className="input !w-auto !px-3">
       {COUNTRY_CODES.map((c) => (
-        <option key={c.code} value={c.code} className="bg-night-900">
+        <option key={c.code} value={c.code} className="bg-ivory-50">
           {c.flag} {c.code}
         </option>
       ))}
@@ -78,8 +78,8 @@ export const ImageField = ({
     <div>
       <span className="label">{label}</span>
       <div className="flex items-center gap-4">
-        <div className={`h-20 w-20 shrink-0 overflow-hidden bg-night-800 ring-1 ring-white/10 ${round ? 'rounded-full' : 'rounded-xl'}`}>
-          {value ? <img src={value} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-xs text-sand-500">Aucune</span>}
+        <div className={`h-20 w-20 shrink-0 overflow-hidden bg-ivory-200 ring-1 ring-ink-900/10 ${round ? 'rounded-full' : 'rounded-xl'}`}>
+          {value ? <img src={value} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-xs text-ink-400">Aucune</span>}
         </div>
         <div className="flex flex-wrap gap-2">
           <label htmlFor={id} className={`cursor-pointer rounded-full bg-brand-600 px-4 py-2 text-sm font-bold text-white hover:bg-brand-500 ${busy ? 'pointer-events-none opacity-60' : ''}`}>
@@ -87,13 +87,13 @@ export const ImageField = ({
           </label>
           <input id={id} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={pick} />
           {value && (
-            <button type="button" onClick={() => onChange('')} className="rounded-full bg-white/5 px-4 py-2 text-sm font-bold text-sand-400 hover:text-white">
+            <button type="button" onClick={() => onChange('')} className="rounded-full bg-ink-900/5 px-4 py-2 text-sm font-bold text-ink-500 hover:text-ink-900">
               Retirer
             </button>
           )}
         </div>
       </div>
-      {err && <p className="mt-2 text-sm text-red-300">{err}</p>}
+      {err && <p className="mt-2 text-sm text-red-600">{err}</p>}
     </div>
   );
 };

@@ -42,17 +42,17 @@ const ChatPage = () => {
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-76px)] max-w-4xl flex-col px-3 sm:px-6">
-      <header className="flex items-center justify-between gap-3 border-b border-white/5 py-4">
+      <header className="flex items-center justify-between gap-3 border-b border-ink-900/5 py-4">
         <div className="flex items-center gap-3">
           <LogoMark className="h-11 w-11" />
           <div>
-            <h1 className="font-serif text-xl font-semibold text-cream-50">Le Compagnon DDR</h1>
-            <p className="flex items-center gap-1.5 text-xs text-sand-400">
+            <h1 className="font-serif text-xl font-semibold text-ink-900">Le Compagnon DDR</h1>
+            <p className="flex items-center gap-1.5 text-xs text-ink-500">
               <span className="h-2 w-2 rounded-full bg-emerald-400" /> Répond avec douceur, en citant ses sources
             </p>
           </div>
         </div>
-        <button onClick={reset} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-sand-400 hover:bg-white/5 hover:text-white">
+        <button onClick={reset} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-ink-500 hover:bg-ink-900/5 hover:text-ink-900">
           <RotateCcw className="h-4 w-4" /> <span className="hidden sm:inline">Nouvelle discussion</span>
         </button>
       </header>
@@ -65,7 +65,7 @@ const ChatPage = () => {
         {messages.length === 1 && !loading && (
           <div className="grid gap-2 pt-2 sm:grid-cols-2">
             {STARTERS.map((s) => (
-              <button key={s} onClick={() => send(s)} className="card card-hover px-4 py-3 text-left text-sm text-cream-200">
+              <button key={s} onClick={() => send(s)} className="card card-hover px-4 py-3 text-left text-sm text-ink-700">
                 {s}
               </button>
             ))}
@@ -75,7 +75,7 @@ const ChatPage = () => {
       </div>
 
       <form onSubmit={submit} className="sticky bottom-0 pb-4 pt-2">
-        <div className="flex items-end gap-2 rounded-3xl border border-white/10 bg-night-900 p-2 shadow-2xl focus-within:border-brand-500/60">
+        <div className="flex items-end gap-2 rounded-3xl border border-ink-900/10 bg-ivory-50 p-2 shadow-2xl focus-within:border-brand-500/60">
           <label htmlFor="chat-input" className="sr-only">Votre question</label>
           <textarea
             id="chat-input"
@@ -90,13 +90,13 @@ const ChatPage = () => {
               }
             }}
             placeholder="Écrivez votre question…"
-            className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base text-cream-50 placeholder:text-sand-500 focus:outline-none"
+            className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base text-ink-900 placeholder:text-ink-400 focus:outline-none"
           />
           <button disabled={loading || !input.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-600 text-white transition hover:bg-brand-500 disabled:opacity-40" aria-label="Envoyer">
             <Send className="h-5 w-5" />
           </button>
         </div>
-        <p className="mt-2 text-center text-[11px] text-sand-500">Le Compagnon peut se tromper. Pour une question importante, demandez conseil à un imam.</p>
+        <p className="mt-2 text-center text-[11px] text-ink-400">Le Compagnon peut se tromper. Pour une question importante, demandez conseil à un imam.</p>
       </form>
     </div>
   );

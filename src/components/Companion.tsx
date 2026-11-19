@@ -43,7 +43,7 @@ export const Bubble = ({ m, compact = false }: { m: ChatTurn; compact?: boolean 
   <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
     <div
       className={`${compact ? 'max-w-[88%] px-3.5 py-2.5 text-sm' : 'max-w-[90%] px-5 py-4 text-[15px] md:max-w-[75%]'} rounded-3xl leading-relaxed ${
-        m.role === 'user' ? 'rounded-br-lg bg-brand-600 text-white' : 'prose-ddr rounded-bl-lg border border-white/10 bg-night-800 text-cream-100'
+        m.role === 'user' ? 'rounded-br-lg bg-brand-600 text-white' : 'prose-ddr rounded-bl-lg border border-ink-900/10 bg-ivory-200 text-ink-800'
       }`}
     >
       {m.role === 'user' ? m.text : <ReactMarkdown>{m.text}</ReactMarkdown>}
@@ -53,7 +53,7 @@ export const Bubble = ({ m, compact = false }: { m: ChatTurn; compact?: boolean 
 
 export const Typing = () => (
   <div className="flex justify-start" aria-label="Le Compagnon écrit">
-    <div className="flex gap-1.5 rounded-3xl rounded-bl-lg border border-white/10 bg-night-800 px-5 py-4">
+    <div className="flex gap-1.5 rounded-3xl rounded-bl-lg border border-ink-900/10 bg-ivory-200 px-5 py-4">
       {[0, 150, 300].map((d) => (
         <span key={d} className="h-2 w-2 animate-bounce rounded-full bg-brand-400" style={{ animationDelay: `${d}ms` }} />
       ))}

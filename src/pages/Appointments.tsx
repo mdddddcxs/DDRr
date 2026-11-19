@@ -42,8 +42,8 @@ const Appointments = () => {
       <Container className="py-24">
         <div className="card mx-auto max-w-xl p-10 text-center">
           <CheckCircle2 className="mx-auto h-16 w-16 text-emerald-400" />
-          <h1 className="mt-6 font-serif text-4xl font-semibold text-cream-50">Demande bien reçue</h1>
-          <p className="mt-4 text-lg leading-relaxed text-sand-400">
+          <h1 className="mt-6 font-serif text-4xl font-semibold text-ink-900">Demande bien reçue</h1>
+          <p className="mt-4 text-lg leading-relaxed text-ink-500">
             Barak Allahou fik{name ? `, ${name.split(' ')[0]}` : ''}. Un membre de la DDR vous rappellera très vite au numéro indiqué.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
@@ -64,24 +64,24 @@ const Appointments = () => {
         <div className="grid gap-8 lg:grid-cols-[1fr_1.5fr]">
           <aside className="space-y-4">
             <div className="card p-6">
-              <h2 className="font-serif text-2xl font-semibold text-cream-50">Besoin d’une réponse rapide ?</h2>
-              <p className="mt-2 text-sm text-sand-400">Appelez-nous ou écrivez sur WhatsApp.</p>
+              <h2 className="font-serif text-2xl font-semibold text-ink-900">Besoin d’une réponse rapide ?</h2>
+              <p className="mt-2 text-sm text-ink-500">Appelez-nous ou écrivez sur WhatsApp.</p>
               <div className="mt-5 space-y-3">
                 {site.contact.phones.map((p) => (
-                  <a key={p} href={telHref(p)} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-brand-500/50">
+                  <a key={p} href={telHref(p)} className="flex items-center gap-3 rounded-2xl border border-ink-900/10 bg-ink-900/5 p-4 transition hover:border-brand-500/50">
                     <span className="grid h-10 w-10 place-items-center rounded-full bg-brand-600 text-white"><Phone className="h-5 w-5" /></span>
-                    <span className="font-mono text-lg font-bold text-cream-50">{p}</span>
+                    <span className="font-mono text-lg font-bold text-ink-900">{p}</span>
                   </a>
                 ))}
-                <a href={waHref(site.contact.whatsapp)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 font-bold text-emerald-200 transition hover:bg-emerald-500/20">
+                <a href={waHref(site.contact.whatsapp)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 font-bold text-emerald-700 transition hover:bg-emerald-500/20">
                   <MessageCircle className="h-5 w-5" /> Écrire sur WhatsApp
                 </a>
               </div>
             </div>
             <div className="card p-6">
-              <h3 className="flex items-center gap-2 font-bold text-cream-50"><MapPin className="h-5 w-5 text-brand-400" /> Siège</h3>
-              <p className="mt-2 text-sm leading-relaxed text-sand-400">{site.contact.address}. Nous recevons sur rendez-vous confirmé.</p>
-              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.contact.address)}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-brand-300 hover:text-brand-200">
+              <h3 className="flex items-center gap-2 font-bold text-ink-900"><MapPin className="h-5 w-5 text-brand-600" /> Siège</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-500">{site.contact.address}. Nous recevons sur rendez-vous confirmé.</p>
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.contact.address)}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-brand-700 hover:text-brand-800">
                 Ouvrir dans Google Maps →
               </a>
             </div>
@@ -104,7 +104,7 @@ const Appointments = () => {
                 <label htmlFor="rdv-subject" className="label">Sujet</label>
                 <select id="rdv-subject" value={subject} onChange={(e) => setSubject(e.target.value)} className="input">
                   {SUBJECTS.map((s) => (
-                    <option key={s} className="bg-night-900">{s}</option>
+                    <option key={s} className="bg-ivory-50">{s}</option>
                   ))}
                 </select>
               </div>
@@ -116,13 +116,13 @@ const Appointments = () => {
             <div>
               <label htmlFor="rdv-msg" className="label">Votre message</label>
               <textarea id="rdv-msg" rows={5} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Expliquez-nous brièvement votre demande…" className="input resize-y" />
-              <p className="mt-1 text-right text-xs text-sand-500">{message.length}/2000</p>
+              <p className="mt-1 text-right text-xs text-ink-400">{message.length}/2000</p>
             </div>
             {error && <Notice tone="error">{error}</Notice>}
             <Button type="submit" size="lg" className="w-full" disabled={status === 'sending'}>
               {status === 'sending' ? 'Envoi en cours…' : 'Envoyer ma demande'}
             </Button>
-            <p className="text-center text-xs text-sand-500">Vos coordonnées servent uniquement à vous recontacter. Elles ne sont jamais partagées.</p>
+            <p className="text-center text-xs text-ink-400">Vos coordonnées servent uniquement à vous recontacter. Elles ne sont jamais partagées.</p>
           </form>
         </div>
       </Container>

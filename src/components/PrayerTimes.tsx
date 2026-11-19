@@ -69,7 +69,7 @@ const PrayerTimes = React.memo(() => {
   }, [data, now]);
 
   if (failed) {
-    return <p className="card p-6 text-center text-sand-400">Les horaires de prière n'ont pas pu être chargés. Vérifiez votre connexion.</p>;
+    return <p className="card p-6 text-center text-ink-500">Les horaires de prière n'ont pas pu être chargés. Vérifiez votre connexion.</p>;
   }
 
   return (
@@ -77,11 +77,11 @@ const PrayerTimes = React.memo(() => {
       <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-400/10 blur-3xl" aria-hidden />
       <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-sand-500">Abidjan · {data?.readable || '…'}</p>
-          <p className="mt-1 font-serif text-lg text-gold-300">{data?.hijri || ' '}</p>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-ink-400">Abidjan · {data?.readable || '…'}</p>
+          <p className="mt-1 font-serif text-lg text-gold-600">{data?.hijri || ' '}</p>
           {next && (
-            <p className="mt-4 text-cream-100">
-              Prochaine prière : <span className="font-serif text-3xl font-semibold text-white">{next.fr}</span>
+            <p className="mt-4 text-ink-800">
+              Prochaine prière : <span className="font-serif text-3xl font-semibold text-ink-900">{next.fr}</span>
               <span className="ml-3 rounded-full bg-brand-600 px-3 py-1 text-sm font-bold text-white">dans {next.left}</span>
             </p>
           )}
@@ -93,11 +93,11 @@ const PrayerTimes = React.memo(() => {
               <li
                 key={p.key}
                 className={`flex min-w-0 flex-col items-center rounded-2xl border px-1.5 py-3 text-center transition md:min-w-[92px] md:px-3 md:py-4 ${
-                  active ? 'border-gold-300/60 bg-gradient-to-b from-gold-300/25 to-gold-500/5 text-white shadow-[0_10px_30px_-12px_rgba(220,180,74,0.6)]' : 'border-white/5 bg-black/20 text-cream-200'
+                  active ? 'border-gold-300/60 bg-gradient-to-b from-gold-300/25 to-gold-500/5 text-white shadow-[0_10px_30px_-12px_rgba(220,180,74,0.6)]' : 'border-ink-900/5 bg-ink-900/5 text-ink-700'
                 }`}
               >
-                <span className="font-arabic text-base leading-none text-gold-300/90 md:text-lg" lang="ar">{p.ar}</span>
-                <span className="mt-1.5 text-[11px] font-bold uppercase tracking-wide text-sand-400 md:text-xs">{p.fr}</span>
+                <span className="font-arabic text-base leading-none text-gold-600/90 md:text-lg" lang="ar">{p.ar}</span>
+                <span className="mt-1.5 text-[11px] font-bold uppercase tracking-wide text-ink-500 md:text-xs">{p.fr}</span>
                 <span className={`mt-1 font-mono text-sm md:text-lg ${active ? 'font-bold' : ''}`}>{data ? data.timings[p.key].split(' ')[0] : '--:--'}</span>
               </li>
             );
