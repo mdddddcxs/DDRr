@@ -49,7 +49,7 @@ export const DEFAULT_SITE: SiteContent = {
     address: 'Yopougon Andokoi, 23ᵉ arrondissement, Abidjan',
   },
   social: {
-    youtube: 'https://www.youtube.com/@ddrlavraiechaine',
+    youtube: 'https://www.youtube.com/@LA_DAWAH_DANS_LA_RUE',
     tiktok: 'https://www.tiktok.com/@ddrofficiel',
     facebook: 'https://www.facebook.com/ismaelAKAofficiel',
     instagram: '',
@@ -72,7 +72,7 @@ export const DEFAULT_SITE: SiteContent = {
       bio: 'Surnommé « Ordinateur », Oustaz Diané compare la Bible et le Coran devant tous ceux qui veulent comprendre. Il anime chaque semaine le rappel de la DDR à Yopougon et intervient régulièrement dans les médias ivoiriens.',
       photoUrl: '/images/oustaz-diane.jpg',
       photoCredit: 'Photo : The Code',
-      youtube: 'https://www.youtube.com/@ddrlavraiechaine',
+      youtube: 'https://www.youtube.com/@LA_DAWAH_DANS_LA_RUE',
       whatsapp: '2250747320455',
     },
     {
