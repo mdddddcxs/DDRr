@@ -8,6 +8,7 @@ import RubriqueHero from '../components/RubriqueHero';
 import { Container, formatFCFA } from '../components/ui';
 import { rubriqueVars } from '../lib/rubriques';
 import { useReveal } from '../lib/useReveal';
+import { trackEvent } from '../lib/analytics';
 
 // Cours indicatifs (novembre 2026), modifiables par l'utilisateur.
 const DEFAULT_GOLD = 74000; // F CFA / g, or 24 carats
@@ -121,6 +122,7 @@ const ZakatSmart = () => {
       /* stockage indisponible */
     }
     setSaved(true);
+    trackEvent('zakat_calcul');
     setTimeout(() => setSaved(false), 2000);
   };
   const removeSaved = (id: number) => {

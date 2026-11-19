@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { CalendarCheck, ExternalLink, HandHeart, Inbox, LayoutDashboard, LogOut, Menu, Newspaper, PenSquare, Settings, Sparkles, Target, X } from 'lucide-react';
+import { BarChart3, CalendarCheck, ExternalLink, HandHeart, Inbox, LayoutDashboard, LogOut, Mail, Menu, Newspaper, PenSquare, Settings, SlidersHorizontal, Sparkles, Target, X } from 'lucide-react';
 import Logo from './Logo';
 import { adminSignOut, getAdminCounts } from '../services/db';
 
 const LINKS = [
   { to: '/admin/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+  { to: '/admin/stats', label: 'Statistiques', icon: BarChart3 },
   { to: '/admin/mailbox', label: 'Témoignages', icon: Inbox, count: 'messages' as const },
   { to: '/admin/appointments', label: 'Rendez-vous', icon: CalendarCheck, count: 'appointments' as const },
   { to: '/admin/conversions', label: 'Conversions', icon: Sparkles, count: 'conversions' as const },
   { to: '/admin/donations', label: 'Dons', icon: HandHeart },
   { to: '/admin/campaigns', label: 'Campagne', icon: Target },
+  { to: '/admin/subscribers', label: 'Abonnés', icon: Mail },
   { to: '/admin/content', label: 'Actualités', icon: Newspaper },
+  { to: '/admin/pilotage', label: 'Pilotage du site', icon: SlidersHorizontal },
   { to: '/admin/site', label: 'Contenu du site', icon: PenSquare },
   { to: '/admin/settings', label: 'Réglages', icon: Settings },
 ];

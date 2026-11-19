@@ -20,6 +20,9 @@ export type SpeakerInfo = {
 export type RealisationKind = 'mosquee' | 'forage' | 'ecole' | 'autre';
 export type Realisation = { id: string; kind: RealisationKind; title: string; place: string; text: string; photoUrl: string };
 
+export type SiteEvent = { id: string; title: string; date: string; time: string; place: string; text: string; link: string };
+export type HomeSections = { rappel: boolean; realisations: boolean; videos: boolean; intervenants: boolean; priere: boolean; campagne: boolean; actualites: boolean };
+
 export type SiteContent = {
   contact: { phones: string[]; whatsapp: string; email: string; address: string };
   social: { youtube: string; tiktok: string; facebook: string; instagram: string };
@@ -28,6 +31,14 @@ export type SiteContent = {
   speakers: SpeakerInfo[];
   /** Réalisations sur le terrain (mosquées, forages, écoles…), modifiables dans l'admin. */
   realisations: Realisation[];
+  /** Bandeau d'annonce en haut de toutes les pages. */
+  banner: { on: boolean; text: string; link: string; tone: 'or' | 'vert' | 'bleu' | 'rouge' };
+  /** Direct annoncé à la main (en plus de la détection YouTube). */
+  live: { on: boolean; title: string; url: string };
+  /** Événements ponctuels (conférences, tournées…), affichés dans l'Agenda. */
+  events: SiteEvent[];
+  /** Sections de l'accueil à afficher ou masquer. */
+  sections: HomeSections;
 };
 
 export const DEFAULT_SITE: SiteContent = {
@@ -90,6 +101,10 @@ export const DEFAULT_SITE: SiteContent = {
     { id: 'r3', kind: 'ecole', title: 'Des écoles', place: '', text: 'Des écoles pour que les enfants apprennent, la religion comme les savoirs.', photoUrl: '' },
     { id: 'r4', kind: 'autre', title: 'Et bien d’autres actions', place: '', text: 'D’autres œuvres de solidarité menées sur le terrain, au service de tous.', photoUrl: '' },
   ],
+  banner: { on: false, text: '', link: '', tone: 'or' },
+  live: { on: false, title: '', url: '' },
+  events: [],
+  sections: { rappel: true, realisations: true, videos: true, intervenants: true, priere: true, campagne: true, actualites: true },
 };
 
 export function mergeSite(raw: any): SiteContent {
@@ -145,7 +160,33 @@ export function mergeSite(raw: any): SiteContent {
           photoUrl: safeUrl(r?.photoUrl, ''),
         })).filter((r: Realisation) => r.title)
       : DEFAULT_SITE.realisations,
+    banner: {
+      on: !!raw.banner?.on,
+      text: str(raw.banner?.text, '').slice(0, 200),
+      link: safeLink(raw.banner?.link),
+      tone: (['or', 'vert', 'bleu', 'rouge'].includes(raw.banner?.tone) ? raw.banner.tone : 'or') as SiteContent['banner']['tone'],
+    },
+    live: { on: !!raw.live?.on, title: str(raw.live?.title, '').slice(0, 140), url: safeUrl(raw.live?.url, '') },
+    events: Array.isArray(raw.events)
+      ? raw.events.slice(0, 40).map((e: any, i: number) => ({
+          id: str(e?.id, `e${i}`),
+          title: str(e?.title, '').slice(0, 140),
+          date: /^\d{4}-\d{2}-\d{2}$/.test(e?.date) ? e.date : '',
+          time: str(e?.time, '').slice(0, 40),
+          place: str(e?.place, '').slice(0, 140),
+          text: str(e?.text, '').slice(0, 600),
+          link: safeLink(e?.link),
+        })).filter((e: SiteEvent) => e.title && e.date)
+      : [],
+    sections: { ...DEFAULT_SITE.sections, ...Object.fromEntries(Object.entries(raw.sections || {}).filter(([k, v]) => k in DEFAULT_SITE.sections && typeof v === 'boolean')) },
   };
+}
+
+/** Lien https, ou chemin interne du site (/agenda, /coran…). */
+export function safeLink(v: any): string {
+  if (typeof v !== 'string') return '';
+  const t = v.trim();
+  return /^\/[\w\-/#?=&.]*$/.test(t) && !t.startsWith('//') ? t : safeUrl(t, '');
 }
 
 /** N'accepte que des liens https (ou vide) pour éviter tout lien piégé. */

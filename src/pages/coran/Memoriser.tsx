@@ -7,6 +7,7 @@ import { SURAHS } from '../../data/quiz/datasets';
 import { AyahNumber, PickerModal } from './common';
 import { BASMALA, RECITERS, STARTER, hasBasmala, loadSurah, store, surahInfo, type Ayah } from './quranApi';
 import { useRecitation } from './useRecitation';
+import { trackEvent } from '../../lib/analytics';
 
 type Learned = Record<number, number[]>;
 const HIDE = [
@@ -81,6 +82,7 @@ const Memoriser = () => {
     const list = Array.from(new Set([...(learned[surah] || []), a.n])).sort((x, y) => x - y);
     setLearned({ ...learned, [surah]: list });
     navigator.vibrate?.(30);
+    trackEvent('coran_verset_appris');
     if (ayahs && i < ayahs.length - 1) {
       setI(i + 1);
       setHide(0);

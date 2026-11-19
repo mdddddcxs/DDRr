@@ -316,8 +316,9 @@ export async function deleteNews(id: string) {
   unwrap(await db().from('news').delete().eq('id', id));
 }
 
-export async function listSubscribers(): Promise<{ email: string; createdAt: string }[]> {
-  return unwrap(await db().from('newsletter_subscribers').select('email, created_at').order('created_at', { ascending: false })).map((r: any) => ({
+export async function listSubscribers(): Promise<{ id: string; email: string; createdAt: string }[]> {
+  return unwrap(await db().from('newsletter_subscribers').select('id, email, created_at').order('created_at', { ascending: false })).map((r: any) => ({
+    id: r.id,
     email: r.email,
     createdAt: r.created_at,
   }));
@@ -377,5 +378,38 @@ export async function getMyEmail(): Promise<string> {
 export async function changeMyPassword(password: string) {
   if (password.length < 10) throw new Error('Le mot de passe doit faire au moins 10 caractères.');
   const { error } = await db().auth.updateUser({ password });
+  if (error) throw error;
+}
+
+export async function deleteSubscriber(id: string) {
+  unwrap(await db().from('newsletter_subscribers').delete().eq('id', id));
+}
+
+// ---------------------------------------------------------------------------
+// Statistiques de fréquentation (fonction admin_stats, réservée aux administrateurs)
+// ---------------------------------------------------------------------------
+export type AdminStats = {
+  range: { days: number; since: string };
+  totals: { views: number; visitors: number; sessions: number; events: number };
+  previous: { views: number; visitors: number; sessions: number };
+  daily: { day: string; views: number; visitors: number }[];
+  hours: { hour: number; views: number }[];
+  pages: { path: string; views: number; visitors: number }[];
+  sources: { source: string; visitors: number }[];
+  devices: { device: 'mobile' | 'tablet' | 'desktop'; visitors: number }[];
+  events: { event: string; count: number }[];
+  forms: { appointments: number; conversions: number; testimonies: number; newsletter: number };
+  live: number;
+};
+export async function getAdminStats(days: number): Promise<AdminStats> {
+  const { data, error } = await db().rpc('admin_stats', { days });
+  if (error) {
+    if (/admin_stats|page_views|does not exist|schema cache/i.test(error.message)) throw new Error('STATS_NOT_READY');
+    throw error;
+  }
+  return data as AdminStats;
+}
+export async function purgeOldStats() {
+  const { error } = await db().rpc('purge_old_page_views');
   if (error) throw error;
 }

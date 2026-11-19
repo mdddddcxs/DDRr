@@ -64,7 +64,13 @@ const Legal = () => {
                     <section>
                         <h2 className="text-lg font-bold text-brand-700 mb-2">3. Protection</h2>
                         <p>
-                            Nous ne vendons ni ne louons vos données à des tiers. Seule l’équipe de la DDR a accès aux demandes envoyées. Les messages vocaux sont supprimés après 7 jours. Pour faire effacer vos données, écrivez à ladawahdanslarue.ddr@gmail.com. Les informations de paiement ne sont pas stockées sur nos serveurs.
+                            Nous ne vendons ni ne louons vos données à des tiers. Seule l’équipe de la DDR a accès aux demandes envoyées. Les témoignages (écrits et vocaux) sont supprimés après 30 jours, sauf ceux que leur auteur a accepté de voir publiés ou que l’équipe conserve pour vous recontacter. Pour faire effacer vos données, écrivez à ladawahdanslarue.ddr@gmail.com. Les informations de paiement ne sont pas stockées sur nos serveurs.
+                        </p>
+                    </section>
+                    <section>
+                        <h2 className="text-lg font-bold text-brand-700 mb-2">4. Mesure d’audience</h2>
+                        <p>
+                            Pour savoir quelles pages sont utiles, le site compte les visites de façon anonyme : la page consultée, le site d’où vous venez (Facebook, Google…), le type d’appareil et un identifiant aléatoire enregistré dans votre navigateur. Aucun nom, numéro, adresse IP ni cookie publicitaire n’est conservé, et rien n’est partagé avec des tiers. Ces statistiques sont effacées après 13 mois. Vos progrès (quiz, Coran, zakat) restent uniquement sur votre téléphone.
                         </p>
                     </section>
                 </>

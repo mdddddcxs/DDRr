@@ -3,6 +3,7 @@ import { CheckCircle2, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { Button, ButtonLink, Container, Honeypot, Notice, PageHero } from '../components/ui';
 import { PhoneField, fullPhone, isPhoneValid } from '../components/forms';
 import { submitAppointment } from '../services/db';
+import { trackEvent } from '../lib/analytics';
 import { friendlyError } from '../lib/supabase';
 import { telHref, useSite, waHref } from '../lib/site';
 
@@ -30,6 +31,7 @@ const Appointments = () => {
     setStatus('sending');
     try {
       await submitAppointment({ name, phone: fullPhone(country, phone), subject, requestedDate: date || undefined, message });
+      trackEvent('rdv_demande');
       setStatus('sent');
     } catch (err) {
       setError(friendlyError(err));

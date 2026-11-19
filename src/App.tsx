@@ -67,6 +67,9 @@ const AdminAppointments = lazyPage(() => import('./pages/Admin/AdminAppointments
 const AdminConversions = lazyPage(() => import('./pages/Admin/AdminConversions'));
 const AdminSettings = lazyPage(() => import('./pages/Admin/AdminSettings'));
 const AdminSite = lazyPage(() => import('./pages/Admin/AdminSite'));
+const AdminStats = lazyPage(() => import('./pages/Admin/AdminStats'));
+const AdminPilotage = lazyPage(() => import('./pages/Admin/AdminPilotage'));
+const AdminSubscribers = lazyPage(() => import('./pages/Admin/AdminSubscribers'));
 
 const PageLoader = () => (
   <div className="grid min-h-[50vh] place-items-center text-brand-600">
@@ -120,6 +123,9 @@ const AppRoutes = () => {
                     <Route path="campaigns" element={<AdminCampaigns />} />
                     <Route path="content" element={<AdminContent />} />
                     <Route path="site" element={<AdminSite />} />
+                    <Route path="stats" element={<AdminStats />} />
+                    <Route path="pilotage" element={<AdminPilotage />} />
+                    <Route path="subscribers" element={<AdminSubscribers />} />
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="*" element={<Navigate to="dashboard" replace />} />
                   </Routes>

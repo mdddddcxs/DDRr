@@ -13,6 +13,7 @@ import { Honeypot, Spinner } from './ui';
 import type { Debate } from '../types';
 import { telHref, useSite } from '../lib/site';
 import { rubriqueVars, type RubriqueKey } from '../lib/rubriques';
+import { trackPage } from '../lib/analytics';
 
 type NavItem = { name: string; path: string; desc?: string; k?: RubriqueKey; icon?: React.ComponentType<{ className?: string }> };
 type NavGroup = { name: string; k: RubriqueKey; items: NavItem[] };
@@ -66,6 +67,7 @@ const isGroup = (n: NavItem | NavGroup): n is NavGroup => 'items' in n;
 
 /** Bandeau "EN DIRECT" quand la chaîne YouTube diffuse un live. */
 const LiveBanner = () => {
+  const site = useSite();
   const [live, setLive] = useState<Debate | null>(null);
   useEffect(() => {
     let alive = true;
@@ -74,12 +76,55 @@ const LiveBanner = () => {
       alive = false;
     };
   }, []);
-  if (!live) return null;
-  return (
-    <Link to="/debates" className="block bg-gradient-to-r from-red-700 via-red-600 to-red-700 px-4 py-2 text-center text-sm font-bold text-white">
+  // Direct annoncé depuis l'admin : prioritaire sur la détection YouTube
+  const manual = site.live.on;
+  if (!manual && !live) return null;
+  const title = manual ? site.live.title || 'La DDR est en direct' : live!.title;
+  const inner = (
+    <>
       <span className="mr-2 inline-block h-2 w-2 rounded-full bg-white animate-pulse-ring align-middle" />
-      EN DIRECT maintenant : <span className="font-semibold opacity-90">{live.title}</span> — Regarder →
-    </Link>
+      EN DIRECT maintenant : <span className="font-semibold opacity-90">{title}</span> — Regarder →
+    </>
+  );
+  const cls = 'block bg-gradient-to-r from-red-700 via-red-600 to-red-700 px-4 py-2 text-center text-sm font-bold text-white';
+  return manual && site.live.url ? (
+    <a href={site.live.url} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
+  ) : (
+    <Link to="/debates" className={cls}>{inner}</Link>
+  );
+};
+
+const TONES = {
+  or: 'from-gold-300 via-gold-200 to-gold-300 text-ink-900',
+  vert: 'from-emerald-700 via-emerald-600 to-emerald-700 text-white',
+  bleu: 'from-ink-900 via-ink-800 to-ink-900 text-white',
+  rouge: 'from-red-700 via-red-600 to-red-700 text-white',
+};
+/** Bandeau d'annonce géré depuis l'admin (Contenu du site › Bandeau d'annonce). */
+const AnnouncementBar = () => {
+  const { banner } = useSite();
+  const [hidden, setHidden] = useState(() => {
+    try {
+      return sessionStorage.getItem('ddr_banner_hidden') === banner.text;
+    } catch {
+      return false;
+    }
+  });
+  if (!banner.on || !banner.text || hidden) return null;
+  const close = () => {
+    setHidden(true);
+    try {
+      sessionStorage.setItem('ddr_banner_hidden', banner.text);
+    } catch {
+      /* rien */
+    }
+  };
+  const text = <span className="font-semibold">{banner.text}{banner.link && <span className="ml-2 underline underline-offset-4">En savoir plus →</span>}</span>;
+  return (
+    <div className={`relative bg-gradient-to-r px-10 py-2.5 text-center text-sm ${TONES[banner.tone]}`}>
+      {banner.link ? (banner.link.startsWith('/') ? <Link to={banner.link}>{text}</Link> : <a href={banner.link} target="_blank" rel="noopener noreferrer">{text}</a>) : text}
+      <button onClick={close} aria-label="Masquer l’annonce" className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full opacity-70 hover:opacity-100"><X className="h-4 w-4" /></button>
+    </div>
   );
 };
 
@@ -191,6 +236,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     setMobileOpen(false);
+    trackPage(location.pathname);
   }, [location.pathname]);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -217,6 +263,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </a>
       <OfflineBanner />
       <LiveBanner />
+      <AnnouncementBar />
 
       <nav className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? 'border-b border-ink-900/[0.07] bg-ivory-100/85 shadow-[0_10px_30px_-24px_rgba(20,36,74,0.5)] backdrop-blur-xl' : 'border-b border-transparent bg-transparent'}`}>
         <div className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 transition-all duration-500 sm:px-6 ${scrolled ? 'h-[70px]' : 'h-[84px]'}`}>

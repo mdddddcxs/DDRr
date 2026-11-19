@@ -8,6 +8,7 @@ import { friendlyError } from '../lib/supabase';
 import { useSite } from '../lib/site';
 import { rubriqueVars } from '../lib/rubriques';
 import { useReveal } from '../lib/useReveal';
+import { trackEvent } from '../lib/analytics';
 import type { PublicTestimony } from '../types';
 
 const MAX_SECONDS = 180;
@@ -247,6 +248,7 @@ const Conversions = () => {
         consentPublish: publish,
         city,
       });
+      trackEvent('temoignage_envoye');
       setStatus('sent');
     } catch (err) {
       setError(err instanceof Error && /trop long/.test(err.message) ? err.message : friendlyError(err));

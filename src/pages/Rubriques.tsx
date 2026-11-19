@@ -206,6 +206,45 @@ export const Decouvrir = () => {
 
 /* Agenda ----------------------------------------------------------- */
 
+const Evenements = () => {
+  const site = useSite();
+  const today = new Date().toISOString().slice(0, 10);
+  const list = site.events.filter((e) => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  if (!list.length) return null;
+  return (
+    <Section>
+      <H2 k="agenda" kicker="À venir">Les prochains événements</H2>
+      <div style={rubriqueVars('agenda')} className="grid gap-4 md:grid-cols-2">
+        {list.map((e, i) => {
+          const d = new Date(e.date + 'T12:00:00Z');
+          const inner = (
+            <>
+              <div className="r-grad grid w-20 shrink-0 place-items-center rounded-2xl py-3 text-center text-white">
+                <span className="text-xs font-bold uppercase">{d.toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                <span className="font-display text-3xl font-bold leading-none">{d.getUTCDate()}</span>
+                <span className="text-[11px] opacity-80">{d.toLocaleDateString('fr-FR', { weekday: 'short' })}</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-serif text-xl font-semibold text-ink-900">{e.title}</h3>
+                <p className="r-ink mt-1 text-sm font-semibold">{[e.time, e.place].filter(Boolean).join(' · ')}</p>
+                {e.text && <p className="mt-2 text-[15px] leading-relaxed text-ink-500">{e.text}</p>}
+                {e.link && <span className="r-ink mt-2 inline-flex items-center gap-1 text-sm font-bold">En savoir plus <ArrowRight className="h-4 w-4" /></span>}
+              </div>
+            </>
+          );
+          const cls = 'reveal card flex gap-4 p-5 transition hover:-translate-y-0.5';
+          const style = { '--d': `${(i % 2) * 90}ms` } as React.CSSProperties;
+          return e.link ? (
+            e.link.startsWith('/') ? <Link key={e.id} to={e.link} className={cls} style={style}>{inner}</Link> : <a key={e.id} href={e.link} target="_blank" rel="noopener noreferrer" className={cls} style={style}>{inner}</a>
+          ) : (
+            <article key={e.id} className={cls} style={style}>{inner}</article>
+          );
+        })}
+      </div>
+    </Section>
+  );
+};
+
 export const Agenda = () => {
   const site = useSite();
   useReveal();
@@ -215,6 +254,7 @@ export const Agenda = () => {
       <div className="-mt-6">
         <NextRappel flush />
       </div>
+      <Evenements />
       <Section>
         <H2 k="agenda" kicker="Ne rien manquer">Les autres rendez-vous</H2>
         <Tiles

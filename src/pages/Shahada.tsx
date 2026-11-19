@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2, Home, Video } from 'lucide-react';
 import { Button, ButtonLink, Container, Honeypot, Notice } from '../components/ui';
 import { PhoneField, fullPhone, isPhoneValid } from '../components/forms';
 import { submitConversionRequest } from '../services/db';
+import { trackEvent } from '../lib/analytics';
 import { friendlyError } from '../lib/supabase';
 
 const Shahada = () => {
@@ -31,6 +32,7 @@ const Shahada = () => {
     setSending(true);
     try {
       await submitConversionRequest({ name, phone: fullPhone(country, phone), location, method });
+      trackEvent('shahada_demande');
       go(3);
     } catch (err) {
       setError(friendlyError(err));

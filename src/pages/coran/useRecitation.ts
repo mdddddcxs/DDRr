@@ -1,6 +1,7 @@
 // Lecture audio verset par verset : enchaînement, répétitions, vitesse, secours en cas d'erreur.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Ayah } from './quranApi';
+import { trackEvent } from '../../lib/analytics';
 
 export type RecitationOptions = {
   /** Combien de fois chaque verset est récité avant de passer au suivant. */
@@ -37,6 +38,7 @@ export function useRecitation(ayahs: Ayah[], opts: RecitationOptions = {}) {
     if (!audio.current) audio.current = new Audio();
     const el = audio.current;
     if (resetCount) played.current = 0;
+    if (indexRef.current === null) trackEvent('coran_ecoute');
     setError('');
     el.src = a.audio;
     el.dataset.alt = a.audioAlt || '';

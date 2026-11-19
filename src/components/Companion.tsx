@@ -2,6 +2,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { askCompanion, type ChatTurn } from '../services/geminiService';
+import { trackEvent } from '../lib/analytics';
 
 export const WELCOME: ChatTurn = {
   role: 'model',
@@ -26,6 +27,7 @@ export function useCompanion() {
     const history: ChatTurn[] = [...current.current, { role: 'user', text: q }];
     setMessages(history);
     try {
+      trackEvent('compagnon_question');
       const { text: answer } = await askCompanion(history.filter((m) => m !== WELCOME));
       setMessages([...current.current, { role: 'model', text: answer }]);
     } finally {

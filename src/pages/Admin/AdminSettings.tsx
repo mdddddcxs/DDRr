@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Download, Trash2, UserPlus } from 'lucide-react';
 import { AdminTitle, useAdminData } from '../../components/AdminLayout';
@@ -84,7 +85,10 @@ const AdminSettings = () => {
         <section className="card p-6">
           <h2 className="font-bold text-ink-900">Newsletter</h2>
           <p className="mt-1 text-sm text-ink-500">{subs ? `${subs.length} personne(s) inscrite(s) depuis le pied de page.` : '…'}</p>
-          <Button size="sm" variant="ghost" className="mt-5" onClick={exportSubs} disabled={!subs?.length}><Download className="h-4 w-4" /> Télécharger la liste</Button>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button size="sm" variant="ghost" onClick={exportSubs} disabled={!subs?.length}><Download className="h-4 w-4" /> Télécharger la liste</Button>
+            <Link to="/admin/subscribers" className="inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50">Gérer les abonnés →</Link>
+          </div>
         </section>
         <section className="card p-6 lg:col-span-2">
           <h2 className="font-bold text-ink-900">Administrateurs</h2>

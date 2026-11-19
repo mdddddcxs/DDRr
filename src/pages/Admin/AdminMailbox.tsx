@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { downloadCsv, dateStamp } from '../../lib/csv';
 import { Archive, ArchiveRestore, Download, Eye, EyeOff, Mic, Phone, Play, Trash2, Type } from 'lucide-react';
 import { AdminTitle, Empty, fmtDateTime, useAdminData } from '../../components/AdminLayout';
 import { deleteMessage, getAudioUrl, keepMessage, listMessages, markMessageRead, publishMessage } from '../../services/db';
@@ -67,6 +68,7 @@ const AdminMailbox = () => {
       <AdminTitle
         title="Témoignages"
         subtitle="Écrits et messages vocaux envoyés depuis le site. Ils sont gardés 30 jours : conservez ou publiez ceux que vous voulez garder."
+        action={<button onClick={() => downloadCsv(`temoignages-ddr-${dateStamp()}.csv`, [['Reçu le', 'Nom', 'Ville', 'Téléphone', 'Type', 'Texte', 'Publication acceptée', 'Publié'], ...(data || []).map((m) => [new Date(m.receivedAt).toLocaleString('fr-FR'), m.senderName, m.city || '', m.senderPhone || '', m.type === 'audio' ? `Vocal ${m.audioDuration || ''}` : 'Écrit', m.type === 'text' ? m.content : '(message vocal)', m.consentPublish ? 'oui' : 'non', m.published ? 'oui' : 'non'])])} disabled={!data?.length} className="inline-flex items-center gap-1.5 rounded-full bg-ink-900 px-3 py-2 text-sm font-bold text-white disabled:opacity-40"><Download className="h-4 w-4" /> Excel</button>}
       />
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 

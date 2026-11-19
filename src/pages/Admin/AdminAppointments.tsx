@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Check, Phone, Trash2, X } from 'lucide-react';
+import { Check, Download, Phone, Trash2, X } from 'lucide-react';
+import { downloadCsv, dateStamp } from '../../lib/csv';
 import { AdminTitle, Empty, fmtDateTime, useAdminData } from '../../components/AdminLayout';
 import { deleteAppointment, listAppointments, updateAppointmentStatus } from '../../services/db';
 import type { Appointment } from '../../types';
@@ -30,7 +31,7 @@ const AdminAppointments = () => {
 
   return (
     <>
-      <AdminTitle title="Rendez-vous" subtitle="Demandes envoyées depuis la page Contact." />
+      <AdminTitle title="Rendez-vous" subtitle="Demandes envoyées depuis la page Contact." action={<button onClick={() => downloadCsv(`rendez-vous-ddr-${dateStamp()}.csv`, [['Reçu le', 'Nom', 'Téléphone', 'Sujet', 'Date souhaitée', 'Message', 'Statut'], ...(data || []).map((a) => [new Date(a.createdAt).toLocaleString('fr-FR'), a.name, a.phone, a.subject, a.requestedDate, a.message, a.status])])} disabled={!data?.length} className="inline-flex items-center gap-1.5 rounded-full bg-ink-900 px-3 py-2 text-sm font-bold text-white disabled:opacity-40"><Download className="h-4 w-4" /> Excel</button>} />
       <div className="mb-6 flex flex-wrap gap-2">
         {(['pending', 'confirmed', 'rejected', 'all'] as const).map((f) => (
           <button key={f} onClick={() => setFilter(f)} className={`rounded-full px-4 py-2 text-sm font-bold ${filter === f ? 'bg-brand-600 text-white' : 'bg-ink-900/5 text-ink-500 hover:text-ink-900'}`}>

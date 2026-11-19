@@ -7,6 +7,7 @@ import { LogoMark } from '../components/Logo';
 import { Container } from '../components/ui';
 import { rubriqueVars } from '../lib/rubriques';
 import { useReveal } from '../lib/useReveal';
+import { trackEvent } from '../lib/analytics';
 
 type Quote = { cat: string; arabic: string; phonetic: string; french: string; source: string };
 
@@ -84,6 +85,7 @@ const StudioDawa = () => {
       const a = document.createElement('a');
       a.href = url;
       a.download = `rappel-ddr-${format}.png`;
+      trackEvent('carte_creee');
       a.click();
       flash('Image enregistrée ✓');
     } catch {

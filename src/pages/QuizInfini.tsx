@@ -6,6 +6,7 @@ import { Container } from '../components/ui';
 import { THEMES, type Theme } from '../data/quiz/bank';
 import { createDeck, QUESTION_COUNT, type Question } from '../data/quiz/engine';
 import { rubriqueVars } from '../lib/rubriques';
+import { trackEvent } from '../lib/analytics';
 
 type Mode = 'marathon' | 'chrono' | 'entrainement';
 
@@ -403,6 +404,7 @@ const QuizInfini = () => {
   const [result, setResult] = useState<{ score: number; answers: Answer[]; record: boolean } | null>(null);
 
   const start = (m: Mode, t?: Theme[]) => {
+    trackEvent('quiz_partie');
     setMode(m);
     setThemes(t);
     setGameId((g) => g + 1);

@@ -572,6 +572,7 @@ const Home = () => {
   const [videos, setVideos] = useState<Debate[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [campaign, setCampaign] = useState<DonationCampaign>(SCHOOL_CAMPAIGN);
+  const show = useSite().sections;
 
   useEffect(() => {
     fetchYoutubeDebates().then(setVideos);
@@ -585,17 +586,17 @@ const Home = () => {
     <>
       <Hero />
       <Marquee />
-      <NextRappel />
+      {show.rappel ? <NextRappel /> : <div className="h-16" />}
       <Rubriques />
       <Demarche />
-      <Realisations />
+      {show.realisations && <Realisations />}
       <AskCompanion />
-      <Mediatheque videos={videos} />
-      <Voices />
-      <Prayers />
-      <Campaign c={campaign} />
+      {show.videos && <Mediatheque videos={videos} />}
+      {show.intervenants && <Voices />}
+      {show.priere && <Prayers />}
+      {show.campagne && <Campaign c={campaign} />}
       <Invitations />
-      {news.length > 0 && <LatestNews news={news} />}
+      {show.actualites && news.length > 0 && <LatestNews news={news} />}
     </>
   );
 };

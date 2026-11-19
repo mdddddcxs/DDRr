@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, CalendarDays, CalendarPlus, Clock, MapPin, Navigation, PlayCircle, Share2 } from 'lucide-react';
 import { ButtonLink, Container } from './ui';
 import { nextPreche, useSite } from '../lib/site';
+import { trackEvent } from '../lib/analytics';
 
 const TZ = 'Africa/Abidjan';
 
@@ -111,7 +112,7 @@ const NextRappel = ({ flush = false }: { flush?: boolean }) => {
                 {live ? (
                   <ButtonLink to="/debates" size="md"><PlayCircle className="h-5 w-5" /> Suivre le direct</ButtonLink>
                 ) : (
-                  <button onClick={() => downloadIcs(start, end, p.title, p.place, p.theme)} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-brand-500 to-brand-600 px-5 py-3 text-[15px] font-bold text-white shadow-[0_12px_28px_-12px_rgba(226,112,10,0.9)] transition hover:brightness-105">
+                  <button onClick={() => { downloadIcs(start, end, p.title, p.place, p.theme); trackEvent('agenda_ajout'); }} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-brand-500 to-brand-600 px-5 py-3 text-[15px] font-bold text-white shadow-[0_12px_28px_-12px_rgba(226,112,10,0.9)] transition hover:brightness-105">
                     <CalendarPlus className="h-5 w-5" /> Ajouter à mon agenda
                   </button>
                 )}
