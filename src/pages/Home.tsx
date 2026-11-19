@@ -10,6 +10,7 @@ import { Avatar, ButtonLink, Container, formatFCFA } from '../components/ui';
 import { SCHOOL_CAMPAIGN } from '../constants';
 import { nextPreche, useSite, waHref } from '../lib/site';
 import { useReveal } from '../lib/useReveal';
+import { RUBRIQUE_THEME, rubriqueVars, type RubriqueKey } from '../lib/rubriques';
 import { fetchNews, fetchYoutubeDebates } from '../services/socialService';
 import { getCampaign } from '../services/db';
 import type { Debate, DonationCampaign, NewsItem } from '../types';
@@ -53,57 +54,96 @@ const TRIO = [
   { name: 'Ibrahim Ouattara', src: '/images/ibrahim-ouattara.jpg' },
 ];
 
-const Hero = () => (
-  <section className="relative overflow-hidden">
-    {/* Lumière et motif */}
-    <div className="absolute -right-40 -top-40 h-[42rem] w-[42rem] rounded-full bg-brand-300/25 blur-[120px] animate-glow" aria-hidden />
-    <div className="absolute -left-40 top-40 h-[30rem] w-[30rem] rounded-full bg-gold-200/40 blur-[110px]" aria-hidden />
-    <div className="absolute inset-0 bg-pattern opacity-[0.07] [mask-image:radial-gradient(ellipse_at_70%_30%,black_10%,transparent_65%)]" aria-hidden />
+/** Rosace géométrique islamique (étoiles entrelacées), tourne très lentement. */
+const Rosette = ({ className = '' }: { className?: string }) => (
+  <svg viewBox="0 0 400 400" className={className} aria-hidden>
+    <g fill="none" stroke="currentColor" strokeWidth="1">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <rect key={i} x="90" y="90" width="220" height="220" transform={`rotate(${i * 7.5} 200 200)`} opacity={0.55} />
+      ))}
+      <circle cx="200" cy="200" r="190" />
+      <circle cx="200" cy="200" r="156" strokeDasharray="2 6" />
+      <circle cx="200" cy="200" r="78" />
+      {Array.from({ length: 16 }).map((_, i) => (
+        <circle key={`c${i}`} cx={200 + 172 * Math.cos((i * Math.PI) / 8)} cy={200 + 172 * Math.sin((i * Math.PI) / 8)} r="5" />
+      ))}
+    </g>
+  </svg>
+);
 
-    <Container className="relative grid items-center gap-14 pb-28 pt-8 md:pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pb-36">
+const INTENTS = [
+  { to: '/decouvrir', k: 'decouvrir' as const, icon: Compass, title: 'Je découvre l’Islam', text: 'Les bases, avec douceur' },
+  { to: '/learning', k: 'apprendre' as const, icon: GraduationCap, title: 'Je veux apprendre', text: 'Coran, savoir, enfants' },
+  { to: '/rejoindre', k: 'rejoindre' as const, icon: HandHeart, title: 'Je veux aider', text: 'Bénévolat et soutien' },
+];
+
+const TITLE_WORDS = ['Découvrir', 'l’Islam,', 'avec', '*sagesse*', 'et', 'respect.'];
+
+const Hero = () => (
+  <section className="relative -mt-[84px] overflow-hidden pt-[84px]">
+    {/* Aube : dégradé chaud et lumières qui dérivent lentement */}
+    <div className="absolute inset-0 bg-[linear-gradient(180deg,#fff7ea_0%,#fdebd3_38%,#fbf7f0_100%)]" aria-hidden />
+    <div className="absolute -right-32 -top-24 h-[36rem] w-[36rem] rounded-full bg-brand-400/35 blur-[110px] animate-drift" aria-hidden />
+    <div className="absolute -left-24 top-1/3 h-[26rem] w-[26rem] rounded-full bg-[#e0485e]/15 blur-[100px] animate-drift [animation-delay:-6s]" aria-hidden />
+    <div className="absolute bottom-0 right-1/3 h-[22rem] w-[22rem] rounded-full bg-[#1ba3a0]/12 blur-[100px] animate-drift [animation-delay:-12s]" aria-hidden />
+    <div className="absolute inset-0 bg-pattern opacity-[0.08] [mask-image:radial-gradient(ellipse_at_70%_35%,black_10%,transparent_65%)]" aria-hidden />
+
+    <Container className="relative grid items-center gap-12 pb-32 pt-8 md:pt-12 lg:grid-cols-[1.08fr_1fr] lg:gap-10 lg:pb-40">
       <div className="text-center lg:text-left">
-        <p className="inline-flex items-center gap-3 rounded-full border border-gold-400/40 bg-white/70 px-4 py-1.5 shadow-sm backdrop-blur animate-fade-up">
+        <p className="inline-flex items-center gap-3 rounded-full border border-gold-400/50 bg-white/75 px-4 py-1.5 shadow-sm backdrop-blur animate-fade-up">
           <span className="font-arabic text-lg leading-none text-gold-700" lang="ar">السَّلَامُ عَلَيْكُمْ</span>
           <span className="h-3.5 w-px bg-gold-400/50" />
           <span className="text-[13px] font-semibold text-ink-700">Que la paix soit sur vous</span>
         </p>
 
-        <h1 className="mt-7 font-serif text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.01em] text-ink-900 animate-fade-up [animation-delay:120ms] sm:text-6xl xl:text-[4.25rem]">
-          Découvrir l’Islam, avec <span className="text-gradient-gold italic">sagesse</span> et respect.
+        <h1 className="mt-6 font-serif text-[2.7rem] font-semibold leading-[1.04] tracking-[-0.01em] text-ink-900 sm:text-6xl xl:text-[4.2rem]" aria-label="Découvrir l’Islam, avec sagesse et respect.">
+          {TITLE_WORDS.map((w, i) => (
+            <span key={i} aria-hidden className="inline-block animate-word" style={{ animationDelay: `${150 + i * 110}ms` }}>
+              {w.startsWith('*') ? <span className="text-gradient-gold italic pr-1">{w.slice(1, -1)}</span> : w}
+              {i < TITLE_WORDS.length - 1 ? ' ' : ''}
+            </span>
+          ))}
         </h1>
 
-        <p className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-ink-500 animate-fade-up [animation-delay:240ms] md:text-xl lg:mx-0">
-          Depuis les rues d’Abidjan, <strong className="font-semibold text-ink-800">La Da’awah Dans la Rue</strong> invite chacun, musulman, chrétien ou simplement curieux, à comparer les écritures, poser ses questions et échanger dans la fraternité.
+        <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-ink-500 animate-fade-up [animation-delay:800ms] lg:mx-0">
+          Depuis les rues d’Abidjan, <strong className="font-semibold text-ink-800">La Da’awah Dans la Rue</strong> invite chacun, musulman, chrétien ou simplement curieux, à poser ses questions et échanger dans la fraternité.
         </p>
 
-        <div className="mt-10 flex flex-col items-center gap-3 animate-fade-up [animation-delay:360ms] sm:flex-row sm:justify-center lg:justify-start">
-          <ButtonLink to="/decouvrir" size="lg">
-            <Compass className="h-5 w-5" /> Découvrir l’Islam
-          </ButtonLink>
-          <a href="#rappel" className="inline-flex items-center gap-2 rounded-full border border-ink-900/12 bg-white/70 px-7 py-4 font-bold text-ink-900 backdrop-blur transition hover:border-ink-900/25 hover:bg-white">
-            <CalendarDays className="h-5 w-5 text-brand-600" /> Le prochain rappel
+        {/* Par où commencer : trois chemins simples */}
+        <div className="mt-8 animate-fade-up [animation-delay:950ms]">
+          <p className="mb-3 text-[12px] font-extrabold uppercase tracking-[0.22em] text-ink-400">Par où commencer ?</p>
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            {INTENTS.map(({ to, k, icon: Icon, title, text }) => (
+              <Link key={to} to={to} style={rubriqueVars(k)} className="group flex items-center gap-3 rounded-2xl border border-white bg-white/80 p-3 text-left shadow-[0_14px_30px_-20px_rgba(20,36,74,0.5)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_40px_-22px_var(--r-to)] sm:flex-col sm:items-start sm:p-4">
+                <span className="r-grad grid h-11 w-11 shrink-0 place-items-center rounded-xl text-white shadow-md transition duration-300 group-hover:scale-110 group-hover:rotate-[-6deg]">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-bold leading-tight text-ink-900">{title}</span>
+                  <span className="block text-[13px] text-ink-500">{text}</span>
+                </span>
+                <ArrowRight className="h-4 w-4 shrink-0 r-ink transition group-hover:translate-x-1 sm:hidden" />
+              </Link>
+            ))}
+          </div>
+          <a href="#rappel" className="mt-5 inline-flex items-center gap-2 text-[15px] font-bold text-ink-900 underline decoration-brand-400 decoration-2 underline-offset-[6px] transition hover:text-brand-700">
+            <CalendarDays className="h-5 w-5 text-brand-600" /> Voir le prochain rappel du jeudi
           </a>
         </div>
-
-        <ul className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-ink-700 animate-fade-up [animation-delay:480ms] lg:justify-start">
-          {['Rappel chaque jeudi', 'Débat dans le respect', 'Ouvert à tous'].map((t) => (
-            <li key={t} className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rotate-45 bg-brand-500" /> {t}
-            </li>
-          ))}
-        </ul>
       </div>
 
       {/* Les trois voix, dans des arches comme les portes du logo */}
-      <div className="relative mx-auto w-full max-w-[34rem] animate-fade-up [animation-delay:200ms]">
-        <div className="arch absolute inset-x-6 bottom-6 top-0 border border-gold-400/50" aria-hidden />
-        <div className="arch absolute inset-x-12 bottom-10 top-8 border border-gold-400/25" aria-hidden />
-        <LogoMark className="absolute left-1/2 top-3 h-16 w-auto -translate-x-1/2 animate-float drop-shadow-[0_12px_24px_rgba(226,112,10,0.35)] sm:h-20" />
+      <div className="relative mx-auto w-full max-w-[34rem] animate-fade-up [animation-delay:300ms]">
+        <Rosette className="absolute left-1/2 top-1/2 w-[118%] max-w-none -translate-x-1/2 -translate-y-[46%] text-gold-500/45 animate-spin-slow" />
+        <div className="absolute left-1/2 top-[52%] h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60 blur-2xl" aria-hidden />
+        <LogoMark className="absolute left-1/2 top-2 z-10 h-16 w-auto -translate-x-1/2 animate-float drop-shadow-[0_12px_24px_rgba(226,112,10,0.45)] sm:h-20" />
         <div className="relative flex items-end justify-center gap-3 pt-28 sm:gap-4 sm:pt-32">
-          {TRIO.map((p) => (
-            <figure key={p.name} className={`flex flex-col items-center ${p.main ? 'w-[38%]' : 'w-[29%] pb-6'}`}>
-              <div className="arch w-full overflow-hidden bg-ink-900 shadow-[0_30px_60px_-30px_rgba(20,36,74,0.7)] ring-4 ring-white">
-                <img src={p.src} alt={p.name} className={`w-full object-cover object-top ${p.main ? 'aspect-[3/4.1]' : 'aspect-[3/4.2]'}`} loading="eager" />
+          {TRIO.map((p, i) => (
+            <figure key={p.name} className={`group flex flex-col items-center animate-word ${p.main ? 'w-[38%]' : 'w-[29%] pb-6'}`} style={{ animationDelay: `${500 + i * 160}ms` }}>
+              <div className={`arch w-full overflow-hidden p-[3px] shadow-[0_30px_60px_-28px_rgba(20,36,74,0.75)] transition duration-500 group-hover:-translate-y-2 ${p.main ? 'border-flow' : 'bg-white'}`}>
+                <div className="arch overflow-hidden bg-ink-900">
+                  <img src={p.src} alt={p.name} className={`w-full object-cover object-top transition duration-700 group-hover:scale-105 ${p.main ? 'aspect-[3/4.1]' : 'aspect-[3/4.2]'}`} loading="eager" />
+                </div>
               </div>
               <figcaption className={`-mt-4 whitespace-nowrap rounded-full px-3 py-1.5 text-center font-bold shadow-lg ${p.main ? 'bg-gradient-to-b from-brand-500 to-brand-600 text-[12.5px] text-white sm:text-sm' : 'bg-ink-900 text-[11px] text-white sm:text-[12.5px]'}`}>
                 {p.name}
@@ -114,6 +154,30 @@ const Hero = () => (
       </div>
     </Container>
   </section>
+);
+
+/** Bandeau défilant : les mots qui nous portent. */
+const VALEURS = [
+  ['Dialogue', 'الحوار'], ['Respect', 'الاحترام'], ['Savoir', 'العلم'], ['Fraternité', 'الأخوة'], ['Sagesse', 'الحكمة'], ['Paix', 'السلام'],
+];
+const Marquee = () => (
+  <div className="relative z-10 -mt-10 overflow-hidden py-3">
+  <div className="-mx-4 -rotate-1 overflow-hidden bg-ink-900 py-4 shadow-[0_20px_40px_-20px_rgba(20,36,74,0.7)]" aria-hidden>
+    <div className="flex w-max animate-marquee gap-10 whitespace-nowrap">
+      {[0, 1].map((dup) => (
+        <div key={dup} className="flex gap-10">
+          {VALEURS.map(([fr, ar]) => (
+            <span key={fr + dup} className="flex items-center gap-4">
+              <span className="font-serif text-xl italic text-white">{fr}</span>
+              <span className="font-arabic text-xl text-gold-300">{ar}</span>
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-brand-400" fill="currentColor"><path d="M12 1l2.6 6.4L21 10l-6.4 2.6L12 19l-2.6-6.4L3 10l6.4-2.6z" /></svg>
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+  </div>
 );
 
 /* ------------------------------------------------------------------ */
@@ -179,9 +243,10 @@ const NextRappel = () => {
   const share = `${p.title} : ${date}, ${p.time}, ${p.place}. ${p.theme} Ouvert à tous ! https://la-ddr.vercel.app`;
 
   return (
-    <section id="rappel" className="relative z-10 -mt-16 scroll-mt-28 md:-mt-20">
+    <section id="rappel" className="relative z-10 scroll-mt-28 pt-20 md:pt-24">
       <Container>
-        <div className="reveal relative overflow-hidden rounded-[2rem] bg-ink-900 text-white shadow-[0_40px_80px_-40px_rgba(20,36,74,0.9)]">
+        <div className="reveal border-flow rounded-[2.1rem] p-[2px] shadow-[0_40px_80px_-40px_rgba(20,36,74,0.9)]">
+        <div className="relative overflow-hidden rounded-[2rem] bg-ink-900 text-white">
           <div className="absolute inset-0 bg-pattern opacity-[0.07]" aria-hidden />
           <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-500/30 blur-[90px]" aria-hidden />
           <div className="relative grid gap-8 p-7 sm:p-10 lg:grid-cols-[1.4fr_1fr] lg:gap-12 lg:p-12">
@@ -247,6 +312,7 @@ const NextRappel = () => {
             </div>
           </div>
         </div>
+        </div>
       </Container>
     </section>
   );
@@ -256,40 +322,47 @@ const NextRappel = () => {
 /* 3. Rubriques                                                        */
 /* ------------------------------------------------------------------ */
 
-const RUBRIQUES = [
-  { to: '/la-ddr', title: 'La DDR', text: 'Notre histoire, notre mission et les voix qui portent la da’wah.', icon: Info },
-  { to: '/decouvrir', title: 'Découvrir l’Islam', text: 'Les bases expliquées simplement, Jésus dans l’Islam, vos questions.', icon: Compass },
-  { to: '/khatma', title: 'Apprendre', text: 'Le Coran, le Centre du savoir et un espace de jeux pour les enfants.', icon: GraduationCap },
-  { to: '/debates', title: 'Médiathèque', text: 'Les directs, les débats et les témoignages en vidéo.', icon: PlayCircle },
-  { to: '/agenda', title: 'Agenda', text: 'Le rappel du jeudi, les conférences et les tournées.', icon: CalendarDays },
-  { to: '/rejoindre', title: 'Rejoindre la DDR', text: 'Devenir bénévole ou membre et servir la da’wah avec nous.', icon: UserPlus },
+const RUBRIQUES: { to: string; k: RubriqueKey; title: string; text: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { to: '/la-ddr', k: 'ddr', title: 'La DDR', text: 'Notre histoire, notre mission et les voix qui portent la da’wah.', icon: Info },
+  { to: '/decouvrir', k: 'decouvrir', title: 'Découvrir l’Islam', text: 'Les bases expliquées simplement, Jésus dans l’Islam, vos questions.', icon: Compass },
+  { to: '/learning', k: 'apprendre', title: 'Apprendre', text: 'Le Coran, le Centre du savoir et un espace de jeux pour les enfants.', icon: GraduationCap },
+  { to: '/debates', k: 'mediatheque', title: 'Médiathèque', text: 'Les directs, les débats et les témoignages en vidéo.', icon: PlayCircle },
+  { to: '/agenda', k: 'agenda', title: 'Agenda', text: 'Le rappel du jeudi, les conférences et les tournées.', icon: CalendarDays },
+  { to: '/rejoindre', k: 'rejoindre', title: 'Rejoindre la DDR', text: 'Devenir bénévole ou membre et servir la da’wah avec nous.', icon: UserPlus },
 ];
 
 const Rubriques = () => (
-  <section className="py-24 md:py-32">
+  <section className="relative py-24 md:py-32">
     <Container>
       <div className="reveal mx-auto max-w-2xl text-center">
         <Ornament className="mb-6" />
-        <Title>Bienvenue chez vous</Title>
-        <p className="mt-5 text-lg leading-relaxed text-ink-500">Que vous veniez chercher une réponse, apprendre, ou simplement écouter, chaque porte de la DDR vous est ouverte.</p>
+        <Title>Six portes, un même accueil</Title>
+        <p className="mt-5 text-lg leading-relaxed text-ink-500">Chaque rubrique a sa couleur : vous savez toujours où vous êtes, et vous trouvez vite ce que vous cherchez.</p>
       </div>
-      <div className="mt-14 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
-        {RUBRIQUES.map(({ to, title, text, icon: Icon }, i) => (
+      <div className="mt-14 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+        {RUBRIQUES.map(({ to, k, title, text, icon: Icon }, i) => (
           <Link
             key={to}
             to={to}
-            style={{ '--d': `${(i % 3) * 90}ms` } as React.CSSProperties}
-            className="reveal group relative flex flex-col overflow-hidden rounded-t-[5rem] rounded-b-[1.5rem] border border-ink-900/[0.07] bg-ivory-50 px-4 pb-5 pt-9 sm:rounded-t-[7rem] sm:rounded-b-[1.75rem] sm:px-7 sm:pb-7 sm:pt-12 text-center shadow-[0_1px_2px_rgba(20,36,74,0.04),0_18px_40px_-28px_rgba(20,36,74,0.35)] transition duration-500 hover:-translate-y-1.5 hover:border-brand-400/50 hover:shadow-[0_30px_60px_-30px_rgba(187,84,11,0.45)]"
+            style={{ ...rubriqueVars(k), '--d': `${(i % 3) * 90}ms` } as React.CSSProperties}
+            className="reveal group relative flex flex-col overflow-hidden rounded-[1.6rem] bg-white text-center shadow-[0_1px_2px_rgba(20,36,74,0.05),0_20px_44px_-30px_rgba(20,36,74,0.45)] ring-1 ring-ink-900/[0.06] transition duration-500 hover:-translate-y-2 hover:shadow-[0_34px_60px_-30px_var(--r-to)]"
           >
-            <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-brand-400 via-gold-400 to-brand-500 opacity-0 transition duration-500 group-hover:opacity-100" />
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gradient-to-b from-brand-50 sm:h-16 sm:w-16 to-brand-100 text-brand-700 ring-1 ring-brand-200 transition duration-500 group-hover:from-brand-500 group-hover:to-brand-600 group-hover:text-white">
-              <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
-            </span>
-            <h3 className="mt-4 font-serif text-lg leading-tight sm:mt-6 sm:text-2xl font-semibold text-ink-900">{title}</h3>
-            <p className="mt-2 hidden flex-1 text-[15px] leading-relaxed text-ink-500 sm:block">{text}</p>
-            <span className="mt-3 sm:mt-5 inline-flex items-center justify-center gap-2 text-sm font-bold text-brand-700">
-              Entrer <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-            </span>
+            {/* Arche colorée */}
+            <div className="r-grad relative mx-3 mt-3 overflow-hidden rounded-t-[999px] rounded-b-[1.1rem] pb-5 pt-8 sm:mx-4 sm:mt-4 sm:pb-7 sm:pt-12">
+              <div className="absolute inset-0 bg-pattern opacity-25 mix-blend-overlay transition duration-700 group-hover:scale-110" aria-hidden />
+              <div className="absolute -bottom-10 left-1/2 h-24 w-40 -translate-x-1/2 rounded-full bg-white/25 blur-2xl" aria-hidden />
+              <span className="relative mx-auto grid h-12 w-12 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/40 backdrop-blur transition duration-500 group-hover:scale-110 sm:h-16 sm:w-16">
+                <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
+              </span>
+              <p className="relative mt-3 text-[10px] font-extrabold uppercase tracking-[0.22em] text-white/85 sm:text-[11px]">{RUBRIQUE_THEME[k].mot}</p>
+            </div>
+            <div className="flex flex-1 flex-col px-3 pb-5 pt-4 sm:px-6 sm:pb-7 sm:pt-5">
+              <h3 className="font-serif text-lg font-semibold leading-tight text-ink-900 sm:text-2xl">{title}</h3>
+              <p className="mt-2 hidden flex-1 text-[15px] leading-relaxed text-ink-500 sm:block">{text}</p>
+              <span className="r-ink mt-3 inline-flex items-center justify-center gap-2 text-sm font-bold sm:mt-5">
+                Entrer <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </span>
+            </div>
           </Link>
         ))}
       </div>
@@ -301,14 +374,14 @@ const Rubriques = () => (
 /* 4. Notre démarche                                                   */
 /* ------------------------------------------------------------------ */
 
-const PILLARS = [
-  { icon: BookOpen, title: 'Le savoir', text: 'Les écritures en main : la Bible et le Coran sont lus, cités et comparés devant tous, pour que chacun puisse vérifier par lui-même.' },
-  { icon: Scale, title: 'Le respect', text: 'On débat des idées, jamais des personnes. Chaque contradicteur est écouté et reçoit une réponse posée.' },
-  { icon: Heart, title: 'La fraternité', text: 'Ceux qui embrassent l’Islam ne restent pas seuls : la DDR les accueille et les accompagne dans leurs premiers pas.' },
+const PILLARS: { icon: React.ComponentType<{ className?: string }>; k: RubriqueKey; title: string; text: string }[] = [
+  { icon: BookOpen, k: 'apprendre', title: 'Le savoir', text: 'Les écritures en main : la Bible et le Coran sont lus, cités et comparés devant tous, pour que chacun puisse vérifier par lui-même.' },
+  { icon: Scale, k: 'decouvrir', title: 'Le respect', text: 'On débat des idées, jamais des personnes. Chaque contradicteur est écouté et reçoit une réponse posée.' },
+  { icon: Heart, k: 'mediatheque', title: 'La fraternité', text: 'Ceux qui embrassent l’Islam ne restent pas seuls : la DDR les accueille et les accompagne dans leurs premiers pas.' },
 ];
 
 const Demarche = () => (
-  <section className="relative overflow-hidden bg-ivory-200/70 py-24 md:py-32">
+  <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f5ede0,#fbefe0)] py-24 md:py-32">
     <div className="absolute inset-0 bg-pattern opacity-[0.05]" aria-hidden />
     <Container className="relative grid items-center gap-14 lg:grid-cols-[1fr_1.15fr]">
       <div className="reveal">
@@ -324,9 +397,9 @@ const Demarche = () => (
         </figure>
       </div>
       <div className="grid gap-5">
-        {PILLARS.map(({ icon: Icon, title, text }, i) => (
-          <article key={title} style={{ '--d': `${i * 110}ms` } as React.CSSProperties} className="reveal card flex gap-5 p-6 md:p-7">
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-ink-900 text-gold-300 shadow-[0_14px_30px_-16px_rgba(20,36,74,0.9)]">
+        {PILLARS.map(({ icon: Icon, k, title, text }, i) => (
+          <article key={title} style={{ ...rubriqueVars(k), '--d': `${i * 110}ms` } as React.CSSProperties} className="reveal card group flex gap-5 p-6 transition duration-500 hover:-translate-x-1 hover:shadow-[0_24px_50px_-30px_var(--r-to)] md:p-7">
+            <span className="r-grad grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-white shadow-[0_14px_30px_-14px_var(--r-to)] transition duration-500 group-hover:rotate-[-8deg] group-hover:scale-110">
               <Icon className="h-6 w-6" />
             </span>
             <div>
@@ -645,6 +718,7 @@ const Home = () => {
   return (
     <>
       <Hero />
+      <Marquee />
       <NextRappel />
       <Rubriques />
       <Demarche />

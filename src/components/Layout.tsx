@@ -12,14 +12,16 @@ import { friendlyError } from '../lib/supabase';
 import { Honeypot, Spinner } from './ui';
 import type { Debate } from '../types';
 import { telHref, useSite } from '../lib/site';
+import { rubriqueVars, type RubriqueKey } from '../lib/rubriques';
 
 type NavItem = { name: string; path: string; desc?: string; icon?: React.ComponentType<{ className?: string }> };
-type NavGroup = { name: string; items: NavItem[] };
+type NavGroup = { name: string; k: RubriqueKey; items: NavItem[] };
 
 /** Architecture du site : une rubrique = un besoin du visiteur. */
 export const NAV: (NavItem | NavGroup)[] = [
   {
     name: 'La DDR',
+    k: 'ddr',
     items: [
       { name: 'Qui sommes-nous', path: '/la-ddr', desc: 'Notre histoire, notre mission', icon: Info },
       { name: 'Nos intervenants', path: '/la-ddr/intervenants', desc: 'Les voix de la DDR', icon: Mic },
@@ -28,6 +30,7 @@ export const NAV: (NavItem | NavGroup)[] = [
   },
   {
     name: 'Découvrir l’Islam',
+    k: 'decouvrir',
     items: [
       { name: 'L’Islam en douceur', path: '/decouvrir', desc: 'Les bases, sans jargon', icon: Compass },
       { name: 'Devenir musulman', path: '/shahada', desc: 'Être accompagné pas à pas', icon: Heart },
@@ -36,6 +39,7 @@ export const NAV: (NavItem | NavGroup)[] = [
   },
   {
     name: 'Apprendre',
+    k: 'apprendre',
     items: [
       { name: 'Le Coran', path: '/khatma', desc: 'Lire et écouter, juz par juz', icon: BookOpen },
       { name: 'Centre du savoir', path: '/learning', desc: 'Piliers, sunnah, histoires', icon: GraduationCap },
@@ -45,6 +49,7 @@ export const NAV: (NavItem | NavGroup)[] = [
   },
   {
     name: 'Médiathèque',
+    k: 'mediatheque',
     items: [
       { name: 'Débats & directs', path: '/debates', desc: 'Les directs et replays', icon: PlayCircle },
       { name: 'Témoignages', path: '/conversions', desc: 'Ils ont trouvé la paix', icon: Users },
@@ -101,12 +106,13 @@ const Dropdown = ({ group, active }: { group: NavGroup; active: boolean }) => {
         {active && <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-brand-500" />}
       </button>
       <div className={`absolute left-1/2 top-full z-50 w-[22rem] -translate-x-1/2 pt-3 transition-all duration-300 ${open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'}`}>
-        <div className="overflow-hidden rounded-3xl border border-ink-900/8 bg-ivory-50/95 p-2 shadow-[0_30px_60px_-24px_rgba(20,36,74,0.35)] backdrop-blur-xl">
+        <div style={rubriqueVars(group.k)} className="overflow-hidden rounded-3xl border border-ink-900/8 bg-ivory-50/95 p-2 shadow-[0_30px_60px_-24px_rgba(20,36,74,0.35)] backdrop-blur-xl">
+          <div className="r-grad mx-2 mb-1 mt-1 h-1 rounded-full" />
           {group.items.map((it) => {
             const Icon = it.icon || Sparkles;
             return (
-              <Link key={it.path} to={it.path} className="group flex items-start gap-3 rounded-2xl p-3 transition hover:bg-brand-50">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-100 text-brand-700 transition group-hover:bg-brand-500 group-hover:text-white">
+              <Link key={it.path} to={it.path} className="group flex items-start gap-3 rounded-2xl p-3 transition hover:bg-[var(--r-soft)]">
+                <span className="r-soft r-ink grid h-10 w-10 shrink-0 place-items-center rounded-xl transition group-hover:bg-[var(--r-to)] group-hover:text-white">
                   <Icon className="h-5 w-5" />
                 </span>
                 <span>
@@ -240,13 +246,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </Link>
               {NAV.map((n) =>
                 isGroup(n) ? (
-                  <div key={n.name}>
-                    <p className="mb-1.5 px-3 text-[11px] font-extrabold uppercase tracking-[0.2em] text-gold-600">{n.name}</p>
+                  <div key={n.name} style={rubriqueVars(n.k)}>
+                    <p className="r-ink mb-1.5 flex items-center gap-2 px-3 text-[11px] font-extrabold uppercase tracking-[0.2em]"><span className="r-grad h-2 w-2 rounded-full" />{n.name}</p>
                     {n.items.map((it) => {
                       const Icon = it.icon || Sparkles;
                       return (
                         <Link key={it.path} to={it.path} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[16px] font-semibold ${isActive(it.path) ? 'bg-brand-100 text-brand-800' : 'text-ink-900'}`}>
-                          <Icon className="h-5 w-5 text-brand-600" /> {it.name}
+                          <span className="r-soft r-ink grid h-9 w-9 place-items-center rounded-xl"><Icon className="h-[18px] w-[18px]" /></span> {it.name}
                         </Link>
                       );
                     })}

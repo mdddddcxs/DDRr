@@ -51,12 +51,39 @@
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-float: float 6s ease-in-out infinite;
   --animate-glow: glow 7s ease-in-out infinite;
+  --animate-spin-slow: spin-slow 120s linear infinite;
+  --animate-drift: drift 18s ease-in-out infinite;
+  --animate-marquee: marquee 45s linear infinite;
+  --animate-word: word-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-shimmer: shimmer 2.4s linear infinite;
   --animate-pulse-ring: pulse-ring 2s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
 
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(14px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.08); }
+    66% { transform: translate(-30px, 25px) scale(0.95); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes shine {
+    from { background-position: 0% 50%; }
+    to { background-position: 200% 50%; }
+  }
+  @keyframes word-in {
+    from { opacity: 0; transform: translateY(0.45em) rotate(2deg); filter: blur(6px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes border-flow {
+    to { background-position: 300% 0; }
   }
   @keyframes glow {
     0%, 100% { opacity: 0.55; transform: scale(1); }
@@ -116,7 +143,9 @@
     background-size: 64px 64px;
   }
   .text-gradient-gold {
-    background: linear-gradient(100deg, var(--color-brand-600), var(--color-gold-500) 55%, var(--color-brand-700));
+    background: linear-gradient(100deg, var(--color-brand-600), var(--color-gold-500) 25%, var(--color-brand-500) 50%, var(--color-gold-500) 75%, var(--color-brand-600));
+    background-size: 200% 100%;
+    animation: shine 6s linear infinite;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -187,6 +216,17 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--color-gold-400), transparent);
   }
+  /* Bordure lumineuse animée (or → orange) */
+  .border-flow {
+    background: linear-gradient(90deg, var(--color-gold-400), var(--color-brand-500), #e0485e, var(--color-gold-400), var(--color-brand-500));
+    background-size: 300% 100%;
+    animation: border-flow 8s linear infinite;
+  }
+  /* Couleurs de rubrique (voir lib/rubriques.ts) */
+  .r-grad { background-image: linear-gradient(140deg, var(--r-from), var(--r-to)); }
+  .r-soft { background-color: var(--r-soft); }
+  .r-ink { color: var(--r-ink); }
+  .r-from { color: var(--r-from); }
   .capitalize-first::first-letter {
     text-transform: uppercase;
   }
