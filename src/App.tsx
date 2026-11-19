@@ -48,7 +48,7 @@ const Appointments = lazyPage(() => import('./pages/Appointments'));
 const Legal = lazyPage(() => import('./pages/Legal'));
 const NotFound = lazyPage(() => import('./pages/NotFound'));
 const LaDDR = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.LaDDR })));
-const Decouvrir = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Decouvrir })));
+const Decouvrir = lazyPage(() => import('./pages/Decouvrir'));
 const Agenda = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Agenda })));
 const Apprendre = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Apprendre })));
 const QuizInfini = lazyPage(() => import('./pages/QuizInfini'));
