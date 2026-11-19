@@ -89,8 +89,10 @@ export async function submitConversionRequest(c: { name: string; phone: string; 
 }
 
 export async function subscribeNewsletter(email: string) {
-  const { error } = await db().from('newsletter_subscribers').insert({ email: email.trim().toLowerCase() });
-  if (error && error.code !== '23505') throw error; // 23505 = déjà inscrit : on considère que c'est bon
+  // Passe par une fonction qui répond pareil que l'adresse soit déjà inscrite ou non
+  // (évite de révéler qui est abonné — voir migration 20261120000000_newsletter_sans_oracle.sql).
+  const { error } = await db().rpc('subscribe_newsletter', { p_email: email.trim().toLowerCase() });
+  if (error) throw error;
 }
 
 export async function submitTestimony(t: { name: string; phone: string; type: 'text' | 'audio'; text?: string; audio?: Blob; audioDuration?: string; consentPublish?: boolean; city?: string }) {
