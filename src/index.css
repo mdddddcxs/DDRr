@@ -2,62 +2,97 @@
 
 /* ==========================================================================
    La DDR — système visuel
-   Nuit chaude + orange DDR + touches dorées, motif géométrique islamique discret.
+   Ivoire lumineux, orange et or du logo, bleu nuit pour le texte.
+   Motif géométrique islamique discret, arches inspirées des portes du logo.
    ========================================================================== */
 
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", "Georgia", serif;
+  --font-display: "Poppins", "Manrope", sans-serif;
+  --font-quran: "Amiri Quran", "Amiri", serif;
   --font-arabic: "Amiri", "Scheherazade New", serif;
 
-  /* Orange DDR */
-  --color-brand-50: #fff7ed;
-  --color-brand-100: #ffedd5;
-  --color-brand-200: #fed7aa;
-  --color-brand-300: #fdba74;
-  --color-brand-400: #fb923c;
-  --color-brand-500: #f97316;
-  --color-brand-600: #ea580c;
-  --color-brand-700: #c2410c;
-  --color-brand-800: #9a3412;
-  --color-brand-900: #7c2d12;
-  --color-brand-950: #431407;
+  /* Orange DDR (tiré du logo) */
+  --color-brand-50: #fff8ed;
+  --color-brand-100: #ffefd4;
+  --color-brand-200: #fedba8;
+  --color-brand-300: #fdc070;
+  --color-brand-400: #fca13a;
+  --color-brand-500: #f58a14;
+  --color-brand-600: #e2700a;
+  --color-brand-700: #bb540b;
+  --color-brand-800: #954211;
+  --color-brand-900: #793811;
+  --color-brand-950: #411a05;
 
   /* Or */
-  --color-gold-200: #f3dfa2;
-  --color-gold-300: #e9c96b;
+  --color-gold-200: #f3e3b3;
+  --color-gold-300: #e9cc7a;
   --color-gold-400: #dcb44a;
   --color-gold-500: #c99a2e;
   --color-gold-600: #a67c1f;
+  --color-gold-700: #7f5e16;
 
-  /* Surfaces (nuit chaude) */
-  --color-night-950: #0b0806;
-  --color-night-900: #120e0b;
-  --color-night-850: #17120e;
-  --color-night-800: #1d1712;
-  --color-night-700: #2a2119;
-  --color-night-600: #3a2e24;
+  /* Fonds clairs : ivoire et sable */
+  --color-ivory-50: #fffdf9;
+  --color-ivory-100: #fbf7f0;
+  --color-ivory-200: #f5ede0;
+  --color-ivory-300: #ece0cc;
+  --color-ivory-400: #dccaae;
 
-  /* Texte */
-  --color-cream-50: #fbf7f1;
-  --color-cream-100: #f3ece2;
-  --color-cream-200: #e4d9ca;
-  --color-sand-400: #b3a593;
-  --color-sand-500: #8f8271;
-
-  /* Anciennes couleurs encore utilisées par quelques pages */
-  --color-dark-800: #1d1712;
-  --color-dark-900: #120e0b;
-  --color-dark-950: #0b0806;
+  /* Encre : bleu nuit du logo */
+  --color-ink-950: #0c1730;
+  --color-ink-900: #14244a;
+  --color-ink-800: #22325a;
+  --color-ink-700: #3a4568;
+  --color-ink-500: #5d6481;
+  --color-ink-400: #868ba0;
 
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-glow: glow 7s ease-in-out infinite;
+  --animate-spin-slow: spin-slow 120s linear infinite;
+  --animate-drift: drift 18s ease-in-out infinite;
+  --animate-marquee: marquee 45s linear infinite;
+  --animate-word: word-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-shimmer: shimmer 2.4s linear infinite;
   --animate-pulse-ring: pulse-ring 2s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
 
+  @keyframes kenburns {
+    from { transform: scale(1.12); }
+    to { transform: scale(1); }
+  }
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(14px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.08); }
+    66% { transform: translate(-30px, 25px) scale(0.95); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes shine {
+    from { background-position: 0% 50%; }
+    to { background-position: 200% 50%; }
+  }
+  @keyframes word-in {
+    from { opacity: 0; transform: translateY(0.45em) rotate(2deg); filter: blur(6px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes border-flow {
+    to { background-position: 300% 0; }
+  }
+  @keyframes glow {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.06); }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -79,8 +114,8 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    background-color: var(--color-night-950);
-    color: var(--color-cream-100);
+    background-color: var(--color-ivory-100);
+    color: var(--color-ink-800);
     font-family: var(--font-sans);
     text-rendering: optimizeLegibility;
   }
@@ -88,8 +123,8 @@
     text-wrap: balance;
   }
   ::selection {
-    background: var(--color-brand-600);
-    color: white;
+    background: var(--color-brand-200);
+    color: var(--color-ink-900);
   }
   :focus-visible {
     outline: 2px solid var(--color-brand-400);
@@ -109,67 +144,136 @@
 @layer components {
   /* Motif géométrique (étoile à 8 branches) — utilisable partout */
   .bg-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23f97316' stroke-opacity='0.55' stroke-width='0.8'%3E%3Cpath d='M32 6l7.6 18.4L58 32l-18.4 7.6L32 58l-7.6-18.4L6 32l18.4-7.6z'/%3E%3Cpath d='M13.6 13.6h36.8v36.8H13.6z' transform='rotate(45 32 32)'/%3E%3Ccircle cx='32' cy='32' r='5'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23c99a2e' stroke-opacity='0.7' stroke-width='0.8'%3E%3Cpath d='M32 6l7.6 18.4L58 32l-18.4 7.6L32 58l-7.6-18.4L6 32l18.4-7.6z'/%3E%3Cpath d='M13.6 13.6h36.8v36.8H13.6z' transform='rotate(45 32 32)'/%3E%3Ccircle cx='32' cy='32' r='5'/%3E%3C/g%3E%3C/svg%3E");
     background-size: 64px 64px;
   }
   .text-gradient-gold {
-    background: linear-gradient(100deg, var(--color-brand-400), var(--color-gold-300) 55%, var(--color-brand-500));
+    background: linear-gradient(100deg, var(--color-brand-600), var(--color-gold-500) 25%, var(--color-brand-500) 50%, var(--color-gold-500) 75%, var(--color-brand-600));
+    background-size: 200% 100%;
+    animation: shine 6s linear infinite;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .card {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
-    border: 1px solid rgba(255, 237, 213, 0.08);
+    background: var(--color-ivory-50);
+    border: 1px solid rgba(20, 36, 74, 0.08);
     border-radius: 1.5rem;
+    box-shadow: 0 1px 2px rgba(20, 36, 74, 0.04), 0 12px 32px -18px rgba(20, 36, 74, 0.18);
   }
   .card-hover {
     transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.35s, background 0.35s, box-shadow 0.35s;
   }
   .card-hover:hover {
     transform: translateY(-3px);
-    border-color: rgba(249, 115, 22, 0.35);
-    box-shadow: 0 20px 40px -20px rgba(249, 115, 22, 0.25);
+    border-color: rgba(245, 138, 20, 0.35);
+    box-shadow: 0 24px 48px -24px rgba(187, 84, 11, 0.35);
   }
   .input {
     width: 100%;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 237, 213, 0.12);
+    background: #fff;
+    border: 1px solid rgba(20, 36, 74, 0.14);
     border-radius: 0.9rem;
     padding: 0.8rem 1rem;
-    color: var(--color-cream-50);
+    color: var(--color-ink-900);
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .input::placeholder {
-    color: var(--color-sand-500);
+    color: var(--color-ink-400);
   }
   .input:focus {
     outline: none;
     border-color: var(--color-brand-500);
-    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+    box-shadow: 0 0 0 4px rgba(245, 138, 20, 0.16);
   }
   .label {
     display: block;
     font-size: 0.8rem;
     font-weight: 700;
-    color: var(--color-sand-400);
+    color: var(--color-ink-500);
     margin-bottom: 0.4rem;
   }
   .prose-ddr p { margin: 0 0 0.9em; line-height: 1.75; }
-  .prose-ddr strong { color: var(--color-brand-200); font-weight: 700; }
+  .prose-ddr strong { color: var(--color-brand-800); font-weight: 700; }
   .prose-ddr ul { list-style: disc; padding-left: 1.3em; margin: 0 0 0.9em; }
   .prose-ddr ol { list-style: decimal; padding-left: 1.3em; margin: 0 0 0.9em; }
   .prose-ddr li { margin: 0.25em 0; }
-  .prose-ddr h1, .prose-ddr h2, .prose-ddr h3 { font-family: var(--font-serif); color: var(--color-cream-50); font-weight: 700; margin: 1.1em 0 0.5em; }
-  .prose-ddr blockquote { border-left: 3px solid var(--color-brand-500); padding: 0.2em 0 0.2em 1em; margin: 1em 0; color: var(--color-cream-200); font-style: italic; }
-  .prose-ddr a { color: var(--color-brand-300); text-decoration: underline; }
+  .prose-ddr h1, .prose-ddr h2, .prose-ddr h3 { font-family: var(--font-serif); color: var(--color-ink-900); font-weight: 700; margin: 1.1em 0 0.5em; }
+  .prose-ddr blockquote { border-left: 3px solid var(--color-brand-500); padding: 0.2em 0 0.2em 1em; margin: 1em 0; color: var(--color-ink-700); font-style: italic; }
+  .prose-ddr a { color: var(--color-brand-700); text-decoration: underline; }
+  /* Apparition douce au défilement (voir useReveal) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  /* Arche : la forme des portes du logo */
+  .arch {
+    border-radius: 999px 999px 1.25rem 1.25rem;
+  }
+  .hairline-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold-400), transparent);
+  }
+  /* Bordure lumineuse animée (or → orange) */
+  .border-flow {
+    background: linear-gradient(90deg, var(--color-gold-400), var(--color-brand-500), #e0485e, var(--color-gold-400), var(--color-brand-500));
+    background-size: 300% 100%;
+    animation: border-flow 8s linear infinite;
+  }
+  /* Couleurs de rubrique (voir lib/rubriques.ts) */
+  .r-grad { background-image: linear-gradient(140deg, var(--r-from), var(--r-to)); }
+  .r-soft { background-color: var(--r-soft); }
+  .r-ink { color: var(--r-ink); }
+  .r-from { color: var(--r-from); }
+  /* Menu principal posé sur un en-tête coloré */
+  .on-color > div > button,
+  .on-color > a {
+    color: #fff !important;
+  }
+  .on-color > div > button > span,
+  .on-color > a > span {
+    background: #fff !important;
+  }
+  .capitalize-first::first-letter {
+    text-transform: uppercase;
+  }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
 }
 
 /* Barre de défilement */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--color-night-950); }
-::-webkit-scrollbar-thumb { background: var(--color-night-600); border-radius: 10px; border: 2px solid var(--color-night-950); }
+::-webkit-scrollbar-track { background: var(--color-ivory-100); }
+::-webkit-scrollbar-thumb { background: var(--color-ivory-400); border-radius: 10px; border: 2px solid var(--color-ivory-100); }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-brand-700); }
+
+/* Animations utilisées directement (quiz) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+@keyframes confetti {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0.9; }
+}
+@keyframes lueur {
+  from { transform: translateY(0); }
+  to { transform: translateY(-115vh); }
+}
+@keyframes onde {
+  from { transform: scaleY(0.4); }
+  to { transform: scaleY(1); }
+}
+@keyframes scintille {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
+}

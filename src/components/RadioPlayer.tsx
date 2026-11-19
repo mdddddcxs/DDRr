@@ -133,40 +133,40 @@ const RadioPlayer = React.memo(() => {
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-4 z-40 flex items-center gap-2.5 rounded-full border border-gold-400/25 bg-night-900/90 py-2 pl-2 pr-4 text-sm font-bold text-cream-100 shadow-2xl backdrop-blur-xl transition hover:border-gold-400/60"
+          className="fixed bottom-5 right-4 z-40 flex items-center gap-2.5 rounded-full border border-gold-400/25 bg-ivory-50/90 py-2 pl-2 pr-4 text-sm font-bold text-ink-800 shadow-2xl backdrop-blur-xl transition hover:border-gold-400/60"
           aria-label="Ouvrir le lecteur de Coran"
         >
-          <span className={`grid h-9 w-9 place-items-center rounded-full ${playing ? 'bg-brand-600 text-white' : 'bg-gold-400/15 text-gold-300'}`}>
+          <span className={`grid h-9 w-9 place-items-center rounded-full ${playing ? 'bg-brand-600 text-white' : 'bg-gold-400/15 text-gold-600'}`}>
             {playing ? <Equalizer /> : <Play className="h-4 w-4 translate-x-px" />}
           </span>
           <span className="hidden sm:inline">{playing ? station.name : 'Écouter le Coran'}</span>
         </button>
       ) : (
-        <div className="fixed bottom-5 right-4 z-40 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-3xl border border-white/10 bg-night-900/95 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl animate-fade-up">
+        <div className="fixed bottom-5 right-4 z-40 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-3xl border border-ink-900/10 bg-ivory-50/95 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl animate-fade-up">
           <div className="flex items-center justify-between px-5 pt-4">
-            <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-gold-300">Récitation · Mishary Alafasy</span>
-            <button onClick={() => setOpen(false)} className="rounded-full p-1.5 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Réduire le lecteur">
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-gold-600">Récitation · Mishary Alafasy</span>
+            <button onClick={() => setOpen(false)} className="rounded-full p-1.5 text-ink-500 hover:bg-ink-900/5 hover:text-ink-900" aria-label="Réduire le lecteur">
               <ChevronDown className="h-5 w-5" />
             </button>
           </div>
           <div className="px-5 pb-4 pt-2">
-            <p className="font-serif text-xl font-semibold text-cream-50">{station.name}</p>
-            <p className="text-sm text-sand-400">{error ? 'Lecture impossible pour le moment. Réessayez.' : station.description}</p>
-            <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10">
+            <p className="font-serif text-xl font-semibold text-ink-900">{station.name}</p>
+            <p className="text-sm text-ink-500">{error ? 'Lecture impossible pour le moment. Réessayez.' : station.description}</p>
+            <div className="mt-3 h-1 overflow-hidden rounded-full bg-ink-900/10">
               {playing && <div className={`h-full w-full bg-gradient-to-r from-brand-600 via-gold-300 to-brand-600 bg-[length:200%_100%] ${loading ? 'animate-shimmer opacity-60' : 'animate-shimmer'}`} />}
             </div>
             <div className="mt-4 flex items-center justify-between">
-              <button onClick={() => setShowList((v) => !v)} className={`rounded-full p-2.5 transition ${showList ? 'bg-brand-500/20 text-brand-300' : 'text-sand-400 hover:bg-white/5 hover:text-white'}`} aria-label="Liste des sourates">
+              <button onClick={() => setShowList((v) => !v)} className={`rounded-full p-2.5 transition ${showList ? 'bg-brand-500/20 text-brand-700' : 'text-ink-500 hover:bg-ink-900/5 hover:text-ink-900'}`} aria-label="Liste des sourates">
                 <ListMusic className="h-5 w-5" />
               </button>
               <div className="flex items-center gap-3">
-                <button onClick={() => go(-1)} className="rounded-full p-2.5 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Sourate précédente">
+                <button onClick={() => go(-1)} className="rounded-full p-2.5 text-ink-500 hover:bg-ink-900/5 hover:text-ink-900" aria-label="Sourate précédente">
                   <SkipBack className="h-5 w-5" />
                 </button>
                 <button onClick={toggle} className="grid h-14 w-14 place-items-center rounded-full bg-brand-600 text-white shadow-[0_10px_30px_-8px_rgba(234,88,12,0.8)] transition hover:bg-brand-500" aria-label={playing ? 'Pause' : 'Lecture'}>
                   {playing && loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" /> : playing ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 translate-x-0.5" />}
                 </button>
-                <button onClick={() => go(1)} className="rounded-full p-2.5 text-sand-400 hover:bg-white/5 hover:text-white" aria-label="Sourate suivante">
+                <button onClick={() => go(1)} className="rounded-full p-2.5 text-ink-500 hover:bg-ink-900/5 hover:text-ink-900" aria-label="Sourate suivante">
                   <SkipForward className="h-5 w-5" />
                 </button>
               </div>
@@ -176,7 +176,7 @@ const RadioPlayer = React.memo(() => {
                   setPlaying(false);
                   setOpen(false);
                 }}
-                className="rounded-full p-2.5 text-sand-400 hover:bg-white/5 hover:text-white"
+                className="rounded-full p-2.5 text-ink-500 hover:bg-ink-900/5 hover:text-ink-900"
                 aria-label="Arrêter"
               >
                 <X className="h-5 w-5" />
@@ -184,7 +184,7 @@ const RadioPlayer = React.memo(() => {
             </div>
           </div>
           {showList && (
-            <ul className="max-h-60 overflow-y-auto border-t border-white/5 p-2">
+            <ul className="max-h-60 overflow-y-auto border-t border-ink-900/5 p-2">
               {STATIONS.map((s, i) => (
                 <li key={s.id}>
                   <button
@@ -192,10 +192,10 @@ const RadioPlayer = React.memo(() => {
                       setIndex(i);
                       setPlaying(true);
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${i === index ? 'bg-brand-500/15 text-brand-200' : 'text-cream-200 hover:bg-white/5'}`}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition ${i === index ? 'bg-brand-500/15 text-brand-800' : 'text-ink-700 hover:bg-ink-900/5'}`}
                   >
                     <span className="font-semibold">{s.name}</span>
-                    <span className="text-xs text-sand-500">{s.description}</span>
+                    <span className="text-xs text-ink-400">{s.description}</span>
                   </button>
                 </li>
               ))}

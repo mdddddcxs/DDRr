@@ -8,37 +8,71 @@ import { checkIsAdmin, getMaintenance } from './services/db';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
 import { SiteProvider } from './lib/site';
+import ErrorBoundary from './components/ErrorBoundary';
+
+/**
+ * Chargement d'une page à la demande, avec une relance automatique :
+ * après une mise à jour du site, un ancien onglet peut réclamer un fichier qui n'existe plus.
+ * On recharge alors la page une seule fois pour récupérer la nouvelle version.
+ */
+function lazyPage<T extends React.ComponentType<any>>(load: () => Promise<{ default: T }>) {
+  return lazy(async () => {
+    try {
+      const mod = await load();
+      sessionStorage.removeItem('ddr_chunk_reload');
+      return mod;
+    } catch (err) {
+      const last = Number(sessionStorage.getItem('ddr_chunk_reload') || 0);
+      if (Date.now() - last > 30000) {
+        sessionStorage.setItem('ddr_chunk_reload', String(Date.now()));
+        window.location.reload();
+        return new Promise<{ default: T }>(() => {});
+      }
+      throw err;
+    }
+  });
+}
 
 // Les pages sont chargées à la demande : le site s'ouvre plus vite, surtout sur mobile.
-const Chat = lazy(() => import('./pages/Chat'));
-const Shahada = lazy(() => import('./pages/Shahada'));
-const LearningCenter = lazy(() => import('./pages/LearningCenter'));
-const Kids = lazy(() => import('./pages/Kids'));
-const Tools = lazy(() => import('./pages/Tools'));
-const Khatma = lazy(() => import('./pages/Khatma'));
-const Donations = lazy(() => import('./pages/Donations'));
-const News = lazy(() => import('./pages/News'));
-const NewsDetail = lazy(() => import('./pages/NewsDetail'));
-const Debates = lazy(() => import('./pages/Debates'));
-const Conversions = lazy(() => import('./pages/Conversions'));
-const Appointments = lazy(() => import('./pages/Appointments'));
-const Legal = lazy(() => import('./pages/Legal'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+const Chat = lazyPage(() => import('./pages/Chat'));
+const Shahada = lazyPage(() => import('./pages/Shahada'));
+const LearningCenter = lazyPage(() => import('./pages/LearningCenter'));
+const Kids = lazyPage(() => import('./pages/Kids'));
+const CoranPage = lazyPage(() => import('./pages/coran/CoranPage'));
+const Donations = lazyPage(() => import('./pages/Donations'));
+const News = lazyPage(() => import('./pages/News'));
+const NewsDetail = lazyPage(() => import('./pages/NewsDetail'));
+const Debates = lazyPage(() => import('./pages/Debates'));
+const Conversions = lazyPage(() => import('./pages/Conversions'));
+const Appointments = lazyPage(() => import('./pages/Appointments'));
+const Legal = lazyPage(() => import('./pages/Legal'));
+const NotFound = lazyPage(() => import('./pages/NotFound'));
+const LaDDR = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.LaDDR })));
+const Decouvrir = lazyPage(() => import('./pages/Decouvrir'));
+const Agenda = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Agenda })));
+const Apprendre = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Apprendre })));
+const QuizInfini = lazyPage(() => import('./pages/QuizInfini'));
+const ZakatSmart = lazyPage(() => import('./pages/ZakatSmart'));
+const StudioDawa = lazyPage(() => import('./pages/StudioDawa'));
+const Rejoindre = lazyPage(() => import('./pages/Rubriques').then((m) => ({ default: m.Rejoindre })));
 
-const AdminLogin = lazy(() => import('./pages/Admin/AdminLogin'));
-const AdminLayout = lazy(() => import('./components/AdminLayout'));
-const Dashboard = lazy(() => import('./pages/Admin/Dashboard'));
-const AdminMailbox = lazy(() => import('./pages/Admin/AdminMailbox'));
-const AdminCampaigns = lazy(() => import('./pages/Admin/AdminCampaigns'));
-const AdminDonations = lazy(() => import('./pages/Admin/AdminDonations'));
-const AdminContent = lazy(() => import('./pages/Admin/AdminContent'));
-const AdminAppointments = lazy(() => import('./pages/Admin/AdminAppointments'));
-const AdminConversions = lazy(() => import('./pages/Admin/AdminConversions'));
-const AdminSettings = lazy(() => import('./pages/Admin/AdminSettings'));
-const AdminSite = lazy(() => import('./pages/Admin/AdminSite'));
+const AdminLogin = lazyPage(() => import('./pages/Admin/AdminLogin'));
+const AdminLayout = lazyPage(() => import('./components/AdminLayout'));
+const Dashboard = lazyPage(() => import('./pages/Admin/Dashboard'));
+const AdminMailbox = lazyPage(() => import('./pages/Admin/AdminMailbox'));
+const AdminCampaigns = lazyPage(() => import('./pages/Admin/AdminCampaigns'));
+const AdminDonations = lazyPage(() => import('./pages/Admin/AdminDonations'));
+const AdminContent = lazyPage(() => import('./pages/Admin/AdminContent'));
+const AdminAppointments = lazyPage(() => import('./pages/Admin/AdminAppointments'));
+const AdminConversions = lazyPage(() => import('./pages/Admin/AdminConversions'));
+const AdminSettings = lazyPage(() => import('./pages/Admin/AdminSettings'));
+const AdminSite = lazyPage(() => import('./pages/Admin/AdminSite'));
+const AdminStats = lazyPage(() => import('./pages/Admin/AdminStats'));
+const AdminPilotage = lazyPage(() => import('./pages/Admin/AdminPilotage'));
+const AdminSubscribers = lazyPage(() => import('./pages/Admin/AdminSubscribers'));
 
 const PageLoader = () => (
-  <div className="grid min-h-[50vh] place-items-center text-brand-400">
+  <div className="grid min-h-[50vh] place-items-center text-brand-600">
     <Spinner className="h-8 w-8" />
   </div>
 );
@@ -78,6 +112,7 @@ const AppRoutes = () => {
           element={
             <RequireAdmin>
               <AdminLayout>
+                <ErrorBoundary resetKey={location.pathname}>
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
                     <Route path="dashboard" element={<Dashboard />} />
@@ -88,10 +123,14 @@ const AppRoutes = () => {
                     <Route path="campaigns" element={<AdminCampaigns />} />
                     <Route path="content" element={<AdminContent />} />
                     <Route path="site" element={<AdminSite />} />
+                    <Route path="stats" element={<AdminStats />} />
+                    <Route path="pilotage" element={<AdminPilotage />} />
+                    <Route path="subscribers" element={<AdminSubscribers />} />
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="*" element={<Navigate to="dashboard" replace />} />
                   </Routes>
                 </Suspense>
+                </ErrorBoundary>
               </AdminLayout>
             </RequireAdmin>
           }
@@ -100,6 +139,7 @@ const AppRoutes = () => {
           path="/*"
           element={
             <Layout>
+              <ErrorBoundary resetKey={location.pathname}>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Home />} />
@@ -107,10 +147,21 @@ const AppRoutes = () => {
                   <Route path="/shahada" element={<Shahada />} />
                   <Route path="/learning" element={<LearningCenter />} />
                   <Route path="/enfants" element={<Kids />} />
-                  <Route path="/tools" element={<Tools />} />
-                  <Route path="/khatma" element={<Khatma />} />
+                  <Route path="/tools" element={<Navigate to="/outils/zakat" replace />} />
+                  <Route path="/outils" element={<Navigate to="/outils/zakat" replace />} />
+                  <Route path="/outils/zakat" element={<ZakatSmart />} />
+                  <Route path="/outils/studio" element={<StudioDawa />} />
+                  <Route path="/coran" element={<CoranPage />} />
+                  <Route path="/khatma" element={<Navigate to="/coran" replace />} />
                   <Route path="/donations" element={<Donations />} />
                   <Route path="/news" element={<News />} />
+                  <Route path="/la-ddr/*" element={<LaDDR />} />
+                  <Route path="/decouvrir" element={<Decouvrir />} />
+                  <Route path="/agenda" element={<Agenda />} />
+                  <Route path="/rejoindre" element={<Rejoindre />} />
+                  <Route path="/apprendre" element={<Apprendre />} />
+                  <Route path="/apprendre/quiz" element={<QuizInfini />} />
+                  <Route path="/quiz" element={<QuizInfini />} />
                   <Route path="/news/:id" element={<NewsDetail />} />
                   <Route path="/debates" element={<Debates />} />
                   <Route path="/conversions" element={<Conversions />} />
@@ -120,7 +171,8 @@ const AppRoutes = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
-              {location.pathname !== '/chat' && <LiveAssistant />}
+              </ErrorBoundary>
+              {!['/chat', '/apprendre/quiz', '/quiz'].includes(location.pathname) && <LiveAssistant />}
             </Layout>
           }
         />

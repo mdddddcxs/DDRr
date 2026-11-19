@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Download, Trash2, UserPlus } from 'lucide-react';
 import { AdminTitle, useAdminData } from '../../components/AdminLayout';
@@ -73,33 +74,36 @@ const AdminSettings = () => {
       <AdminTitle title="Réglages" />
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="card p-6">
-          <h2 className="font-bold text-cream-50">Mode maintenance</h2>
-          <p className="mt-1 text-sm text-sand-400">Masque le site public (l’administration reste accessible).</p>
-          <div className="mt-5 flex items-center justify-between rounded-2xl bg-black/20 p-4">
-            <span className={`font-bold ${maintenance ? 'text-red-300' : 'text-emerald-300'}`}>{maintenance === null ? '…' : maintenance ? 'Site masqué' : 'Site en ligne'}</span>
+          <h2 className="font-bold text-ink-900">Mode maintenance</h2>
+          <p className="mt-1 text-sm text-ink-500">Masque le site public (l’administration reste accessible).</p>
+          <div className="mt-5 flex items-center justify-between rounded-2xl bg-ink-900/5 p-4">
+            <span className={`font-bold ${maintenance ? 'text-red-600' : 'text-emerald-600'}`}>{maintenance === null ? '…' : maintenance ? 'Site masqué' : 'Site en ligne'}</span>
             <Button size="sm" variant={maintenance ? 'primary' : 'ghost'} onClick={toggle} disabled={maintenance === null}>{maintenance ? 'Remettre en ligne' : 'Activer'}</Button>
           </div>
           {err && <div className="mt-3"><Notice tone="error">{err}</Notice></div>}
         </section>
         <section className="card p-6">
-          <h2 className="font-bold text-cream-50">Newsletter</h2>
-          <p className="mt-1 text-sm text-sand-400">{subs ? `${subs.length} personne(s) inscrite(s) depuis le pied de page.` : '…'}</p>
-          <Button size="sm" variant="ghost" className="mt-5" onClick={exportSubs} disabled={!subs?.length}><Download className="h-4 w-4" /> Télécharger la liste</Button>
+          <h2 className="font-bold text-ink-900">Newsletter</h2>
+          <p className="mt-1 text-sm text-ink-500">{subs ? `${subs.length} personne(s) inscrite(s) depuis le pied de page.` : '…'}</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button size="sm" variant="ghost" onClick={exportSubs} disabled={!subs?.length}><Download className="h-4 w-4" /> Télécharger la liste</Button>
+            <Link to="/admin/subscribers" className="inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-50">Gérer les abonnés →</Link>
+          </div>
         </section>
         <section className="card p-6 lg:col-span-2">
-          <h2 className="font-bold text-cream-50">Administrateurs</h2>
-          {adminsErr && <p className="mt-2 text-sm text-red-300">{adminsErr}</p>}
-          <ul className="mt-4 divide-y divide-white/5">
+          <h2 className="font-bold text-ink-900">Administrateurs</h2>
+          {adminsErr && <p className="mt-2 text-sm text-red-600">{adminsErr}</p>}
+          <ul className="mt-4 divide-y divide-ink-900/5">
             {(admins || []).map((a) => (
               <li key={a.userId} className="flex items-center justify-between py-3 text-sm">
-                <span className="text-cream-100">{a.name || a.email}<span className="ml-2 text-sand-500">{a.name ? a.email : ''}{a.email === me ? ' (vous)' : ''}</span></span>
+                <span className="text-ink-800">{a.name || a.email}<span className="ml-2 text-ink-400">{a.name ? a.email : ''}{a.email === me ? ' (vous)' : ''}</span></span>
                 {a.email !== me && (
-                  <button onClick={() => revoke(a.userId, a.email)} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-red-300 hover:bg-red-500/10"><Trash2 className="h-4 w-4" /> Retirer</button>
+                  <button onClick={() => revoke(a.userId, a.email)} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-red-600 hover:bg-red-500/10"><Trash2 className="h-4 w-4" /> Retirer</button>
                 )}
               </li>
             ))}
           </ul>
-          <form onSubmit={addAdmin} className="mt-5 grid gap-3 rounded-2xl bg-black/20 p-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
+          <form onSubmit={addAdmin} className="mt-5 grid gap-3 rounded-2xl bg-ink-900/5 p-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
             <div><label className="label" htmlFor="na-name">Nom</label><input id="na-name" value={newAdmin.name} onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })} className="input" /></div>
             <div><label className="label" htmlFor="na-email">Email *</label><input id="na-email" type="email" required value={newAdmin.email} onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })} className="input" /></div>
             <div><label className="label" htmlFor="na-pass">Mot de passe provisoire *</label><input id="na-pass" type="text" required minLength={10} value={newAdmin.password} onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })} className="input" /></div>
@@ -108,7 +112,7 @@ const AdminSettings = () => {
           {adminMsg && <div className="mt-3"><Notice tone={adminMsg.tone}>{adminMsg.text}</Notice></div>}
         </section>
         <section className="card p-6 lg:col-span-2">
-          <h2 className="font-bold text-cream-50">Mon mot de passe</h2>
+          <h2 className="font-bold text-ink-900">Mon mot de passe</h2>
           <form onSubmit={savePwd} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1"><label className="label" htmlFor="my-pass">Nouveau mot de passe (10 caractères minimum)</label><input id="my-pass" type="password" autoComplete="new-password" minLength={10} required value={pwd} onChange={(e) => setPwd(e.target.value)} className="input" /></div>
             <Button type="submit" size="sm">Changer</Button>

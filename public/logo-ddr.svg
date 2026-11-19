@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="238 0 320 440" role="img" aria-label="Logo de La DDR">
+<defs>
+<linearGradient id="o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FDB022"/><stop offset="1" stop-color="#EE7A0C"/></linearGradient>
+<mask id="cm"><rect x="200" y="0" width="400" height="200" fill="#fff"/><circle cx="425" cy="56" r="52" fill="#000"/></mask>
+</defs>
+<circle cx="398" cy="76" r="60" fill="url(#o)" mask="url(#cm)"/>
+<path d="M428 42l8 16.2 17.9 2.6-13 12.6 3.1 17.8-16-8.4-16 8.4 3.1-17.8-13-12.6 17.9-2.6z" fill="url(#o)"/>
+<path d="M258 241L398 150L538 241V278L398 187L258 278Z" fill="#14244A"/>
+<path d="M258 298L398 207L538 298V405H494V336A21 21 0 0 0 452 336V405L398 434L344 405V336A21 21 0 0 0 302 336V405H258Z" fill="url(#o)"/>
+</svg>

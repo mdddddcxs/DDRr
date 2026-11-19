@@ -1,7 +1,7 @@
 // Accès aux données (Supabase). Toutes les règles de sécurité sont dans la base (RLS) :
 // un visiteur ne peut qu'envoyer des formulaires ; seuls les admins lisent et modifient.
 import { db, supabase } from '../lib/supabase';
-import type { Appointment, ConversionRequest, Donation, DonationCampaign, InboxMessage, NewsItem } from '../types';
+import type { PublicTestimony, Appointment, ConversionRequest, Donation, DonationCampaign, InboxMessage, NewsItem } from '../types';
 import { SCHOOL_CAMPAIGN } from '../constants';
 
 const unwrap = <T,>(r: { data: T | null; error: any }): T => {
@@ -93,7 +93,7 @@ export async function subscribeNewsletter(email: string) {
   if (error && error.code !== '23505') throw error; // 23505 = déjà inscrit : on considère que c'est bon
 }
 
-export async function submitTestimony(t: { name: string; phone: string; type: 'text' | 'audio'; text?: string; audio?: Blob; audioDuration?: string }) {
+export async function submitTestimony(t: { name: string; phone: string; type: 'text' | 'audio'; text?: string; audio?: Blob; audioDuration?: string; consentPublish?: boolean; city?: string }) {
   let content = (t.text || '').trim();
   if (t.type === 'audio') {
     if (!t.audio) throw new Error('audio manquant');
@@ -111,8 +111,32 @@ export async function submitTestimony(t: { name: string; phone: string; type: 't
       sender_phone: t.phone.trim(),
       content,
       audio_duration: t.audioDuration || null,
+      consent_publish: !!t.consentPublish,
+      city: t.city?.trim().slice(0, 80) || null,
     }),
   );
+}
+
+/** Témoignages publiés par l'administration (prénom, ville et contenu seulement). */
+export async function listPublicTestimonies(): Promise<PublicTestimony[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.rpc('public_testimonies', { max_rows: 30 });
+  if (error || !Array.isArray(data)) return [];
+  return data.map((r: any) => ({
+    id: r.id,
+    type: r.type,
+    displayName: r.display_name || 'Anonyme',
+    city: r.city || undefined,
+    content: r.content,
+    audioDuration: r.audio_duration || undefined,
+    publishedAt: r.published_at,
+  }));
+}
+/** Lien d'écoute temporaire d'un témoignage audio publié. */
+export async function getPublicAudioUrl(path: string): Promise<string | null> {
+  if (!supabase) return null;
+  const { data } = await supabase.storage.from('testimonies').createSignedUrl(path, 60 * 30);
+  return data?.signedUrl || null;
 }
 
 // ---------------------------------------------------------------------------
@@ -173,8 +197,12 @@ const toMessage = (r: any): InboxMessage => ({
   content: r.content,
   audioDuration: r.audio_duration || undefined,
   receivedAt: new Date(r.created_at).getTime(),
-  expiresAt: new Date(r.expires_at).getTime(),
+  expiresAt: String(r.expires_at).toLowerCase().includes('infinity') ? Infinity : new Date(r.expires_at).getTime(),
   isRead: r.is_read,
+  consentPublish: !!r.consent_publish,
+  published: !!r.published,
+  displayName: r.display_name || undefined,
+  city: r.city || undefined,
 });
 /** Supprime définitivement les messages expirés (et leurs fichiers audio). Appelé à l'ouverture de la boîte. */
 async function purgeExpiredMessages() {
@@ -198,6 +226,18 @@ export async function markMessageRead(id: string) {
 export async function deleteMessage(m: InboxMessage) {
   if (m.type === 'audio' && m.content.startsWith('incoming/')) await db().storage.from('testimonies').remove([m.content]);
   unwrap(await db().from('messages').delete().eq('id', m.id));
+}
+/** Garder un témoignage sans limite de durée (ou le remettre à 30 jours). */
+export async function keepMessage(id: string, keep: boolean) {
+  const expires = keep ? 'infinity' : new Date(Date.now() + 30 * 864e5).toISOString();
+  unwrap(await db().from('messages').update({ expires_at: expires }).eq('id', id));
+}
+/** Publier / retirer un témoignage (uniquement s'il y a consentement). Publier le conserve aussi. */
+export async function publishMessage(id: string, publish: boolean, displayName?: string) {
+  const patch: Record<string, unknown> = publish
+    ? { published: true, published_at: new Date().toISOString(), expires_at: 'infinity', display_name: displayName?.trim() || null }
+    : { published: false, published_at: null };
+  unwrap(await db().from('messages').update(patch).eq('id', id));
 }
 export async function getAudioUrl(path: string): Promise<string> {
   const { data, error } = await db().storage.from('testimonies').createSignedUrl(path, 60 * 10);
@@ -276,8 +316,9 @@ export async function deleteNews(id: string) {
   unwrap(await db().from('news').delete().eq('id', id));
 }
 
-export async function listSubscribers(): Promise<{ email: string; createdAt: string }[]> {
-  return unwrap(await db().from('newsletter_subscribers').select('email, created_at').order('created_at', { ascending: false })).map((r: any) => ({
+export async function listSubscribers(): Promise<{ id: string; email: string; createdAt: string }[]> {
+  return unwrap(await db().from('newsletter_subscribers').select('id, email, created_at').order('created_at', { ascending: false })).map((r: any) => ({
+    id: r.id,
     email: r.email,
     createdAt: r.created_at,
   }));
@@ -301,7 +342,7 @@ export async function saveSiteContent(content: unknown) {
 }
 
 /** Envoie une photo dans l'espace public "media" et renvoie son adresse. */
-export async function uploadMedia(file: File, folder: 'speakers' | 'campaign' | 'news' | 'misc'): Promise<string> {
+export async function uploadMedia(file: File, folder: 'speakers' | 'campaign' | 'news' | 'misc' | 'realisations'): Promise<string> {
   if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) throw new Error('Format accepté : JPG, PNG ou WebP.');
   if (file.size > 5 * 1024 * 1024) throw new Error('Image trop lourde (5 Mo maximum).');
   const ext = file.type.split('/')[1].replace('jpeg', 'jpg');
@@ -337,5 +378,38 @@ export async function getMyEmail(): Promise<string> {
 export async function changeMyPassword(password: string) {
   if (password.length < 10) throw new Error('Le mot de passe doit faire au moins 10 caractères.');
   const { error } = await db().auth.updateUser({ password });
+  if (error) throw error;
+}
+
+export async function deleteSubscriber(id: string) {
+  unwrap(await db().from('newsletter_subscribers').delete().eq('id', id));
+}
+
+// ---------------------------------------------------------------------------
+// Statistiques de fréquentation (fonction admin_stats, réservée aux administrateurs)
+// ---------------------------------------------------------------------------
+export type AdminStats = {
+  range: { days: number; since: string };
+  totals: { views: number; visitors: number; sessions: number; events: number };
+  previous: { views: number; visitors: number; sessions: number };
+  daily: { day: string; views: number; visitors: number }[];
+  hours: { hour: number; views: number }[];
+  pages: { path: string; views: number; visitors: number }[];
+  sources: { source: string; visitors: number }[];
+  devices: { device: 'mobile' | 'tablet' | 'desktop'; visitors: number }[];
+  events: { event: string; count: number }[];
+  forms: { appointments: number; conversions: number; testimonies: number; newsletter: number };
+  live: number;
+};
+export async function getAdminStats(days: number): Promise<AdminStats> {
+  const { data, error } = await db().rpc('admin_stats', { days });
+  if (error) {
+    if (/admin_stats|page_views|does not exist|schema cache/i.test(error.message)) throw new Error('STATS_NOT_READY');
+    throw error;
+  }
+  return data as AdminStats;
+}
+export async function purgeOldStats() {
+  const { error } = await db().rpc('purge_old_page_views');
   if (error) throw error;
 }

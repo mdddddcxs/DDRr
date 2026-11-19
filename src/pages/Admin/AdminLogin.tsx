@@ -90,12 +90,12 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="relative grid min-h-screen place-items-center bg-night-950 px-4">
+    <div className="relative grid min-h-screen place-items-center bg-ivory-100 px-4">
       <div className="absolute inset-0 bg-pattern opacity-[0.04]" aria-hidden />
-      <form onSubmit={mode === 'login' ? login : mode === 'forgot' ? forgot : setNewPassword} className="card relative w-full max-w-sm space-y-5 bg-night-900 p-8">
+      <form onSubmit={mode === 'login' ? login : mode === 'forgot' ? forgot : setNewPassword} className="card relative w-full max-w-sm space-y-5 bg-ivory-50 p-8">
         <div className="flex flex-col items-center gap-4 text-center">
           <Logo showArabic={false} />
-          <p className="flex items-center gap-2 text-sm font-bold text-sand-400">
+          <p className="flex items-center gap-2 text-sm font-bold text-ink-500">
             <Lock className="h-4 w-4" /> {mode === 'set-password' ? 'Choisissez votre mot de passe' : mode === 'forgot' ? 'Mot de passe oublié' : 'Espace administrateur'}
           </p>
         </div>
@@ -132,15 +132,15 @@ const AdminLogin = () => {
           {loading ? 'Patientez…' : mode === 'login' ? 'Se connecter' : mode === 'forgot' ? 'Recevoir un lien' : 'Enregistrer mon mot de passe'}
         </Button>
         {mode === 'login' ? (
-          <button type="button" onClick={() => { setMode('forgot'); setError(''); setInfo(''); }} className="block w-full text-center text-xs text-sand-400 hover:text-cream-100">
+          <button type="button" onClick={() => { setMode('forgot'); setError(''); setInfo(''); }} className="block w-full text-center text-xs text-ink-500 hover:text-ink-800">
             Mot de passe oublié ?
           </button>
         ) : (
-          <button type="button" onClick={() => { setMode('login'); setError(''); }} className="block w-full text-center text-xs text-sand-400 hover:text-cream-100">
+          <button type="button" onClick={() => { setMode('login'); setError(''); }} className="block w-full text-center text-xs text-ink-500 hover:text-ink-800">
             ← Retour à la connexion
           </button>
         )}
-        <Link to="/" className="block text-center text-xs text-sand-500 hover:text-cream-100">← Retour au site</Link>
+        <Link to="/" className="block text-center text-xs text-ink-400 hover:text-ink-800">← Retour au site</Link>
       </form>
     </div>
   );
