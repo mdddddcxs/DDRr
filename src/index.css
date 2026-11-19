@@ -10,6 +10,7 @@
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", "Georgia", serif;
   --font-display: "Poppins", "Manrope", sans-serif;
+  --font-quran: "Amiri Quran", "Amiri", serif;
   --font-arabic: "Amiri", "Scheherazade New", serif;
 
   /* Orange DDR (tiré du logo) */
@@ -267,4 +268,8 @@
 @keyframes onde {
   from { transform: scaleY(0.4); }
   to { transform: scaleY(1); }
+}
+@keyframes scintille {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
 }

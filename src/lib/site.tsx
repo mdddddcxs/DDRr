@@ -17,12 +17,17 @@ export type SpeakerInfo = {
   whatsapp?: string;
 };
 
+export type RealisationKind = 'mosquee' | 'forage' | 'ecole' | 'autre';
+export type Realisation = { id: string; kind: RealisationKind; title: string; place: string; text: string; photoUrl: string };
+
 export type SiteContent = {
   contact: { phones: string[]; whatsapp: string; email: string; address: string };
   social: { youtube: string; tiktok: string; facebook: string; instagram: string };
   /** Rappel hebdomadaire. start/end au format HH:MM servent au compte à rebours et à l'ajout à l'agenda. */
   preche: { day: string; time: string; start: string; end: string; place: string; mapsQuery: string; title: string; theme: string };
   speakers: SpeakerInfo[];
+  /** Réalisations sur le terrain (mosquées, forages, écoles…), modifiables dans l'admin. */
+  realisations: Realisation[];
 };
 
 export const DEFAULT_SITE: SiteContent = {
@@ -79,9 +84,14 @@ export const DEFAULT_SITE: SiteContent = {
       photoCredit: 'Photo : La DDR',
     },
   ],
+  realisations: [
+    { id: 'r1', kind: 'mosquee', title: 'Des mosquées', place: '', text: 'La DDR construit des mosquées pour que chaque communauté ait un lieu de prière digne et accueillant.', photoUrl: '' },
+    { id: 'r2', kind: 'forage', title: 'Des forages et châteaux d’eau', place: '', text: 'Des forages et des châteaux d’eau pour apporter l’eau potable là où elle manque.', photoUrl: '' },
+    { id: 'r3', kind: 'ecole', title: 'Des écoles', place: '', text: 'Des écoles pour que les enfants apprennent, la religion comme les savoirs.', photoUrl: '' },
+    { id: 'r4', kind: 'autre', title: 'Et bien d’autres actions', place: '', text: 'D’autres œuvres de solidarité menées sur le terrain, au service de tous.', photoUrl: '' },
+  ],
 };
 
-/** Fusion prudente : on garde les valeurs par défaut pour tout champ absent ou mal formé. */
 export function mergeSite(raw: any): SiteContent {
   if (!raw || typeof raw !== 'object') return DEFAULT_SITE;
   const str = (v: any, d: string) => (typeof v === 'string' ? v : d);
@@ -125,6 +135,16 @@ export function mergeSite(raw: any): SiteContent {
           whatsapp: str(s?.whatsapp, '').replace(/\D/g, ''),
         })).filter((s: SpeakerInfo) => s.name)
       : DEFAULT_SITE.speakers,
+    realisations: Array.isArray(raw.realisations)
+      ? raw.realisations.slice(0, 24).map((r: any, i: number) => ({
+          id: str(r?.id, `r${i}`),
+          kind: (['mosquee', 'forage', 'ecole', 'autre'].includes(r?.kind) ? r.kind : 'autre') as RealisationKind,
+          title: str(r?.title, '').slice(0, 120),
+          place: str(r?.place, '').slice(0, 120),
+          text: str(r?.text, '').slice(0, 600),
+          photoUrl: safeUrl(r?.photoUrl, ''),
+        })).filter((r: Realisation) => r.title)
+      : DEFAULT_SITE.realisations,
   };
 }
 

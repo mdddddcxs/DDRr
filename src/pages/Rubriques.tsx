@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import RubriqueHero from '../components/RubriqueHero';
 import NextRappel from '../components/NextRappel';
+import Realisations from '../components/Realisations';
 import { Avatar, Container } from '../components/ui';
 import { telHref, useSite, waHref } from '../lib/site';
 import { rubriqueVars, type RubriqueKey } from '../lib/rubriques';
@@ -123,6 +124,8 @@ export const LaDDR = () => {
           </div>
         </Container>
       </section>
+
+      <Realisations compact />
 
       <Section>
         <H2 k="ddr" kicker="Aller plus loin">Suivre la vie de la DDR</H2>
@@ -361,7 +364,7 @@ export const Apprendre = () => {
             <p className="mt-4 font-display text-5xl font-bold text-ink-900">{surah.n}</p>
             <p className="mt-3 font-serif text-xl font-semibold text-ink-900">{surah.name}</p>
             <p className="text-ink-500">« {surah.fr} » · {surah.ayat} versets · {surah.medine ? 'médinoise' : 'mecquoise'}</p>
-            <Link to="/khatma" className="r-ink mt-3 inline-flex items-center gap-1 text-sm font-bold">Lire le Coran <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/coran" className="r-ink mt-3 inline-flex items-center gap-1 text-sm font-bold">Lire le Coran <ArrowRight className="h-4 w-4" /></Link>
           </article>
         </div>
 
@@ -385,7 +388,7 @@ export const Apprendre = () => {
             k="apprendre"
             cols="lg:grid-cols-3"
             items={[
-              { to: '/khatma', icon: BookOpen, title: 'Le Coran', text: 'Lire et écouter le Coran, juz par juz, avec la traduction.' },
+              { to: '/coran', icon: BookOpen, title: 'Le Coran', text: 'Lire et écouter le Coran, juz par juz, avec la traduction.' },
               { to: '/learning', icon: GraduationCap, title: 'Centre du savoir', text: 'Les piliers, la sunnah et les histoires des prophètes.' },
               { to: '/enfants', icon: Baby, title: 'Espace enfants', text: 'Des jeux et des quiz adaptés aux plus petits.' },
               { to: '/outils/zakat', icon: Calculator, title: 'Zakat Smart', text: 'Calculer sa zakat en quelques gestes, avec explications.' },

@@ -5,7 +5,7 @@ import type React from 'react';
 // ciel → océan → pervenche → lavande → rose poudré) pour que le site reste calme et cohérent.
 export type RubriqueKey =
   | 'ddr' | 'decouvrir' | 'apprendre' | 'savoir' | 'mediatheque' | 'temoignages'
-  | 'agenda' | 'rejoindre' | 'soutenir' | 'zakat' | 'studio' | 'actualites';
+  | 'agenda' | 'rejoindre' | 'soutenir' | 'zakat' | 'studio' | 'actualites' | 'coran';
 
 export const RUBRIQUE_THEME: Record<RubriqueKey, { from: string; to: string; soft: string; ink: string; mot: string }> = {
   ddr: { from: '#F5A03A', to: '#D2691A', soft: '#FFF1DE', ink: '#A04A0A', mot: 'Notre famille' },
@@ -19,6 +19,7 @@ export const RUBRIQUE_THEME: Record<RubriqueKey, { from: string; to: string; sof
   rejoindre: { from: '#B094DD', to: '#7957B5', soft: '#F2ECFB', ink: '#5E4196', mot: 'L’engagement' },
   temoignages: { from: '#E39AB4', to: '#A9567A', soft: '#FBEAF1', ink: '#843E5E', mot: 'Le cœur' },
   soutenir: { from: '#F5A03A', to: '#C99A2E', soft: '#FFF1DE', ink: '#A04A0A', mot: 'Le partage' },
+  coran: { from: '#2A8FA8', to: '#0F3B52', soft: '#E2F0F4', ink: '#0F3B52', mot: 'La parole d’Allah' },
   actualites: { from: '#6FA0B5', to: '#3B6A80', soft: '#E5F0F4', ink: '#2F5668', mot: 'Les nouvelles' },
 };
 

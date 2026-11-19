@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import PrayerTimes from '../components/PrayerTimes';
 import NextRappel from '../components/NextRappel';
+import Realisations from '../components/Realisations';
 import { LogoMark } from '../components/Logo';
 import { Avatar, ButtonLink, Container, formatFCFA } from '../components/ui';
 import { SCHOOL_CAMPAIGN } from '../constants';
@@ -587,6 +588,7 @@ const Home = () => {
       <NextRappel />
       <Rubriques />
       <Demarche />
+      <Realisations />
       <AskCompanion />
       <Mediatheque videos={videos} />
       <Voices />

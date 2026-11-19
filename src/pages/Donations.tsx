@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { HandHeart, MessageCircle, Package, Phone, ShieldCheck, Smartphone } from 'lucide-react';
 import { ButtonLink, Container, Eyebrow, PageHero, formatFCFA } from '../components/ui';
+import Realisations from '../components/Realisations';
+import { useReveal } from '../lib/useReveal';
 import { SCHOOL_CAMPAIGN } from '../constants';
 import { telHref, useSite, waHref } from '../lib/site';
 import { getCampaign, getRecentDonations, type PublicDonation } from '../services/db';
@@ -18,6 +20,7 @@ const timeAgo = (iso: string) => {
 };
 
 const Donations = () => {
+  useReveal();
   const site = useSite();
   const [c, setC] = useState<DonationCampaign>(SCHOOL_CAMPAIGN);
   const [recent, setRecent] = useState<PublicDonation[]>([]);
@@ -32,7 +35,7 @@ const Donations = () => {
       <PageHero
         eyebrow="Sadaqa jariya"
         title={<>Investir pour <span className="text-gradient-gold">l’éternité</span></>}
-        subtitle="Votre don n’est pas une dépense : c’est une aumône continue qui bénéficiera à des générations d’élèves et de fidèles."
+        subtitle="Votre don n’est pas une dépense : c’est une aumône continue. Mosquées, forages, châteaux d’eau, écoles : chaque contribution devient une œuvre durable."
       />
       <Container className="pb-10">
         <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
@@ -123,6 +126,7 @@ const Donations = () => {
           </aside>
         </div>
       </Container>
+      <Realisations showCta={false} />
     </>
   );
 };

@@ -3,7 +3,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { AdminTitle } from '../../components/AdminLayout';
 import { Button, Notice } from '../../components/ui';
 import { ImageField } from '../../components/forms';
-import { DEFAULT_SITE, mergeSite, useSite, useSiteReload, type SiteContent, type SpeakerInfo } from '../../lib/site';
+import { DEFAULT_SITE, mergeSite, useSite, useSiteReload, type Realisation, type RealisationKind, type SiteContent, type SpeakerInfo } from '../../lib/site';
 import { saveSiteContent, uploadMedia } from '../../services/db';
 
 const Field = ({ id, label, value, onChange, placeholder, area = false }: { id: string; label: string; value: string; onChange: (v: string) => void; placeholder?: string; area?: boolean }) => (
@@ -143,6 +143,42 @@ const AdminSite = () => {
             </div>
           </section>
         ))}
+      </div>
+
+      <div className="mt-10 flex items-center justify-between">
+        <div>
+          <h2 className="font-serif text-2xl font-semibold text-ink-900">Réalisations sur le terrain</h2>
+          <p className="text-sm text-ink-500">Mosquées, forages, châteaux d’eau, écoles… Ajoutez une photo, un lieu et quelques mots.</p>
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => set({ realisations: [...s.realisations, { id: `r${Date.now()}`, kind: 'mosquee', title: 'Nouvelle réalisation', place: '', text: '', photoUrl: '' }] })}>
+          <Plus className="h-4 w-4" /> Ajouter
+        </Button>
+      </div>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        {s.realisations.map((r, i) => {
+          const setR = (patch: Partial<Realisation>) => set({ realisations: s.realisations.map((x, k) => (k === i ? { ...x, ...patch } : x)) });
+          return (
+            <section key={r.id} className="card space-y-4 p-6">
+              <div className="flex items-center justify-between">
+                <p className="font-bold text-ink-900">{r.title || 'Sans titre'}</p>
+                <button type="button" onClick={() => confirm(`Retirer « ${r.title} » ?`) && set({ realisations: s.realisations.filter((_, k) => k !== i) })} className="rounded-full p-2 text-red-600 hover:bg-red-500/10" aria-label="Retirer"><Trash2 className="h-4 w-4" /></button>
+              </div>
+              <div>
+                <label htmlFor={`rk-${r.id}`} className="label">Type</label>
+                <select id={`rk-${r.id}`} value={r.kind} onChange={(e) => setR({ kind: e.target.value as RealisationKind })} className="input">
+                  <option value="mosquee">Mosquée</option>
+                  <option value="forage">Forage / château d’eau</option>
+                  <option value="ecole">École</option>
+                  <option value="autre">Autre action</option>
+                </select>
+              </div>
+              <ImageField id={`rp-${r.id}`} label="Photo" value={r.photoUrl} onChange={(url) => setR({ photoUrl: url })} upload={(f) => uploadMedia(f, 'realisations')} />
+              <Field id={`rt-${r.id}`} label="Titre" value={r.title} onChange={(v) => setR({ title: v })} />
+              <Field id={`rl-${r.id}`} label="Lieu (ex. : Bouaké, 2025)" value={r.place} onChange={(v) => setR({ place: v })} />
+              <Field id={`rx-${r.id}`} label="Description" value={r.text} onChange={(v) => setR({ text: v })} area />
+            </section>
+          );
+        })}
       </div>
 
       <div className="mt-8 flex flex-wrap justify-end gap-3">

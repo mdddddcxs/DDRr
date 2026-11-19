@@ -341,7 +341,7 @@ export async function saveSiteContent(content: unknown) {
 }
 
 /** Envoie une photo dans l'espace public "media" et renvoie son adresse. */
-export async function uploadMedia(file: File, folder: 'speakers' | 'campaign' | 'news' | 'misc'): Promise<string> {
+export async function uploadMedia(file: File, folder: 'speakers' | 'campaign' | 'news' | 'misc' | 'realisations'): Promise<string> {
   if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) throw new Error('Format accepté : JPG, PNG ou WebP.');
   if (file.size > 5 * 1024 * 1024) throw new Error('Image trop lourde (5 Mo maximum).');
   const ext = file.type.split('/')[1].replace('jpeg', 'jpg');

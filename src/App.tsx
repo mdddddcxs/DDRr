@@ -38,7 +38,7 @@ const Chat = lazyPage(() => import('./pages/Chat'));
 const Shahada = lazyPage(() => import('./pages/Shahada'));
 const LearningCenter = lazyPage(() => import('./pages/LearningCenter'));
 const Kids = lazyPage(() => import('./pages/Kids'));
-const Khatma = lazyPage(() => import('./pages/Khatma'));
+const CoranPage = lazyPage(() => import('./pages/coran/CoranPage'));
 const Donations = lazyPage(() => import('./pages/Donations'));
 const News = lazyPage(() => import('./pages/News'));
 const NewsDetail = lazyPage(() => import('./pages/NewsDetail'));
@@ -145,7 +145,8 @@ const AppRoutes = () => {
                   <Route path="/outils" element={<Navigate to="/outils/zakat" replace />} />
                   <Route path="/outils/zakat" element={<ZakatSmart />} />
                   <Route path="/outils/studio" element={<StudioDawa />} />
-                  <Route path="/khatma" element={<Khatma />} />
+                  <Route path="/coran" element={<CoranPage />} />
+                  <Route path="/khatma" element={<Navigate to="/coran" replace />} />
                   <Route path="/donations" element={<Donations />} />
                   <Route path="/news" element={<News />} />
                   <Route path="/la-ddr/*" element={<LaDDR />} />

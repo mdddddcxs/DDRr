@@ -43,7 +43,7 @@ export const NAV: (NavItem | NavGroup)[] = [
     items: [
       { name: 'Apprendre l’Islam', path: '/apprendre', desc: 'La leçon du jour, tous les espaces', icon: GraduationCap },
       { name: 'Le Grand Quiz', path: '/apprendre/quiz', desc: 'Des questions sans fin, pour tous', icon: Trophy },
-      { name: 'Le Coran', path: '/khatma', desc: 'Lire et écouter, juz par juz', icon: BookOpen },
+      { name: 'Le Coran', path: '/coran', desc: 'Lire, écouter, apprendre par cœur', k: 'coran', icon: BookOpen },
       { name: 'Centre du savoir', path: '/learning', desc: 'Piliers, histoires, Bible & Coran', k: 'savoir', icon: GraduationCap },
       { name: 'Espace enfants', path: '/enfants', desc: 'Quiz et jeux pour les petits', icon: Baby },
       { name: 'Zakat Smart', path: '/outils/zakat', desc: 'Calculer sa zakat simplement', k: 'zakat', icon: Calculator },
@@ -207,7 +207,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path));
   // Rubriques à en-tête coloré : tant qu'on n'a pas défilé, la barre passe en blanc pour rester lisible.
-  const onColor = !scrolled && (['/la-ddr', '/decouvrir', '/agenda', '/rejoindre', '/learning', '/outils', '/conversions'].some((p) => location.pathname.startsWith(p)) || ['/apprendre', '/news'].includes(location.pathname));
+  const onColor = !scrolled && (['/la-ddr', '/decouvrir', '/agenda', '/rejoindre', '/learning', '/outils', '/conversions', '/coran'].some((p) => location.pathname.startsWith(p)) || ['/apprendre', '/news'].includes(location.pathname));
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory-100 text-ink-800">
@@ -361,7 +361,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <FooterLink to="/decouvrir">L’Islam en douceur</FooterLink>
               <FooterLink to="/shahada">Devenir musulman</FooterLink>
               <FooterLink to="/apprendre/quiz">Le Grand Quiz</FooterLink>
-              <FooterLink to="/khatma">Le Coran</FooterLink>
+              <FooterLink to="/coran">Le Coran</FooterLink>
               <FooterLink to="/learning">Centre du savoir</FooterLink>
               <FooterLink to="/enfants">Espace enfants</FooterLink>
               <FooterLink to="/debates">Débats & directs</FooterLink>
