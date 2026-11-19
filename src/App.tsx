@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
+import ScrollToTop from './components/ScrollToTop';
 import LiveAssistant from './components/LiveAssistant';
 import Home from './pages/Home';
 import Maintenance from './pages/Maintenance';
@@ -184,6 +185,7 @@ const AppRoutes = () => {
 const App = () => (
   <BrowserRouter>
     <SiteProvider>
+      <ScrollToTop />
       <AppRoutes />
     </SiteProvider>
   </BrowserRouter>

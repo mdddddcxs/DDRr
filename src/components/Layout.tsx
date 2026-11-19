@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import RadioPlayer from './RadioPlayer';
 import Logo from './Logo';
-import ScrollToTop from './ScrollToTop';
 import { fetchYoutubeDebates } from '../services/socialService';
 import { subscribeNewsletter } from '../services/db';
 import { friendlyError } from '../lib/supabase';
@@ -257,7 +256,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory-100 text-ink-800">
-      <ScrollToTop />
       <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-white">
         Aller au contenu
       </a>
