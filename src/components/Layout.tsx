@@ -1,296 +1,365 @@
-
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import DonationModal from './DonationModal';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import {
+  BookOpen, ChevronDown, GraduationCap, HandHeart, Menu, MessageCircleHeart, Newspaper, PlayCircle, Sparkles, Users, Wrench, X, Phone, Mail, MapPin, Baby,
+} from 'lucide-react';
 import RadioPlayer from './RadioPlayer';
 import Logo from './Logo';
 import ScrollToTop from './ScrollToTop';
+import { fetchYoutubeDebates } from '../services/socialService';
+import { subscribeNewsletter } from '../services/db';
+import { friendlyError } from '../lib/supabase';
+import { Honeypot, Spinner } from './ui';
+import type { Debate } from '../types';
+import { telHref, useSite } from '../lib/site';
 
-const NavLink = React.memo(({ link, active, layoutId }: { link: any, active: boolean, layoutId: string }) => (
-  <Link
-    to={link.path}
-    className={`relative px-3 py-2 text-[11px] xl:text-xs uppercase tracking-wider font-bold transition-all duration-300 ${active ? 'text-brand-500' : 'text-gray-400 hover:text-brand-400'} ${link.name === 'Le Compagnon DDR' ? 'border border-brand-500/30 rounded-full px-4 hover:bg-brand-900/20' : ''} ${link.name === 'Le Coran' ? 'text-gold-500' : ''}`}
-  >
-    {active && link.name !== 'Le Compagnon DDR' && (
-      <motion.div
-        layoutId={layoutId}
-        className="absolute inset-0 bg-brand-500/5 rounded-lg -z-10"
-        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-      />
-    )}
-    {link.name === 'Le Compagnon DDR' ? (
-        <span className="flex items-center gap-2">
-            <span className="text-lg">📖</span> {link.name}
-        </span>
-    ) : link.name === 'Le Coran' ? (
-        <span className="flex items-center gap-1">
-            <span>📖</span> {link.name}
-        </span>
-    ) : link.name}
-  </Link>
-));
+type NavItem = { name: string; path: string; desc?: string; icon?: React.ComponentType<{ className?: string }> };
+type NavGroup = { name: string; items: NavItem[] };
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showDonate, setShowDonate] = useState(() => location.hash === '#donate');
+export const NAV: (NavItem | NavGroup)[] = [
+  { name: 'Accueil', path: '/' },
+  {
+    name: 'Apprendre',
+    items: [
+      { name: 'Le Coran', path: '/khatma', desc: 'Lire et écouter, juz par juz', icon: BookOpen },
+      { name: 'Centre du savoir', path: '/learning', desc: 'Piliers, sunnah, histoires', icon: GraduationCap },
+      { name: 'Espace enfants', path: '/enfants', desc: 'Quiz et jeux pour les petits', icon: Baby },
+      { name: 'Outils du croyant', path: '/tools', desc: 'Zakat, cartes de rappel', icon: Wrench },
+    ],
+  },
+  {
+    name: 'Médiathèque',
+    items: [
+      { name: 'Débats & vidéos', path: '/debates', desc: 'Les directs et replays', icon: PlayCircle },
+      { name: 'Actualités', path: '/news', desc: 'La vie de la DDR', icon: Newspaper },
+      { name: 'Témoignages', path: '/conversions', desc: 'Ils ont trouvé la paix', icon: Users },
+    ],
+  },
+  { name: 'Compagnon DDR', path: '/chat' },
+  { name: 'Contact', path: '/appointments' },
+];
 
-  // Écoute globale du hash #donate pour ouvrir la modale depuis d'autres pages ou liens
+const isGroup = (n: NavItem | NavGroup): n is NavGroup => 'items' in n;
+
+/** Bandeau "EN DIRECT" quand la chaîne YouTube diffuse un live. */
+const LiveBanner = () => {
+  const [live, setLive] = useState<Debate | null>(null);
   useEffect(() => {
-    if (location.hash === '#donate') {
-      setTimeout(() => setShowDonate(true), 0);
-    }
-  }, [location.hash]);
-
-  const handleCloseDonate = () => {
-    setShowDonate(false);
-    // Si le hash était présent, on le nettoie
-    if (location.hash === '#donate') {
-        navigate(location.pathname, { replace: true });
-    }
-  };
-
-  const isActive = (path: string) => location.pathname === path ? "text-brand-500 font-bold" : "text-gray-300 hover:text-brand-400";
-
-  const navLinks = [
-    { name: 'Accueil', path: '/' },
-    { name: 'Le Compagnon DDR', path: '/chat' },
-    { name: 'Savoir', path: '/learning' },
-    { name: 'Le Coran', path: '/khatma' }, // RENOMMAGE ICI
-    { name: 'Donations', path: '/donations' },
-    { name: 'Outils', path: '/tools' },
-    { name: 'Actualités', path: '/news' },
-    { name: 'Débats', path: '/debates' },
-    { name: 'Témoignages', path: '/conversions' },
-  ];
-
+    let alive = true;
+    fetchYoutubeDebates().then((list) => alive && setLive(list.find((d) => d.isLive) || null));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  if (!live) return null;
   return (
-    <div className="min-h-screen flex flex-col bg-black text-gray-100 font-sans relative pb-0">
-      <ScrollToTop />
-      {/* Header */}
-      <nav className="bg-black/90 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20">
-            <div className="flex items-center">
-              <Link to="/" className="flex-shrink-0 flex items-center gap-3 group">
-                <Logo className="h-12" />
-              </Link>
-            </div>
-            
-            {/* Desktop Menu */}
-            <div className="hidden lg:flex lg:items-center lg:justify-center flex-1 lg:space-x-1 xl:space-x-2">
-              {navLinks.map((link) => (
-                <NavLink 
-                  key={link.name} 
-                  link={link} 
-                  active={location.pathname === link.path} 
-                  layoutId="nav-active" 
-                />
-              ))}
-            </div>
+    <Link to="/debates" className="block bg-gradient-to-r from-red-700 via-red-600 to-red-700 px-4 py-2 text-center text-sm font-bold text-white">
+      <span className="mr-2 inline-block h-2 w-2 rounded-full bg-white animate-pulse-ring align-middle" />
+      EN DIRECT maintenant : <span className="font-semibold opacity-90">{live.title}</span> — Regarder →
+    </Link>
+  );
+};
 
-            {/* Right Actions */}
-            <div className="hidden lg:flex lg:items-center lg:gap-2">
-              {/* BOUTON SPECIAL CONVERSION */}
-              <Link
-                to="/shahada"
-                className="px-3 py-2 bg-gradient-to-r from-gold-600 to-yellow-600 text-black text-[10px] font-bold uppercase tracking-wider rounded-full shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_25px_rgba(212,175,55,0.6)] hover:scale-105 transition-all flex items-center gap-2"
-              >
-                 <span>☝️</span> Convertir
-              </Link>
-
-              <button 
-                onClick={() => setShowDonate(true)}
-                className="px-3 py-2 border border-brand-500 rounded-full text-[10px] font-bold text-brand-500 hover:bg-brand-600 hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(234,88,12,0.2)] hover:shadow-[0_0_20px_rgba(234,88,12,0.6)] cursor-pointer"
-              >
-                Faire un Don
-              </button>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="flex items-center lg:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                type="button"
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-brand-500 focus:outline-none"
-              >
-                <span className="sr-only">Ouvrir menu</span>
-                {isMobileMenuOpen ? (
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden bg-gray-900 border-t border-gray-800 absolute w-full z-40 shadow-2xl">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${isActive(link.path)}`}
-                >
-                  {link.name}
+const Dropdown = ({ group, active }: { group: NavGroup; active: boolean }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => ref.current && !ref.current.contains(e.target as Node) && setOpen(false);
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+  return (
+    <div ref={ref} className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className={`flex items-center gap-1 rounded-full px-3.5 py-2 text-[14px] font-semibold transition ${active ? 'text-brand-300' : 'text-cream-200 hover:text-white'}`}
+      >
+        {group.name}
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute left-1/2 top-full z-50 w-80 -translate-x-1/2 pt-3">
+          <div className="rounded-3xl border border-white/10 bg-night-900/95 p-2 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.9)] backdrop-blur-xl animate-fade-up">
+            {group.items.map((it) => {
+              const Icon = it.icon || Sparkles;
+              return (
+                <Link key={it.path} to={it.path} className="flex items-start gap-3 rounded-2xl p-3 transition hover:bg-white/5">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-500/10 text-brand-300">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span>
+                    <span className="block text-[15px] font-bold text-cream-50">{it.name}</span>
+                    <span className="block text-[13px] text-sand-400">{it.desc}</span>
+                  </span>
                 </Link>
-              ))}
-              
-              <Link
-                to="/shahada"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-full text-center block px-3 py-3 rounded-md text-base font-bold text-black bg-gradient-to-r from-gold-600 to-yellow-600 mt-4 mb-2 shadow-[0_0_15px_rgba(212,175,55,0.3)]"
-              >
-                 ☝️ Je veux me convertir
-              </Link>
-
-              <button
-                 onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    setShowDonate(true);
-                 }}
-                 className="w-full text-left block px-3 py-2 rounded-md text-base font-bold text-black bg-brand-500 mt-2 cursor-pointer"
-              >
-                Faire un Don
-              </button>
-            </div>
+              );
+            })}
           </div>
-        )}
-      </nav>
-
-      {/* Main Content */}
-      <main className="flex-grow bg-black relative z-10 pb-40 flex flex-col items-center w-full overflow-x-hidden">
-        <div className="w-full max-w-7xl mx-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
         </div>
-      </main>
-
-      {/* Footer Professional */}
-      <footer className="bg-[#020202] border-t border-gray-900 pt-16 pb-32 relative overflow-hidden z-20">
-        {/* Decorative Top Line */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-900 via-brand-500 to-brand-900 opacity-60"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-                
-                {/* Col 1: Brand & Identity */}
-                <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                        <Logo className="h-12" />
-                    </div>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                        L'association de référence pour le dialogue interreligieux en Côte d'Ivoire. Nous prônons la paix par le savoir et la fraternité par la vérité.
-                    </p>
-                    <p className="text-brand-500 font-serif italic text-sm">
-                        "Pour ma foi et pour ma religion"
-                    </p>
-                    <div className="flex gap-4 pt-2">
-                        <a href="https://www.facebook.com/Oustazdianeoff" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-[#1877F2] transition"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.791-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                        <a href="https://www.youtube.com/@ddrlavraiechaine" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-[#FF0000] transition"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-                        <a href="https://www.tiktok.com/@ddrofficielle" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-white transition"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.49-3.35-3.98-5.6-.48-2.24-.08-4.62 1.09-6.64 1.19-2.05 3.29-3.56 5.6-4.05 1.58-.33 3.24-.18 4.79.46V11c-1.28-.65-2.73-.8-4.13-.39-1.27.37-2.33 1.25-2.94 2.42-.62 1.18-.63 2.61-.02 3.8.61 1.2 1.71 2.11 3.01 2.51 1.34.41 2.82.25 4.05-.44 1.24-.7 2.05-2 2.1-3.41.06-2.95.02-5.9.03-8.85h-.01c-.13-.01-.2.01-.53-.02-.85-.22-1.32-.87-1.6-1.58-.23-.6-.32-1.23-.32-1.85V3.06c0-.26.02-.51.05-.76.08-.72.4-1.37.94-1.87.53-.49 1.18-.76 1.91-.79h.03z"/></svg></a>
-                    </div>
-                </div>
-
-                {/* Col 2: Navigation */}
-                <div>
-                    <h3 className="text-white font-bold uppercase tracking-widest text-xs mb-6 border-b border-gray-800 pb-2 inline-block">Plan du site</h3>
-                    <ul className="space-y-3 text-sm">
-                        <li><Link to="/" className="text-gray-400 hover:text-brand-500 transition flex items-center gap-2"><span>›</span> Accueil</Link></li>
-                        <li><Link to="/khatma" className="text-gray-400 hover:text-brand-500 transition flex items-center gap-2"><span>›</span> Le Coran (Lecture)</Link></li>
-                        <li><Link to="/learning" className="text-gray-400 hover:text-brand-500 transition flex items-center gap-2"><span>›</span> Centre du Savoir</Link></li>
-                        <li><Link to="/tools" className="text-gray-400 hover:text-brand-500 transition flex items-center gap-2"><span>›</span> Outils du Croyant</Link></li>
-                        <li><Link to="/debates" className="text-gray-400 hover:text-brand-500 transition flex items-center gap-2"><span>›</span> Médiathèque</Link></li>
-                        <li><Link to="/news" className="text-gray-400 hover:text-brand-500 transition flex items-center gap-2"><span>›</span> Presse & Actualités</Link></li>
-                        <li><Link to="/appointments" className="text-gray-400 hover:text-brand-500 transition flex items-center gap-2"><span>›</span> Contact & RDV</Link></li>
-                    </ul>
-                </div>
-
-                {/* Col 3: Siège Social */}
-                <div>
-                    <h3 className="text-white font-bold uppercase tracking-widest text-xs mb-6 border-b border-gray-800 pb-2 inline-block">Siège Social</h3>
-                    <div className="space-y-4">
-                        <div className="flex items-start gap-3">
-                            <div className="mt-1 text-brand-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
-                            <p className="text-sm text-gray-400 leading-relaxed">
-                                <strong className="text-white block">Yopougon Andokoi</strong>
-                                En face du commissariat 23ème Arrondissement<br/>
-                                Abidjan, Côte d'Ivoire
-                            </p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                            <div className="mt-1 text-brand-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg></div>
-                            <div className="text-sm text-gray-400">
-                                <a href="tel:+2250747320455" className="block hover:text-white transition">+225 07 47 32 04 55</a>
-                                <a href="tel:+2250505408685" className="block hover:text-white transition">+225 05 05 40 86 85</a>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                            <div className="mt-1 text-brand-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
-                            <a href="mailto:ladawahdanslarue.ddr@gmail.com" className="text-sm text-gray-400 hover:text-white transition break-all">ladawahdanslarue.ddr@gmail.com</a>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Col 4: Newsletter & Admin */}
-                <div>
-                    <h3 className="text-white font-bold uppercase tracking-widest text-xs mb-6 border-b border-gray-800 pb-2 inline-block">Restez connecté</h3>
-                    <p className="text-gray-500 text-xs mb-4">Recevez les dates des prochains débats.</p>
-                    <div className="flex flex-col gap-2">
-                        <input type="email" placeholder="Votre email" className="bg-gray-900 border border-gray-800 rounded px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition" />
-                        <button className="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold uppercase tracking-wider py-2 rounded transition">
-                            S'inscrire
-                        </button>
-                    </div>
-                    
-                    <div className="mt-8 pt-8 border-t border-gray-800">
-                        <Link to="/shahada" className="block bg-gradient-to-r from-gold-600 to-yellow-600 text-black text-center font-bold text-sm py-3 rounded-lg hover:brightness-110 transition shadow-lg">
-                            Je veux me convertir ☝️
-                        </Link>
-                    </div>
-                </div>
-            </div>
-
-            {/* Bottom Bar */}
-            <div className="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
-                <p>&copy; {new Date().getFullYear()} Association La DDR. Tous droits réservés.</p>
-                <div className="flex gap-4 mt-4 md:mt-0">
-                    <Link to="/admin" className="hover:text-gray-400 transition">Administration</Link>
-                    <span className="text-gray-800">|</span>
-                    <Link to="/legal/mentions" className="hover:text-gray-400 transition">Mentions Légales</Link>
-                    <span className="text-gray-800">|</span>
-                    <Link to="/legal/privacy" className="hover:text-gray-400 transition">Politique de Confidentialité</Link>
-                </div>
-            </div>
-        </div>
-      </footer>
-
-      {/* Radio Player Fixed Bottom */}
-      <RadioPlayer />
-
-      {/* MODAL GLOBAL DE DON */}
-      {showDonate && <DonationModal onClose={handleCloseDonate} />}
+      )}
     </div>
   );
 };
+
+const Newsletter = () => {
+  const [email, setEmail] = useState('');
+  const [trap, setTrap] = useState('');
+  const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [msg, setMsg] = useState('');
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (trap) return setState('done');
+    setState('loading');
+    try {
+      await subscribeNewsletter(email);
+      setState('done');
+    } catch (err) {
+      setMsg(friendlyError(err));
+      setState('error');
+    }
+  };
+  if (state === 'done') return <p className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">Merci ! Vous recevrez les dates des prochains débats in shâ Allah.</p>;
+  return (
+    <form onSubmit={submit} className="relative flex flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
+      <Honeypot value={trap} onChange={setTrap} />
+      <label htmlFor="nl-email" className="sr-only">Votre email</label>
+      <input id="nl-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Votre email" className="input !rounded-full !py-2.5" />
+      <button disabled={state === 'loading'} className="flex shrink-0 items-center justify-center gap-2 rounded-full bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-500">
+        {state === 'loading' ? <Spinner className="h-4 w-4" /> : "S'inscrire"}
+      </button>
+      {state === 'error' && <p className="text-xs text-red-300">{msg}</p>}
+    </form>
+  );
+};
+
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const site = useSite();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+  const isActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path));
+
+  return (
+    <div className="flex min-h-screen flex-col bg-night-950 text-cream-100">
+      <ScrollToTop />
+      <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-white">
+        Aller au contenu
+      </a>
+      <LiveBanner />
+
+      <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'border-b border-white/5 bg-night-950/85 backdrop-blur-xl' : 'bg-transparent'}`}>
+        <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Link to="/" aria-label="La DDR — accueil" className="shrink-0">
+            <Logo showArabic={false} />
+          </Link>
+
+          <div className="hidden items-center gap-0.5 lg:flex">
+            {NAV.map((n) =>
+              isGroup(n) ? (
+                <Dropdown key={n.name} group={n} active={n.items.some((i) => isActive(i.path))} />
+              ) : (
+                <Link
+                  key={n.path}
+                  to={n.path}
+                  className={`rounded-full px-3.5 py-2 text-[14px] font-semibold transition ${isActive(n.path) ? 'text-brand-300' : 'text-cream-200 hover:text-white'}`}
+                >
+                  {n.name}
+                </Link>
+              ),
+            )}
+          </div>
+
+          <div className="hidden items-center gap-2 lg:flex">
+            <Link to="/shahada" className="rounded-full border border-gold-400/40 px-4 py-2 text-[13px] font-bold text-gold-200 transition hover:border-gold-300 hover:bg-gold-400/10">
+              Devenir musulman
+            </Link>
+            <Link to="/donations" className="flex items-center gap-2 rounded-full bg-brand-600 px-4 py-2 text-[13px] font-bold text-white shadow-[0_8px_24px_-10px_rgba(234,88,12,0.9)] transition hover:bg-brand-500">
+              <HandHeart className="h-4 w-4" /> Faire un don
+            </Link>
+          </div>
+
+          <button onClick={() => setMobileOpen(true)} className="rounded-full p-2.5 text-cream-100 hover:bg-white/5 lg:hidden" aria-label="Ouvrir le menu">
+            <Menu className="h-6 w-6" />
+          </button>
+        </div>
+      </nav>
+
+      {/* Menu mobile */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-y-0 right-0 flex w-[88%] max-w-sm flex-col overflow-y-auto bg-night-900 shadow-2xl animate-fade-up">
+            <div className="flex items-center justify-between border-b border-white/5 p-4">
+              <Logo showArabic={false} />
+              <button onClick={() => setMobileOpen(false)} className="rounded-full p-2 text-sand-400 hover:bg-white/5" aria-label="Fermer le menu">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="flex-1 space-y-6 p-4">
+              {NAV.map((n) =>
+                isGroup(n) ? (
+                  <div key={n.name}>
+                    <p className="mb-2 px-3 text-[11px] font-extrabold uppercase tracking-[0.2em] text-sand-500">{n.name}</p>
+                    {n.items.map((it) => {
+                      const Icon = it.icon || Sparkles;
+                      return (
+                        <Link key={it.path} to={it.path} className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-[16px] font-semibold ${isActive(it.path) ? 'bg-brand-500/10 text-brand-300' : 'text-cream-100'}`}>
+                          <Icon className="h-5 w-5 text-brand-400" /> {it.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <Link key={n.path} to={n.path} className={`flex items-center gap-3 rounded-2xl px-3 py-3 text-[16px] font-semibold ${isActive(n.path) ? 'bg-brand-500/10 text-brand-300' : 'text-cream-100'}`}>
+                    {n.path === '/chat' ? <MessageCircleHeart className="h-5 w-5 text-brand-400" /> : n.path === '/' ? <Sparkles className="h-5 w-5 text-brand-400" /> : <Phone className="h-5 w-5 text-brand-400" />}
+                    {n.name}
+                  </Link>
+                ),
+              )}
+            </div>
+            <div className="space-y-2 border-t border-white/5 p-4">
+              <Link to="/donations" className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 py-3.5 font-bold text-white">
+                <HandHeart className="h-5 w-5" /> Faire un don
+              </Link>
+              <Link to="/shahada" className="flex w-full items-center justify-center rounded-full border border-gold-400/40 py-3.5 font-bold text-gold-200">
+                Je veux devenir musulman
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main id="contenu" className="relative flex-1">
+        <div key={location.pathname} className="animate-fade-up">
+          {children}
+        </div>
+      </main>
+
+      {/* Pied de page */}
+      <footer className="relative mt-16 overflow-hidden border-t border-white/5 bg-night-900">
+        <div className="absolute inset-0 bg-pattern opacity-[0.035]" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-4 pb-28 pt-16 sm:px-6">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.2fr]">
+            <div className="space-y-5">
+              <Logo />
+              <p className="max-w-sm text-sm leading-relaxed text-sand-400">
+                Association ivoirienne de dialogue interreligieux. Nous invitons à la paix par le savoir, et à la fraternité par la vérité.
+              </p>
+              <p className="font-serif text-sm italic text-brand-300">« Pour ma foi et pour ma religion »</p>
+              <div className="flex gap-2">
+                <Social href={site.social.youtube} label="YouTube">
+                  <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6z" />
+                </Social>
+                <Social href={site.social.tiktok} label="TikTok">
+                  <path d="M12.5 0h3.9c.1 1.5.6 3.1 1.8 4.2 1.1 1.1 2.7 1.6 4.2 1.8V10a10 10 0 0 1-5.8-1.9v8.8c-.1 1.4-.5 2.8-1.4 3.9a7.3 7.3 0 0 1-5.9 3.2 7.2 7.2 0 0 1-7.9-6.6c-.5-2.2-.1-4.6 1-6.6a7.2 7.2 0 0 1 10.4-3.6V11a3.6 3.6 0 0 0-4.1-.4 3.4 3.4 0 0 0-1.6 4.6 3.5 3.5 0 0 0 3 2.5 3.4 3.4 0 0 0 4-2.4c.1-.5.1-1 .1-1.5z" />
+                </Social>
+                {site.social.instagram && (
+                  <Social href={site.social.instagram} label="Instagram">
+                    <path d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zM17.3 5.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z" />
+                  </Social>
+                )}
+                <Social href={site.social.facebook} label="Facebook">
+                  <path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12z" />
+                </Social>
+              </div>
+            </div>
+
+            <FooterCol title="Découvrir">
+              <FooterLink to="/khatma">Le Coran</FooterLink>
+              <FooterLink to="/learning">Centre du savoir</FooterLink>
+              <FooterLink to="/enfants">Espace enfants</FooterLink>
+              <FooterLink to="/debates">Débats & vidéos</FooterLink>
+              <FooterLink to="/news">Actualités</FooterLink>
+              <FooterLink to="/donations">Faire un don</FooterLink>
+            </FooterCol>
+
+            <FooterCol title="Nous trouver">
+              <li className="flex gap-3 text-sm text-sand-400">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
+                <span>{site.contact.address}</span>
+              </li>
+              <li className="flex gap-3 text-sm text-sand-400">
+                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
+                <span className="flex flex-col">
+                  {site.contact.phones.map((p) => (
+                    <a key={p} href={telHref(p)} className="hover:text-white">{p}</a>
+                  ))}
+                </span>
+              </li>
+              <li className="flex gap-3 text-sm text-sand-400">
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-400" />
+                <a href={`mailto:${site.contact.email}`} className="break-all hover:text-white">{site.contact.email}</a>
+              </li>
+            </FooterCol>
+
+            <div>
+              <h3 className="mb-5 text-[11px] font-extrabold uppercase tracking-[0.22em] text-sand-500">Restez informé</h3>
+              <p className="mb-4 text-sm text-sand-400">Recevez les dates des prochains débats et conférences.</p>
+              <Newsletter />
+              <div className="mt-6 rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-sm text-sand-400">
+                <p className="font-bold text-cream-100">Prêche chaque {site.preche.day} · {site.preche.time}</p>
+                {site.preche.place}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 text-xs text-sand-500 md:flex-row">
+            <p>© {new Date().getFullYear()} Association La DDR. Tous droits réservés.</p>
+            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+              <Link to="/legal/mentions" className="hover:text-cream-100">Mentions légales</Link>
+              <Link to="/legal/privacy" className="hover:text-cream-100">Confidentialité</Link>
+              <Link to="/admin" className="hover:text-cream-100">Espace administrateur</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      <RadioPlayer />
+    </div>
+  );
+};
+
+const FooterCol = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div>
+    <h3 className="mb-5 text-[11px] font-extrabold uppercase tracking-[0.22em] text-sand-500">{title}</h3>
+    <ul className="space-y-3">{children}</ul>
+  </div>
+);
+const FooterLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
+  <li>
+    <Link to={to} className="text-sm text-sand-400 transition hover:text-brand-300">
+      {children}
+    </Link>
+  </li>
+);
+const Social = ({ href, label, children }: { href: string; label: string; children: React.ReactNode }) => (
+  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-sand-400 transition hover:border-brand-500/50 hover:text-white">
+    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">{children}</svg>
+  </a>
+);
 
 export default Layout;

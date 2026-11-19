@@ -39,21 +39,21 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
   {
     id: '5',
     question: "Qu'est-ce que la DDR ?",
-    answer: "La DDR (Dawa Dans la Rue) est une association basée en Côte d'Ivoire, dirigée par Oustaz Diane. Son objectif est de propager le message de l'Islam à travers le dialogue interreligieux, la science et la sagesse, notamment par des débats publics et des prêches hebdomadaires.",
-    keywords: ['ddr', 'association', 'dawa', 'oustaz diane', 'cote d\'ivoire'],
+    answer: "La DDR (La Dawah Dans la Rue) est un mouvement ivoirien de prédication et de dialogue interreligieux, animé notamment par Oustaz Diané et Ismaël Aka. Son but : porter le message de l'Islam dans la rue, auprès de tous, par la comparaison de la Bible et du Coran, des débats publics et un rappel chaque jeudi à Yopougon.",
+    keywords: ['ddr', 'association', 'dawa', 'dawah', 'mouvement', 'oustaz diane', 'ismael aka', 'cote d\'ivoire'],
     category: 'ddr'
   },
   {
     id: '6',
     question: "Où se trouve le siège de la DDR ?",
-    answer: "Le siège social de la DDR se situe à Yopougon Andokoi, en face du commissariat du 23ème Arrondissement, à Abidjan, Côte d'Ivoire.",
+    answer: "La DDR est basée à Yopougon Andokoi (23ᵉ arrondissement), à Abidjan, Côte d'Ivoire. Vous pouvez la joindre au +225 07 47 32 04 55 (WhatsApp) ou par la page **Contact & RDV** du site.",
     keywords: ['siege', 'adresse', 'yopougon', 'abidjan', 'localisation'],
     category: 'ddr'
   },
   {
     id: '7',
     question: "Quand a lieu le prêche du jeudi ?",
-    answer: "Le prêche de la DDR a lieu tous les jeudis à 16h00 GMT à la Place Ficgayo de Yopougon. C'est un moment ouvert à tous pour poser des questions et apprendre sur la religion.",
+    answer: "Le rappel de la DDR a lieu chaque jeudi à 16h00 à la place Ficgayo, à Yopougon (Abidjan). Il est souvent diffusé en direct sur YouTube et Facebook. C'est un moment ouvert à tous pour poser des questions et apprendre sur la religion.",
     keywords: ['preche', 'jeudi', 'ficgayo', 'heure', 'rendez-vous'],
     category: 'ddr'
   },
@@ -105,5 +105,33 @@ export const KNOWLEDGE_BASE: KnowledgeEntry[] = [
     answer: "Les 5 piliers sont : 1. La Shahada (foi), 2. La Salat (prière), 3. La Zakat (aumône), 4. Le Sawm (jeûne du Ramadan), 5. Le Hajj (pèlerinage à la Mecque). Ils constituent le fondement de la vie d'un musulman.",
     keywords: ['piliers', 'fondements', 'pratique', 'ramadan', 'priere'],
     category: 'islam'
-  }
+  },
+  {
+    id: '16',
+    question: "Qui est Oustaz Diané ?",
+    answer: "Oustaz Diané, surnommé « Ordinateur », est l'un des prédicateurs fondateurs de la DDR. Il est connu pour sa comparaison de la Bible et du Coran, ses débats avec des chrétiens et ses passages dans les médias ivoiriens.",
+    keywords: ['oustaz', 'diane', 'ordinateur', 'predicateur', 'fondateur'],
+    category: 'ddr'
+  },
+  {
+    id: '17',
+    question: "Qui est Ismaël Aka ?",
+    answer: "Ismaël Aka est prédicateur et débatteur de la DDR. Il anime des séances de questions-réponses et des débats avec des contradicteurs de toutes convictions, avec une approche tournée vers les jeunes.",
+    keywords: ['ismael', 'aka', 'debatteur', 'predicateur', 'jeunes'],
+    category: 'ddr'
+  },
+  {
+    id: '18',
+    question: "Comment contacter la DDR ?",
+    answer: "Par téléphone ou WhatsApp au **+225 07 47 32 04 55**, par email à ladawahdanslarue.ddr@gmail.com, ou en laissant vos coordonnées sur la page **Contact & RDV** : un membre vous rappellera.",
+    keywords: ['contact', 'contacter', 'telephone', 'numero', 'whatsapp', 'appeler', 'joindre', 'email'],
+    category: 'ddr'
+  },
+  {
+    id: '19',
+    question: "Comment faire un don à la DDR ?",
+    answer: "Rendez-vous sur la page **Faire un don** : en attendant le paiement en ligne, vous pouvez donner en contactant la DDR sur WhatsApp. Ne donnez qu'aux numéros communiqués par les responsables. Les dons matériels sont aussi les bienvenus.",
+    keywords: ['don', 'donner', 'aider', 'soutenir', 'sadaqa', 'zakat', 'contribuer', 'mosquee', 'ecole'],
+    category: 'ddr'
+  },
 ];

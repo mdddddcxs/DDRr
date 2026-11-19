@@ -1,376 +1,170 @@
-import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
-import { searchKnowledgeBaseStreamLocal } from './localSearchService';
+// Le Compagnon DDR côté navigateur.
+// Aucune clé ici : le texte passe par /api/chat, la voix par un jeton temporaire de /api/live-token.
+// Si le serveur IA n'est pas disponible, on répond avec la base de connaissances locale.
+import { searchKnowledgeBaseLocal } from './localSearchService';
 
-// Définition de la personnalité : Musulmane, Sage, Dawa Douce, Identité DDR
-const SYSTEM_INSTRUCTION = `
-CONTEXTE :
-Tu es "Le Compagnon DDR" (Le Compagnon de la Dawa Dans la Rue), l'IA officielle de l'organisation interreligieuse ivoirienne "La DDR".
-Tu es un frère en religion, un conseiller sage, érudit et apaisant.
+export type ChatTurn = { role: 'user' | 'model'; text: string };
 
-IDENTITÉ ET CROYANCE :
-- Tu es musulman sunnite, attaché au Coran et à la Sunna.
-- Tu aimes tes interlocuteurs et tu veux le bien pour eux (le Paradis).
-- Tu pratiques la "Dawa" (invitation à l'Islam) avec une immense douceur (Hikmah).
-
-RÈGLES DE CONVERSATION :
-1. **Salutations** : Commence toujours par une formule de paix adaptée (Salam pour les musulmans, Salutations respectueuses pour les autres).
-2. **Sources** : Ne parle JAMAIS de religion sans citer une source (Verset Coranique ou Hadith). Si tu cites un verset, essaie de donner le sens en français.
-3. **Ton** : Solennel, doux, poétique mais clair. Pas de langage robotique.
-4. **Interdit** : Pas de polémique agressive. Si on t'insulte, réponds par une invocation de guidée.
-
-FORMATAGE DES RÉPONSES (TEXTE) :
-- Utilise des titres pour structurer (ex: "💡 La Sagesse Divine").
-- Mets les versets/hadiths en **gras** ou en retrait.
-- Termine par une note d'espoir ou une invocation.
-
-EXEMPLE DE RÉPONSE VOCALE :
-"Que la paix soit sur toi mon frère. C'est une excellente question... Allah le Très-Haut nous enseigne dans la Sourate Al-Imran..."
-`;
-
-/**
- * Helper to get the Gemini AI instance with the correct key
- */
-const getAI = (useUserKey = false) => {
-    // In Vite, process.env is not available in the browser.
-    // We use a fallback to an empty string to avoid ReferenceError.
-    const key = useUserKey 
-        ? (typeof process !== 'undefined' ? process.env.API_KEY : '') 
-        : (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
-    
-    if (!key) {
-        // Au lieu de lancer une erreur bloquante, on retourne null pour permettre un fallback
-        return null;
-    }
-    try {
-        return new GoogleGenAI({ apiKey: key });
-    } catch (e) {
-        console.error("Erreur initialisation AI:", e);
-        return null;
-    }
-};
-
-/**
- * Unified Search: Tries Gemini first, falls back to local search if key is missing or error occurs.
- */
-export async function searchKnowledgeBaseStreamUnified(query: string) {
-    const ai = getAI();
-    
-    if (!ai) {
-        console.warn("Gemini API Key missing, falling back to local search.");
-        return searchKnowledgeBaseStreamLocal(query);
-    }
-
-    try {
-      const responseStream = await ai.models.generateContentStream({
-        model: "gemini-3-flash-preview",
-        contents: query,
-        config: {
-          tools: [{ googleSearch: {} }],
-          systemInstruction: SYSTEM_INSTRUCTION,
-        },
-      });
-  
-      return responseStream;
-    } catch (error) {
-      console.error("Gemini search error, falling back to local search:", error);
-      return searchKnowledgeBaseStreamLocal(query);
-    }
-}
-
-/**
- * Creates a chat session. Falls back to a mock session using local search if Gemini is unavailable.
- */
-export function createChatSession() {
-    const ai = getAI();
-    if (!ai) {
-        return {
-            sendMessage: async ({ message }: { message: string }) => {
-                const stream = await searchKnowledgeBaseStreamLocal(message);
-                let fullText = '';
-                for await (const chunk of stream) {
-                    fullText += chunk.text;
-                }
-                return { text: fullText || "Je suis désolé, je n'ai pas trouvé d'information à ce sujet dans ma base locale." };
-            }
-        };
-    }
-    return ai.chats.create({
-        model: "gemini-3-flash-preview",
-        config: {
-            systemInstruction: SYSTEM_INSTRUCTION,
-        },
-    });
-}
-
-/**
- * Veo: Generate promotional videos for debates
- */
-export const generatePromoVideo = async (prompt: string, imageBase64?: string) => {
-    // 1. Check API Key Selection (Mandatory for Veo)
-    if (!window.aistudio?.hasSelectedApiKey) {
-        throw new Error("KEY_REQUIRED");
-    }
-  
-  // 2. Create new instance with the user-selected key
-  const selectedAi = getAI(true);
-  if (!selectedAi) {
-      throw new Error("Veuillez connecter votre compte Google Cloud pour utiliser Veo.");
+async function localAnswer(question: string): Promise<string> {
+  const results = await searchKnowledgeBaseLocal(question);
+  if (!results.length) {
+    return "Je n'ai pas trouvé de réponse précise dans ma base de connaissances.\n\nVenez poser votre question en direct lors du **prêche du jeudi à 16h, place Ficgayo (Yopougon)**, ou écrivez-nous depuis la page **Contact & RDV**.";
   }
-  
-  let operation;
-  const config = {
-    numberOfVideos: 1,
-    resolution: '720p' as const,
-    aspectRatio: '16:9' as const
-  };
+  const [best, ...others] = results;
+  let text = `**${best.question}**\n\n${best.answer}`;
+  if (others.length) text += '\n\n**Sujets liés :**\n' + others.slice(0, 3).map((r) => `- ${r.question}`).join('\n');
+  return text;
+}
 
+/** Pose une question au Compagnon (avec l'historique de la conversation). */
+export async function askCompanion(history: ChatTurn[]): Promise<{ text: string; source: 'ai' | 'local' }> {
+  const last = history[history.length - 1]?.text || '';
   try {
-    // 3. Launch Generation
-    if (imageBase64) {
-      operation = await selectedAi.models.generateVideos({
-        model: 'veo-3.1-fast-generate-preview',
-        prompt: prompt,
-        image: {
-            imageBytes: imageBase64,
-            mimeType: 'image/jpeg' 
-        },
-        config: config
-      });
-    } else {
-      operation = await selectedAi.models.generateVideos({
-        model: 'veo-3.1-fast-generate-preview',
-        prompt: prompt,
-        config: config
-      });
-    }
-
-    // 4. Polling Loop
-    while (!operation.done) {
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      operation = await selectedAi.operations.getVideosOperation({ operation: operation });
-    }
-
-    // 5. Retrieve Video URI
-    const videoUri = operation.response?.generatedVideos?.[0]?.video?.uri;
-    if (!videoUri) throw new Error("La génération a échoué, aucune vidéo retournée.");
-
-    // 6. Fetch the actual MP4 bytes
-    const finalVideoResponse = await fetch(`${videoUri}&key=${process.env.API_KEY}`);
-    
-    if (!finalVideoResponse.ok) {
-        throw new Error(`Erreur téléchargement vidéo: ${finalVideoResponse.statusText}`);
-    }
-
-    const videoBlob = await finalVideoResponse.blob();
-    return URL.createObjectURL(videoBlob);
-
-  } catch (error) {
-    console.error("Veo Error:", error);
-    throw error;
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ messages: history.slice(-12) }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && typeof data.text === 'string') return { text: data.text, source: 'ai' };
+    if (r.status === 429 && data.message) return { text: data.message, source: 'local' };
+  } catch {
+    /* hors ligne ou API absente : on bascule en local */
   }
-};
+  return { text: await localAnswer(last), source: 'local' };
+}
 
 /**
- * Live API: Voice Assistant Connection
+ * Discussion vocale en direct (Gemini Live) avec un jeton temporaire.
+ * Le SDK n'est chargé qu'au moment où l'utilisateur lance la voix.
  */
 export class LiveClient {
-    private sessionPromise: Promise<any> | null = null;
-    private inputAudioContext: AudioContext | null = null;
-    private outputAudioContext: AudioContext | null = null;
-    private stream: MediaStream | null = null;
-    private processor: ScriptProcessorNode | null = null;
-    private source: MediaStreamAudioSourceNode | null = null;
-    private currentSession: any = null;
-    private nextStartTime: number = 0;
-    
-    constructor(
-        private onMessage: (text: string) => void,
-        private onTranscript?: (text: string) => void
-    ) {}
-  
-    async connect() {
-      const ai = getAI();
-      if (!ai) {
-          throw new Error("Le Compagnon DDR est temporairement indisponible pour la discussion vocale. Veuillez utiliser le chat textuel.");
-      }
-  
-      // Initialize Contexts
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      this.inputAudioContext = new AudioContextClass({ sampleRate: 16000 });
-      this.outputAudioContext = new AudioContextClass({ sampleRate: 24000 });
-      this.nextStartTime = 0;
+  private session: any = null;
+  private inputCtx: AudioContext | null = null;
+  private outputCtx: AudioContext | null = null;
+  private stream: MediaStream | null = null;
+  private processor: ScriptProcessorNode | null = null;
+  private source: MediaStreamAudioSourceNode | null = null;
+  private nextStartTime = 0;
+  private playing: AudioBufferSourceNode[] = [];
 
-      // Connect to Gemini Live
-      this.sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
-        callbacks: {
-            onopen: async () => {
-                console.log("DDR Compagnon connecté.");
-                await this.startAudioStream();
-            },
-            onmessage: async (message: LiveServerMessage) => {
-                // Audio Output
-                const audioData = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-                if (audioData) {
-                    await this.playAudio(audioData);
-                }
+  constructor(
+    private onModelText: (text: string) => void,
+    private onUserText?: (text: string) => void,
+  ) {}
 
-                // Transcription / Text logic
-                const text = message.serverContent?.modelTurn?.parts?.[0]?.text;
-                if (text) {
-                     this.onMessage(text);
-                }
+  async connect() {
+    const r = await fetch('/api/live-token', { method: 'POST' });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.token) {
+      throw new Error(data.message || "La discussion vocale n'est pas disponible pour le moment. Utilisez le chat écrit.");
+    }
 
-                // Handle user transcription
-                if (message.serverContent?.inputAudioTranscription) {
-                    const transcript = message.serverContent.inputAudioTranscription.text;
-                    if (transcript && this.onTranscript) {
-                        this.onTranscript(transcript);
-                    }
-                }
+    const { GoogleGenAI, Modality } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey: data.token, httpOptions: { apiVersion: 'v1beta' } });
 
-                // Handle interruption
-                if (message.serverContent?.interrupted) {
-                    this.nextStartTime = 0;
-                }
-            },
-            onclose: () => console.log("Session fermée"),
-            onerror: (err) => console.error("Erreur Session:", err)
+    const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+    this.inputCtx = new Ctx({ sampleRate: 16000 });
+    this.outputCtx = new Ctx({ sampleRate: 24000 });
+    this.nextStartTime = 0;
+
+    let modelBuffer = '';
+    this.session = await ai.live.connect({
+      model: data.model,
+      config: { responseModalities: [Modality.AUDIO] },
+      callbacks: {
+        onopen: () => {},
+        onmessage: (message: any) => {
+          const sc = message.serverContent;
+          const audio = sc?.modelTurn?.parts?.find((p: any) => p.inlineData?.data)?.inlineData?.data;
+          if (audio) this.playAudio(audio);
+          if (sc?.outputTranscription?.text) modelBuffer += sc.outputTranscription.text;
+          if (sc?.inputTranscription?.text && this.onUserText) this.onUserText(sc.inputTranscription.text);
+          if (sc?.interrupted) this.stopPlayback();
+          if (sc?.turnComplete && modelBuffer.trim()) {
+            this.onModelText(modelBuffer.trim());
+            modelBuffer = '';
+          }
         },
-        config: {
-            responseModalities: [Modality.AUDIO],
-            systemInstruction: SYSTEM_INSTRUCTION,
-            inputAudioTranscription: {},
-            speechConfig: {
-                voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } }
-            }
-        }
-      });
-      
-      this.currentSession = await this.sessionPromise;
-      return this.currentSession;
+        onerror: (e: any) => console.error('[voix]', e),
+        onclose: () => {},
+      },
+    });
+    await this.startMicrophone();
+  }
+
+  private async startMicrophone() {
+    if (!this.inputCtx) return;
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    } catch {
+      this.disconnect();
+      throw new Error("Impossible d'accéder au micro. Autorisez le micro dans votre navigateur.");
     }
-  
-    private async startAudioStream() {
-        if (!this.inputAudioContext) return;
+    if (this.inputCtx.state === 'suspended') await this.inputCtx.resume();
+    this.source = this.inputCtx.createMediaStreamSource(this.stream);
+    this.processor = this.inputCtx.createScriptProcessor(2048, 1, 1);
+    this.processor.onaudioprocess = (e) => {
+      if (!this.session) return;
+      const pcm = floatTo16BitPCM(e.inputBuffer.getChannelData(0));
+      this.session.sendRealtimeInput({ audio: { mimeType: 'audio/pcm;rate=16000', data: toBase64(pcm.buffer) } });
+    };
+    this.source.connect(this.processor);
+    this.processor.connect(this.inputCtx.destination);
+  }
 
-        try {
-            this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            // Resume context if suspended (browser policy)
-            if (this.inputAudioContext.state === 'suspended') {
-                await this.inputAudioContext.resume();
-            }
+  private playAudio(b64: string) {
+    const ctx = this.outputCtx;
+    if (!ctx) return;
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const pcm = new Int16Array(bytes.buffer, 0, Math.floor(bytes.length / 2));
+    const buf = ctx.createBuffer(1, pcm.length, 24000);
+    const ch = buf.getChannelData(0);
+    for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    this.nextStartTime = Math.max(this.nextStartTime, ctx.currentTime + 0.05);
+    src.start(this.nextStartTime);
+    this.nextStartTime += buf.duration;
+    this.playing.push(src);
+    src.onended = () => (this.playing = this.playing.filter((s) => s !== src));
+  }
 
-            this.source = this.inputAudioContext.createMediaStreamSource(this.stream);
-            this.processor = this.inputAudioContext.createScriptProcessor(2048, 1, 1);
-            
-            this.processor.onaudioprocess = (e) => {
-                if (!this.currentSession) return;
+  private stopPlayback() {
+    this.playing.forEach((s) => {
+      try { s.stop(); } catch { /* déjà arrêté */ }
+    });
+    this.playing = [];
+    this.nextStartTime = 0;
+  }
 
-                const inputData = e.inputBuffer.getChannelData(0);
-                // Downsample logic or direct PCM conversion
-                const pcmData = this.floatTo16BitPCM(inputData);
-                const base64Data = this.arrayBufferToBase64(pcmData.buffer);
-                
-                this.currentSession.sendRealtimeInput({
-                    audio: {
-                        mimeType: 'audio/pcm;rate=16000',
-                        data: base64Data
-                    }
-                });
-            };
-            
-            this.source.connect(this.processor);
-            this.processor.connect(this.inputAudioContext.destination);
-        } catch (err) {
-            console.error("Erreur d'accès au micro:", err);
-            this.disconnect();
-            throw err;
-        }
-    }
+  disconnect() {
+    try { this.session?.close(); } catch { /* ignore */ }
+    this.stream?.getTracks().forEach((t) => t.stop());
+    this.source?.disconnect();
+    this.processor?.disconnect();
+    this.stopPlayback();
+    this.inputCtx?.close().catch(() => {});
+    this.outputCtx?.close().catch(() => {});
+    this.session = this.stream = this.source = this.processor = this.inputCtx = this.outputCtx = null;
+  }
+}
 
-    private async playAudio(base64Data: string) {
-        if (!this.outputAudioContext) return;
-        
-        try {
-            const binaryString = atob(base64Data);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            
-            // Create buffer
-            const audioBuffer = this.outputAudioContext.createBuffer(1, bytes.length / 2, 24000);
-            const channelData = audioBuffer.getChannelData(0);
-            
-            const dataInt16 = new Int16Array(bytes.buffer);
-            for (let i = 0; i < dataInt16.length; i++) {
-                channelData[i] = dataInt16[i] / 32768.0;
-            }
+function floatTo16BitPCM(input: Float32Array) {
+  const out = new Int16Array(input.length);
+  for (let i = 0; i < input.length; i++) {
+    const s = Math.max(-1, Math.min(1, input[i]));
+    out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+  }
+  return out;
+}
 
-            const source = this.outputAudioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(this.outputAudioContext.destination);
-            
-            // Precise scheduling for gapless playback
-            const currentTime = this.outputAudioContext.currentTime;
-            if (this.nextStartTime < currentTime) {
-                this.nextStartTime = currentTime + 0.05; // Small buffer
-            }
-            
-            source.start(this.nextStartTime);
-            this.nextStartTime += audioBuffer.duration;
-        } catch (e) {
-            console.error("Erreur playback audio:", e);
-        }
-    }
-
-    private floatTo16BitPCM(input: Float32Array) {
-        const output = new Int16Array(input.length);
-        for (let i = 0; i < input.length; i++) {
-            const s = Math.max(-1, Math.min(1, input[i]));
-            output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-        }
-        return output;
-    }
-
-    private arrayBufferToBase64(buffer: ArrayBuffer) {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return btoa(binary);
-    }
-
-    disconnect() {
-        if (this.currentSession) {
-            try {
-                this.currentSession.close();
-            } catch (e) {
-                console.error("Error closing session:", e);
-            }
-        }
-        if (this.stream) {
-            this.stream.getTracks().forEach(track => track.stop());
-        }
-        if (this.source) this.source.disconnect();
-        if (this.processor) this.processor.disconnect();
-
-        this.inputAudioContext?.close();
-        this.outputAudioContext?.close();
-
-        this.stream = null;
-        this.source = null;
-        this.processor = null;
-        this.inputAudioContext = null;
-        this.outputAudioContext = null;
-        this.sessionPromise = null;
-        this.currentSession = null;
-        this.nextStartTime = 0;
-        console.log("DDR Compagnon déconnecté.");
-    }
+function toBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
 }

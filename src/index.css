@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   La DDR — système visuel
+   Nuit chaude + orange DDR + touches dorées, motif géométrique islamique discret.
+   ========================================================================== */
+
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", "Georgia", serif;
-  
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", "Georgia", serif;
+  --font-arabic: "Amiri", "Scheherazade New", serif;
+
+  /* Orange DDR */
   --color-brand-50: #fff7ed;
   --color-brand-100: #ffedd5;
   --color-brand-200: #fed7aa;
@@ -16,32 +23,153 @@
   --color-brand-900: #7c2d12;
   --color-brand-950: #431407;
 
-  --color-dark-800: #1f1f1f;
-  --color-dark-900: #121212;
-  --color-dark-950: #000000;
+  /* Or */
+  --color-gold-200: #f3dfa2;
+  --color-gold-300: #e9c96b;
+  --color-gold-400: #dcb44a;
+  --color-gold-500: #c99a2e;
+  --color-gold-600: #a67c1f;
 
-  --color-gold-300: #e5c453;
-  --color-gold-400: #d4af37;
-  --color-gold-500: #d4af37;
-  --color-gold-600: #aa8c2c;
+  /* Surfaces (nuit chaude) */
+  --color-night-950: #0b0806;
+  --color-night-900: #120e0b;
+  --color-night-850: #17120e;
+  --color-night-800: #1d1712;
+  --color-night-700: #2a2119;
+  --color-night-600: #3a2e24;
+
+  /* Texte */
+  --color-cream-50: #fbf7f1;
+  --color-cream-100: #f3ece2;
+  --color-cream-200: #e4d9ca;
+  --color-sand-400: #b3a593;
+  --color-sand-500: #8f8271;
+
+  /* Anciennes couleurs encore utilisées par quelques pages */
+  --color-dark-800: #1d1712;
+  --color-dark-900: #120e0b;
+  --color-dark-950: #0b0806;
+
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-pulse-ring: pulse-ring 2s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+    100% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #121212;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background-color: var(--color-night-950);
+    color: var(--color-cream-100);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  ::selection {
+    background: var(--color-brand-600);
+    color: white;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-body {
-  background-color: #000000;
-  color: #f3f4f6;
+@layer components {
+  /* Motif géométrique (étoile à 8 branches) — utilisable partout */
+  .bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23f97316' stroke-opacity='0.55' stroke-width='0.8'%3E%3Cpath d='M32 6l7.6 18.4L58 32l-18.4 7.6L32 58l-7.6-18.4L6 32l18.4-7.6z'/%3E%3Cpath d='M13.6 13.6h36.8v36.8H13.6z' transform='rotate(45 32 32)'/%3E%3Ccircle cx='32' cy='32' r='5'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 64px 64px;
+  }
+  .text-gradient-gold {
+    background: linear-gradient(100deg, var(--color-brand-400), var(--color-gold-300) 55%, var(--color-brand-500));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(255, 237, 213, 0.08);
+    border-radius: 1.5rem;
+  }
+  .card-hover {
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.35s, background 0.35s, box-shadow 0.35s;
+  }
+  .card-hover:hover {
+    transform: translateY(-3px);
+    border-color: rgba(249, 115, 22, 0.35);
+    box-shadow: 0 20px 40px -20px rgba(249, 115, 22, 0.25);
+  }
+  .input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 237, 213, 0.12);
+    border-radius: 0.9rem;
+    padding: 0.8rem 1rem;
+    color: var(--color-cream-50);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input::placeholder {
+    color: var(--color-sand-500);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+  }
+  .label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-sand-400);
+    margin-bottom: 0.4rem;
+  }
+  .prose-ddr p { margin: 0 0 0.9em; line-height: 1.75; }
+  .prose-ddr strong { color: var(--color-brand-200); font-weight: 700; }
+  .prose-ddr ul { list-style: disc; padding-left: 1.3em; margin: 0 0 0.9em; }
+  .prose-ddr ol { list-style: decimal; padding-left: 1.3em; margin: 0 0 0.9em; }
+  .prose-ddr li { margin: 0.25em 0; }
+  .prose-ddr h1, .prose-ddr h2, .prose-ddr h3 { font-family: var(--font-serif); color: var(--color-cream-50); font-weight: 700; margin: 1.1em 0 0.5em; }
+  .prose-ddr blockquote { border-left: 3px solid var(--color-brand-500); padding: 0.2em 0 0.2em 1em; margin: 1em 0; color: var(--color-cream-200); font-style: italic; }
+  .prose-ddr a { color: var(--color-brand-300); text-decoration: underline; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
 }
+
+/* Barre de défilement */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-night-950); }
+::-webkit-scrollbar-thumb { background: var(--color-night-600); border-radius: 10px; border: 2px solid var(--color-night-950); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-brand-700); }

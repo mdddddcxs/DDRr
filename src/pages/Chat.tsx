@@ -1,149 +1,105 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { RotateCcw, Send } from 'lucide-react';
+import { Bubble, Typing, useCompanion } from '../components/Companion';
+import { LogoMark } from '../components/Logo';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { searchKnowledgeBaseStreamUnified } from '../services/geminiService';
-
-interface Message {
-    id: number;
-    role: 'user' | 'model';
-    text: string;
-    isTyping?: boolean;
-}
+const STARTERS = [
+  'Qui est Allah ?',
+  'Que dit le Coran sur Jésus (Issa) ?',
+  'Quels sont les 5 piliers de l’Islam ?',
+  'Comment devenir musulman ?',
+  'Pourquoi le mal existe-t-il ?',
+  'Quand a lieu le prêche de la DDR ?',
+];
 
 const ChatPage = () => {
-    const [messages, setMessages] = useState<Message[]>([
-        { id: 0, role: 'model', text: "Salam aleykoum mon frère/ma sœur. Je suis Le Compagnon DDR. Comment puis-je t'aider dans ta quête de savoir aujourd'hui ?" }
-    ]);
-    const [input, setInput] = useState('');
-    const [loading, setLoading] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { messages, loading, send, reset } = useCompanion();
+  const [input, setInput] = useState('');
+  const [params, setParams] = useSearchParams();
+  const endRef = useRef<HTMLDivElement>(null);
+  const asked = useRef(false);
 
-    // Scroll automatique vers le bas
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+  // Question venue de la page d'accueil (?q=...)
+  useEffect(() => {
+    const q = params.get('q');
+    if (q && !asked.current) {
+      asked.current = true;
+      send(q);
+      setParams({}, { replace: true });
+    }
+  }, [params, send, setParams]);
 
-    const handleSend = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input.trim()) return;
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, loading]);
 
-        const userMsg: Message = { id: Date.now(), role: 'user', text: input };
-        setMessages(prev => [...prev, userMsg]);
-        const query = input;
-        setInput('');
-        setLoading(true);
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    send(input);
+    setInput('');
+  };
 
-        try {
-            // Ajouter bulle temporaire de réflexion
-            const tempId = Date.now() + 1;
-            setMessages(prev => [...prev, { id: tempId, role: 'model', text: '', isTyping: true }]);
-
-            const resultStream = await searchKnowledgeBaseStreamUnified(query);
-            
-            let fullText = '';
-            
-            // Mise à jour progressive du texte (streaming simulé)
-            for await (const chunk of resultStream) {
-                const text = chunk.text || '';
-                fullText += text;
-                
-                setMessages(prev => prev.map(msg => 
-                    msg.id === tempId ? { ...msg, text: fullText, isTyping: false } : msg
-                ));
-            }
-        } catch (error) {
-            console.error(error);
-            setMessages(prev => [...prev, { id: Date.now(), role: 'model', text: "Désolé, une erreur est survenue lors de la recherche." }]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const formatMessage = (text: string) => {
-        return text.split('\n').map((line, i) => {
-            if (line.trim().startsWith('###')) return <h3 key={i} className="text-brand-400 font-bold mt-2">{line.replace(/^###\s/, '')}</h3>;
-            if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) return <li key={i} className="ml-4">{line.replace(/^[*-]\s/, '')}</li>;
-            const parts = line.split(/(\*\*.*?\*\*)/g);
-            return (
-                <p key={i} className="mb-1">
-                    {parts.map((part, j) => {
-                        if (part.startsWith('**') && part.endsWith('**')) {
-                            return <strong key={j} className="text-brand-200">{part.slice(2, -2)}</strong>;
-                        }
-                        return part;
-                    })}
-                </p>
-            );
-        });
-    };
-
-    return (
-        <div className="flex flex-col h-[calc(100vh-80px)] bg-black">
-            {/* Header Chat */}
-            <div className="bg-dark-900 p-4 border-b border-gray-800 flex items-center justify-between shadow-md z-10">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-brand-900 border border-brand-500 flex items-center justify-center text-xl shadow-[0_0_10px_rgba(234,88,12,0.4)]">
-                        📖
-                    </div>
-                    <div>
-                        <h1 className="text-white font-bold text-lg leading-none">Le Compagnon DDR</h1>
-                        <p className="text-brand-500 text-xs flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            En ligne • Base de Savoir
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
-                {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-lg ${
-                            msg.role === 'user' 
-                                ? 'bg-brand-600 text-white rounded-br-none' 
-                                : 'bg-dark-800 text-gray-200 border border-gray-700 rounded-bl-none'
-                        }`}>
-                            {msg.isTyping && !msg.text ? (
-                                <div className="flex gap-1 h-5 items-center">
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></span>
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></span>
-                                </div>
-                            ) : (
-                                <div className="text-sm md:text-base leading-relaxed">
-                                    {formatMessage(msg.text)}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input Area */}
-            <div className="p-4 bg-black border-t border-gray-800">
-                <form onSubmit={handleSend} className="max-w-4xl mx-auto relative flex gap-3">
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Posez votre question (ex: Qui est Allah ?)..."
-                        className="flex-1 bg-dark-900 border border-gray-700 rounded-full px-6 py-4 text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-inner"
-                        disabled={loading}
-                    />
-                    <button 
-                        type="submit" 
-                        disabled={loading || !input.trim()}
-                        className="bg-brand-600 hover:bg-brand-500 text-white rounded-full p-4 transition-all shadow-[0_0_15px_rgba(234,88,12,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <svg className="w-6 h-6 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                        </svg>
-                    </button>
-                </form>
-            </div>
+  return (
+    <div className="mx-auto flex h-[calc(100dvh-76px)] max-w-4xl flex-col px-3 sm:px-6">
+      <header className="flex items-center justify-between gap-3 border-b border-white/5 py-4">
+        <div className="flex items-center gap-3">
+          <LogoMark className="h-11 w-11" />
+          <div>
+            <h1 className="font-serif text-xl font-semibold text-cream-50">Le Compagnon DDR</h1>
+            <p className="flex items-center gap-1.5 text-xs text-sand-400">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" /> Répond avec douceur, en citant ses sources
+            </p>
+          </div>
         </div>
-    );
+        <button onClick={reset} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-sm text-sand-400 hover:bg-white/5 hover:text-white">
+          <RotateCcw className="h-4 w-4" /> <span className="hidden sm:inline">Nouvelle discussion</span>
+        </button>
+      </header>
+
+      <div className="flex-1 space-y-5 overflow-y-auto py-6" aria-live="polite">
+        {messages.map((m, i) => (
+          <Bubble key={i} m={m} />
+        ))}
+        {loading && <Typing />}
+        {messages.length === 1 && !loading && (
+          <div className="grid gap-2 pt-2 sm:grid-cols-2">
+            {STARTERS.map((s) => (
+              <button key={s} onClick={() => send(s)} className="card card-hover px-4 py-3 text-left text-sm text-cream-200">
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      <form onSubmit={submit} className="sticky bottom-0 pb-4 pt-2">
+        <div className="flex items-end gap-2 rounded-3xl border border-white/10 bg-night-900 p-2 shadow-2xl focus-within:border-brand-500/60">
+          <label htmlFor="chat-input" className="sr-only">Votre question</label>
+          <textarea
+            id="chat-input"
+            rows={1}
+            value={input}
+            maxLength={1500}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submit(e);
+              }
+            }}
+            placeholder="Écrivez votre question…"
+            className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-base text-cream-50 placeholder:text-sand-500 focus:outline-none"
+          />
+          <button disabled={loading || !input.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-600 text-white transition hover:bg-brand-500 disabled:opacity-40" aria-label="Envoyer">
+            <Send className="h-5 w-5" />
+          </button>
+        </div>
+        <p className="mt-2 text-center text-[11px] text-sand-500">Le Compagnon peut se tromper. Pour une question importante, demandez conseil à un imam.</p>
+      </form>
+    </div>
+  );
 };
 
 export default ChatPage;

@@ -1,5 +1,5 @@
 {
-  "name": "la-ddr---dawa-dans-la-rue",
+  "name": "la-ddr",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -19,7 +19,8 @@
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.6",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "@supabase/supabase-js": "^2.58.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
@@ -33,5 +34,8 @@
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.57.0",
     "vite": "^6.2.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

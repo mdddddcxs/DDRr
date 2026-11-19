@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { logAction } from '../services/logService';
 import { motion } from 'framer-motion';
 import { Trophy, Star, Flame, BookOpen, Calendar, CheckCircle2, Award, MapPin, Clock, MessageCircle, Users } from 'lucide-react';
 
@@ -22,7 +21,7 @@ const RECITERS = [
 ];
 
 const THEMES = [
-    { id: 'dark', name: 'Nuit', bg: 'bg-[#0a0a0a]', text: 'text-gray-300', accent: 'text-gold-500' },
+    { id: 'dark', name: 'Nuit', bg: 'bg-night-900', text: 'text-cream-200', accent: 'text-gold-500' },
     { id: 'sepia', name: 'Parchemin', bg: 'bg-[#f5e6d3]', text: 'text-[#5c4b37]', accent: 'text-[#8c7b5d]' },
     { id: 'light', name: 'Lumière', bg: 'bg-white', text: 'text-gray-800', accent: 'text-brand-600' }
 ];
@@ -116,7 +115,6 @@ const Khatma = () => {
           updated = completedJuzs.filter(n => n !== juzNum);
       } else {
           updated = [...completedJuzs, juzNum];
-          logAction('QURAN_PROGRESS', `Juz ${juzNum} marqué comme lu`, 'success');
           addNoorPoints(100); // Reward for completing a Juz
       }
       setCompletedJuzs(updated);
@@ -145,17 +143,13 @@ const Khatma = () => {
       setCurrentPlayingIndex(null);
 
       try {
-          // 1. Texte Arabe
-          const arabicRes = await fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/quran-uthmani`);
-          const arabicData = await arabicRes.json();
-
-          // 2. Traduction Française
-          const frenchRes = await fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/fr.hamidullah`);
-          const frenchData = await frenchRes.json();
-          
-          // 3. Audio (Selon le récitateur choisi)
-          const audioRes = await fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/${selectedReciter}`);
-          const audioData = await audioRes.json();
+          // Texte arabe, traduction et audio chargés en parallèle (l'audio est facultatif)
+          const get = (edition: string) => fetch(`https://api.alquran.cloud/v1/juz/${juzNum}/${edition}`).then((r) => r.json());
+          const [arabicData, frenchData, audioData] = await Promise.all([
+              get('quran-uthmani'),
+              get('fr.hamidullah'),
+              get(selectedReciter).catch(() => null),
+          ]);
 
           if (arabicData.code === 200 && frenchData.code === 200) {
               const mergedVerses: Verse[] = arabicData.data.ayahs.map((ayah: any, index: number) => ({
@@ -164,7 +158,7 @@ const Khatma = () => {
                   translation: frenchData.data.ayahs[index].text,
                   numberInSurah: ayah.numberInSurah,
                   surahName: ayah.surah.englishName,
-                  audio: audioData.data.ayahs[index].audio // URL Audio MP3
+                  audio: audioData?.data?.ayahs?.[index]?.audio // URL audio MP3 (si disponible)
               }));
               setVerses(mergedVerses);
               // Précharger le premier audio
@@ -242,15 +236,15 @@ const Khatma = () => {
   const level = getLevel();
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20 relative font-sans selection:bg-gold-500 selection:text-black">
+    <div className="min-h-screen bg-night-950 text-white pb-20 relative font-sans selection:bg-gold-500 selection:text-black">
       
       {/* --- FOND D'ÉCRAN SPIRITUEL --- */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-black"></div>
+          <div className="absolute inset-0 bg-night-950"></div>
           {/* Ciel étoilé subtil */}
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 animate-pulse"></div>
+          <div className="absolute inset-0 bg-pattern opacity-[0.04]"></div>
           {/* Arabesque de fond */}
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-5 mix-blend-overlay"></div>
+          <div className="absolute inset-0 hidden"></div>
           {/* Halo central */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-900/10 rounded-full blur-[120px]"></div>
       </div>
@@ -263,14 +257,14 @@ const Khatma = () => {
                 <div className="max-w-4xl mx-auto px-4 pt-24 flex justify-center gap-4">
                     <button 
                         onClick={() => setView('reader')}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'reader' ? 'bg-gold-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]' : 'bg-gray-900 text-gray-400 hover:bg-gray-800'}`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'reader' ? 'bg-gold-500 text-black shadow-[0_0_20px_rgba(212,175,55,0.3)]' : 'bg-night-800 text-sand-400 hover:bg-night-700'}`}
                     >
                         <BookOpen size={20} />
                         Lecture
                     </button>
                     <button 
                         onClick={() => setView('preche')}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'preche' ? 'bg-brand-500 text-white shadow-[0_0_20px_rgba(234,88,12,0.3)]' : 'bg-gray-900 text-gray-400 hover:bg-gray-800'}`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${view === 'preche' ? 'bg-brand-500 text-white shadow-[0_0_20px_rgba(234,88,12,0.3)]' : 'bg-night-800 text-sand-400 hover:bg-night-700'}`}
                     >
                         <Calendar size={20} />
                         Prêche Place Figayo
@@ -280,22 +274,22 @@ const Khatma = () => {
                 {view === 'reader' ? (
                     <>
                         {/* --- HEADER NOOR (LUMIÈRE) --- */}
-                        <div className="relative pt-12 pb-16 px-4 text-center overflow-hidden border-b border-gray-900">
+                        <div className="relative pt-12 pb-16 px-4 text-center overflow-hidden border-b border-white/5">
                             <div className="max-w-4xl mx-auto relative z-10">
                                 <div className="flex justify-center gap-4 mb-6">
-                                    <span className="inline-block py-1 px-3 rounded-full border border-gold-500/30 bg-gold-500/10 text-gold-500 text-xs font-bold uppercase tracking-widest animate-fade-in-up">
+                                    <span className="inline-block py-1 px-3 rounded-full border border-gold-500/30 bg-gold-500/10 text-gold-500 text-xs font-bold uppercase tracking-widest animate-fade-up">
                                         {hijriDate || 'Calendrier Hijri'}
                                     </span>
-                                    <span className={`inline-block py-1 px-3 rounded-full border border-brand-500/30 bg-brand-500/10 ${level.color} text-xs font-bold uppercase tracking-widest animate-fade-in-up delay-100`}>
+                                    <span className={`inline-block py-1 px-3 rounded-full border border-brand-500/30 bg-brand-500/10 ${level.color} text-xs font-bold uppercase tracking-widest animate-fade-up delay-100`}>
                                         {level.icon} {level.name}
                                     </span>
                                 </div>
                                 
-                                <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-6 font-serif tracking-tight animate-fade-in-up delay-100 drop-shadow-2xl">
+                                <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-6 font-serif tracking-tight animate-fade-up delay-100 drop-shadow-2xl">
                                     Le Saint Coran
                                 </h1>
                                 
-                                <p className="text-gray-400 text-lg max-w-2xl mx-auto font-light leading-relaxed animate-fade-in-up delay-200">
+                                <p className="text-sand-400 text-lg max-w-2xl mx-auto font-light leading-relaxed animate-fade-up delay-200">
                                     "Une guidée et une miséricorde pour les croyants."
                                     <br/>
                                     <span className="text-sm text-brand-500 font-bold mt-2 block">Lisez à votre rythme, méditez chaque mot.</span>
@@ -305,7 +299,7 @@ const Khatma = () => {
 
                         {/* PROGRESS DASHBOARD */}
                         <div className="max-w-5xl mx-auto px-4 -mt-8 mb-12 relative z-20">
-                            <div className="bg-[#0f0f11] border border-gray-800 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div className="bg-night-900 border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
                                 <div className="flex items-center gap-6 w-full md:w-auto">
                                     <div className="relative w-20 h-20 flex items-center justify-center">
                                         <svg className="w-full h-full transform -rotate-90">
@@ -316,7 +310,7 @@ const Khatma = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-white font-bold text-lg">Votre Progression</h3>
-                                        <p className="text-gray-500 text-sm">Vous avez lu {completedJuzs.length} Juz sur 30.</p>
+                                        <p className="text-sand-500 text-sm">Vous avez lu {completedJuzs.length} Juz sur 30.</p>
                                     </div>
                                 </div>
                                 
@@ -326,22 +320,22 @@ const Khatma = () => {
                                             <Star size={16} fill="currentColor" />
                                             <span className="text-2xl font-black">{noorPoints}</span>
                                         </div>
-                                        <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Points de Noor</span>
+                                        <span className="text-[10px] text-sand-500 uppercase tracking-widest font-bold">Points de Noor</span>
                                     </div>
-                                    <div className="w-px h-12 bg-gray-800 hidden md:block"></div>
+                                    <div className="w-px h-12 bg-night-700 hidden md:block"></div>
                                     <div className="flex flex-col items-center">
                                         <div className="flex items-center gap-2 text-orange-500 mb-1">
                                             <Flame size={16} fill="currentColor" />
                                             <span className="text-2xl font-black">{streak}</span>
                                         </div>
-                                        <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Jours de suite</span>
+                                        <span className="text-[10px] text-sand-500 uppercase tracking-widest font-bold">Jours de suite</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* GRID DES 30 JUZ */}
-                        <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in-up delay-200">
+                        <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-up delay-200">
                             <h2 className="text-2xl font-bold text-white mb-8 border-l-4 border-gold-500 pl-4">Sélectionnez un Juz</h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
                                 {Array.from({ length: 30 }, (_, i) => i + 1).map((juzNum) => {
@@ -353,7 +347,7 @@ const Khatma = () => {
                                             className={`group relative p-6 rounded-2xl border transition-all duration-300 h-40 flex flex-col items-center justify-center hover:-translate-y-1 overflow-hidden ${
                                                 isCompleted 
                                                     ? 'bg-green-900/10 border-green-500/30' 
-                                                    : 'bg-[#121214] border-gray-800 hover:border-gold-500/50 hover:bg-gray-900'
+                                                    : 'bg-night-900 border-white/10 hover:border-gold-500/50 hover:bg-night-800'
                                             }`}
                                         >
                                             {/* Icone Arrière Plan */}
@@ -371,7 +365,7 @@ const Khatma = () => {
                                                     Terminé
                                                 </span>
                                             ) : (
-                                                <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider group-hover:text-gray-400">Lire</span>
+                                                <span className="text-[10px] text-sand-500 font-bold uppercase tracking-wider group-hover:text-sand-400">Lire</span>
                                             )}
                                         </button>
                                     )
@@ -388,7 +382,7 @@ const Khatma = () => {
                             className="text-center mb-12"
                         >
                             <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Le Grand <span className="text-brand-500">Prêche Hebdomadaire</span></h2>
-                            <p className="text-gray-400">Un moment de partage, de questions et de rapprochement pour toute la communauté.</p>
+                            <p className="text-sand-400">Un moment de partage, de questions et de rapprochement pour toute la communauté.</p>
                         </motion.div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -396,7 +390,7 @@ const Khatma = () => {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-[#0f0f11] border border-gray-800 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-brand-500/50 transition-all"
+                                className="bg-night-900 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-brand-500/50 transition-all"
                             >
                                 <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
                                     <MapPin size={80} className="text-brand-500" />
@@ -405,15 +399,15 @@ const Khatma = () => {
                                     <MapPin className="text-brand-500" />
                                     Lieu
                                 </h3>
-                                <p className="text-gray-300 text-lg font-serif">Place Figayo, Yopougon</p>
-                                <p className="text-gray-500 text-sm mt-2">Un espace ouvert pour accueillir tout le monde dans la fraternité.</p>
+                                <p className="text-cream-200 text-lg font-serif">Place Figayo, Yopougon</p>
+                                <p className="text-sand-500 text-sm mt-2">Un espace ouvert pour accueillir tout le monde dans la fraternité.</p>
                             </motion.div>
 
                             <motion.div 
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="bg-[#0f0f11] border border-gray-800 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-gold-500/50 transition-all"
+                                className="bg-night-900 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-gold-500/50 transition-all"
                             >
                                 <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
                                     <Clock size={80} className="text-gold-500" />
@@ -422,8 +416,8 @@ const Khatma = () => {
                                     <Clock className="text-gold-500" />
                                     Horaire
                                 </h3>
-                                <p className="text-gray-300 text-lg font-serif">Chaque Jeudi à 16h00</p>
-                                <p className="text-gray-500 text-sm mt-2">Marquez vos calendriers pour ce rendez-vous spirituel incontournable.</p>
+                                <p className="text-cream-200 text-lg font-serif">Chaque Jeudi à 16h00</p>
+                                <p className="text-sand-500 text-sm mt-2">Marquez vos calendriers pour ce rendez-vous spirituel incontournable.</p>
                             </motion.div>
                         </div>
 
@@ -435,7 +429,7 @@ const Khatma = () => {
                         >
                             <MessageCircle className="w-12 h-12 text-brand-500 mx-auto mb-6" />
                             <h3 className="text-2xl font-bold text-white mb-4">Posez vos Questions</h3>
-                            <p className="text-gray-300 mb-8 leading-relaxed">
+                            <p className="text-cream-200 mb-8 leading-relaxed">
                                 Le prêche est interactif. C'est l'occasion idéale pour poser vos questions sur la foi, la pratique et la vie quotidienne. Nos imams et savants sont là pour vous éclairer.
                             </p>
                             <div className="flex flex-wrap justify-center gap-4">
@@ -451,10 +445,10 @@ const Khatma = () => {
                             transition={{ delay: 0.4 }}
                             className="bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-[2.5rem] p-12 text-center relative overflow-hidden"
                         >
-                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-5"></div>
+                            <div className="absolute inset-0 bg-pattern opacity-[0.04]"></div>
                             <Users className="w-16 h-16 text-gold-500 mx-auto mb-6 relative z-10" />
                             <h3 className="text-3xl font-black text-white mb-4 relative z-10">Rejoignez le Live !</h3>
-                            <p className="text-gray-400 mb-8 max-w-xl mx-auto relative z-10">
+                            <p className="text-sand-400 mb-8 max-w-xl mx-auto relative z-10">
                                 Vous ne pouvez pas vous déplacer ? Suivez nos sessions en direct et participez à la discussion où que vous soyez. Votre présence renforce notre communauté.
                             </p>
                             <button 
@@ -467,20 +461,20 @@ const Khatma = () => {
 
                         {/* STATS SECTION (REUSED) */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-                            <div className="bg-gray-900/50 border border-white/5 p-6 rounded-3xl text-center">
+                            <div className="bg-night-800/50 border border-white/5 p-6 rounded-3xl text-center">
                                 <Award className="w-8 h-8 text-gold-500 mx-auto mb-3" />
                                 <h4 className="text-white font-bold mb-1">Niveau {level.name}</h4>
-                                <p className="text-gray-500 text-sm">Prochain rang à {noorPoints < 500 ? '500' : noorPoints < 1500 ? '1500' : '3000'} pts</p>
+                                <p className="text-sand-500 text-sm">Prochain rang à {noorPoints < 500 ? '500' : noorPoints < 1500 ? '1500' : '3000'} pts</p>
                             </div>
-                            <div className="bg-gray-900/50 border border-white/5 p-6 rounded-3xl text-center">
+                            <div className="bg-night-800/50 border border-white/5 p-6 rounded-3xl text-center">
                                 <Star className="w-8 h-8 text-brand-500 mx-auto mb-3" />
                                 <h4 className="text-white font-bold mb-1">{noorPoints} Points</h4>
-                                <p className="text-gray-500 text-sm">Accumulés ce mois</p>
+                                <p className="text-sand-500 text-sm">Accumulés ce mois</p>
                             </div>
-                            <div className="bg-gray-900/50 border border-white/5 p-6 rounded-3xl text-center">
+                            <div className="bg-night-800/50 border border-white/5 p-6 rounded-3xl text-center">
                                 <Flame className="w-8 h-8 text-orange-500 mx-auto mb-3" />
                                 <h4 className="text-white font-bold mb-1">{streak} Jours</h4>
-                                <p className="text-gray-500 text-sm">Série de lecture</p>
+                                <p className="text-sand-500 text-sm">Série de lecture</p>
                             </div>
                         </div>
                     </div>
@@ -490,10 +484,10 @@ const Khatma = () => {
 
         {/* --- LECTEUR IMMERSIF (FULL SCREEN) --- */}
         {readingJuz && (
-            <div className={`fixed inset-0 z-50 flex flex-col animate-fade-in-up ${currentTheme.bg}`}>
+            <div className={`fixed inset-0 z-50 flex flex-col animate-fade-up ${currentTheme.bg}`}>
                 
                 {/* 1. TOP BAR (SETTINGS) */}
-                <div className={`border-b px-4 py-3 flex flex-col md:flex-row justify-between items-center shadow-sm shrink-0 z-30 transition-colors ${currentTheme.id === 'dark' ? 'border-gray-800 bg-[#0f0f11]' : 'border-gray-300 bg-white/50 backdrop-blur'}`}>
+                <div className={`border-b px-4 py-3 flex flex-col md:flex-row justify-between items-center shadow-sm shrink-0 z-30 transition-colors ${currentTheme.id === 'dark' ? 'border-white/10 bg-night-900' : 'border-gray-300 bg-white/50 backdrop-blur'}`}>
                     <div className="flex items-center justify-between w-full md:w-auto gap-4">
                         <button 
                             onClick={closeReader}
@@ -539,7 +533,7 @@ const Khatma = () => {
 
                 {/* 2. AUDIO PLAYER BAR (STICKY) */}
                 {!loading && (
-                    <div className={`border-b p-3 flex items-center justify-between gap-4 shrink-0 z-20 transition-colors ${currentTheme.id === 'dark' ? 'bg-[#1a1a1c] border-gray-800' : 'bg-gray-100 border-gray-300'}`}>
+                    <div className={`border-b p-3 flex items-center justify-between gap-4 shrink-0 z-20 transition-colors ${currentTheme.id === 'dark' ? 'bg-[#1a1a1c] border-white/10' : 'bg-gray-100 border-gray-300'}`}>
                         <audio 
                             ref={audioRef} 
                             src={currentAudioSrc || ""} 
@@ -559,7 +553,7 @@ const Khatma = () => {
                             </button>
                             <div className="hidden sm:block">
                                 <p className={`text-xs font-bold ${currentTheme.text}`}>Récitation Audio</p>
-                                <p className="text-[10px] text-gray-500">{RECITERS.find(r => r.id === selectedReciter)?.name}</p>
+                                <p className="text-[10px] text-sand-500">{RECITERS.find(r => r.id === selectedReciter)?.name}</p>
                             </div>
                         </div>
                         
@@ -576,7 +570,7 @@ const Khatma = () => {
 
                 {/* 3. CONTENT SCROLLABLE */}
                 <div className={`flex-1 overflow-y-auto relative transition-colors ${currentTheme.bg}`} ref={readerContentRef}>
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/p6.png')] opacity-10 pointer-events-none fixed"></div>
+                    <div className="absolute inset-0 bg-pattern opacity-[0.03] pointer-events-none"></div>
                     
                     <div className="max-w-3xl mx-auto p-6 pb-32 min-h-full">
                         {loading ? (
@@ -602,8 +596,8 @@ const Khatma = () => {
                                     return (
                                         <div key={index} id={`verse-${index}`} className={`relative transition-all duration-500 ${isActive ? 'scale-[1.02]' : ''}`}>
                                             {isNewSurah && (
-                                                <div className={`my-16 pt-8 border-t text-center ${currentTheme.id === 'dark' ? 'border-gray-800' : 'border-gray-300'}`}>
-                                                    <span className={`inline-block px-4 py-1 rounded-full text-xs uppercase tracking-widest font-bold mb-4 ${currentTheme.id === 'dark' ? 'bg-gray-900 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
+                                                <div className={`my-16 pt-8 border-t text-center ${currentTheme.id === 'dark' ? 'border-white/10' : 'border-gray-300'}`}>
+                                                    <span className={`inline-block px-4 py-1 rounded-full text-xs uppercase tracking-widest font-bold mb-4 ${currentTheme.id === 'dark' ? 'bg-night-800 text-sand-400' : 'bg-gray-200 text-sand-500'}`}>
                                                         Sourate
                                                     </span>
                                                     <h3 className={`text-4xl font-serif mb-8 ${currentTheme.text}`}>{verse.surahName}</h3>
@@ -614,7 +608,7 @@ const Khatma = () => {
                                                 className={`p-6 md:p-8 rounded-2xl border transition-all duration-300 cursor-pointer group ${
                                                     isActive 
                                                         ? 'border-brand-500 shadow-[0_0_30px_rgba(234,88,12,0.15)] bg-brand-500/5' 
-                                                        : `hover:border-gold-500/30 ${currentTheme.id === 'dark' ? 'bg-[#0f0f11]/60 border-white/5' : 'bg-white/60 border-gray-200'}`
+                                                        : `hover:border-gold-500/30 ${currentTheme.id === 'dark' ? 'bg-night-900/60 border-white/5' : 'bg-white/60 border-gray-200'}`
                                                 }`}
                                                 onClick={() => playAudio(index)}
                                             >
@@ -634,7 +628,7 @@ const Khatma = () => {
                                                     {verse.text}
                                                 </p>
 
-                                                <p className={`font-light leading-relaxed ${currentTheme.id === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} style={{ fontSize: `${Math.max(16, fontSize * 0.6)}px` }}>
+                                                <p className={`font-light leading-relaxed ${currentTheme.id === 'dark' ? 'text-sand-400' : 'text-sand-500'}`} style={{ fontSize: `${Math.max(16, fontSize * 0.6)}px` }}>
                                                     {verse.translation}
                                                 </p>
                                             </div>
@@ -660,15 +654,15 @@ const Khatma = () => {
 
         {/* SUCCESS MODAL */}
         {showSuccess && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in-up">
-                <div className="bg-[#121214] border border-gold-500/40 rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-10"></div>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-up">
+                <div className="bg-night-900 border border-gold-500/40 rounded-3xl p-10 max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
+                    <div className="absolute inset-0 bg-pattern opacity-[0.04]"></div>
                     <div className="relative z-10">
                         <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/50 animate-bounce">
                             <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <h2 className="text-3xl font-serif font-bold text-white mb-2">MachaAllah !</h2>
-                        <p className="text-gray-400 mb-6">Qu'Allah accepte votre lecture et illumine votre cœur.</p>
+                        <p className="text-sand-400 mb-6">Qu'Allah accepte votre lecture et illumine votre cœur.</p>
                         <p className="text-xs text-gold-500 uppercase tracking-widest font-bold">Progression sauvegardée</p>
                     </div>
                 </div>

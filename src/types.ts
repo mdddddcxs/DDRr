@@ -21,7 +21,9 @@ export interface Debate {
   date: string;
   speaker: string;
   location: string;
-  thumbnailUrl?: string; // Nouvelle propriété pour l'optimisation
+  thumbnailUrl?: string;
+  isLive?: boolean;
+  isUpcoming?: boolean;
 }
 
 export interface Conversion {
@@ -57,11 +59,22 @@ export interface Donation {
   donorName: string; // "Anonyme" si isAnonymous est true
   donorPhone: string;
   isAnonymous: boolean;
-  method: 'Wave' | 'OrangeMoney' | 'MTN' | 'Carte' | 'PayPal';
+  method: 'Wave' | 'OrangeMoney' | 'MTN' | 'Moov' | 'Carte' | 'Espèces' | 'Autre';
   status: 'pending' | 'success' | 'failed';
   transactionId?: string;
   createdAt: string;
   campaignId?: string;
+  note?: string;
+}
+
+export interface ConversionRequest {
+  id: string;
+  name: string;
+  phone: string;
+  location: string;
+  method: 'presentiel' | 'video';
+  status: 'pending' | 'contacted' | 'done';
+  createdAt: string;
 }
 
 export interface Appointment {
