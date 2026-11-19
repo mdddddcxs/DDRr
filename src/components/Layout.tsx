@@ -106,7 +106,7 @@ const Dropdown = ({ group, active }: { group: NavGroup; active: boolean }) => {
         {active && <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-brand-500" />}
       </button>
       <div className={`absolute left-1/2 top-full z-50 w-[22rem] -translate-x-1/2 pt-3 transition-all duration-300 ${open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0'}`}>
-        <div style={rubriqueVars(group.k)} className="overflow-hidden rounded-3xl border border-ink-900/8 bg-ivory-50/95 p-2 shadow-[0_30px_60px_-24px_rgba(20,36,74,0.35)] backdrop-blur-xl">
+        <div style={rubriqueVars(group.k)} onClick={(e) => (e.target as HTMLElement).closest('a') && setOpen(false)} className="overflow-hidden rounded-3xl border border-ink-900/8 bg-ivory-50/95 p-2 shadow-[0_30px_60px_-24px_rgba(20,36,74,0.35)] backdrop-blur-xl">
           <div className="r-grad mx-2 mb-1 mt-1 h-1 rounded-full" />
           {group.items.map((it) => {
             const Icon = it.icon || Sparkles;
@@ -182,6 +182,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [mobileOpen]);
 
   const isActive = (path: string) => (path === '/' ? location.pathname === '/' : location.pathname.startsWith(path));
+  // Rubriques à en-tête coloré : tant qu'on n'a pas défilé, la barre passe en blanc pour rester lisible.
+  const onColor = !scrolled && ['/la-ddr', '/decouvrir', '/agenda', '/rejoindre'].some((p) => location.pathname.startsWith(p));
 
   return (
     <div className="flex min-h-screen flex-col bg-ivory-100 text-ink-800">
@@ -194,10 +196,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <nav className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? 'border-b border-ink-900/[0.07] bg-ivory-100/85 shadow-[0_10px_30px_-24px_rgba(20,36,74,0.5)] backdrop-blur-xl' : 'border-b border-transparent bg-transparent'}`}>
         <div className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 transition-all duration-500 sm:px-6 ${scrolled ? 'h-[70px]' : 'h-[84px]'}`}>
           <Link to="/" aria-label="La DDR — accueil" className="shrink-0">
-            <Logo showArabic={false} size={scrolled ? 'sm' : 'md'} />
+            <Logo showArabic={false} size={scrolled ? 'sm' : 'md'} tone={onColor ? 'light' : 'dark'} />
           </Link>
 
-          <div className="hidden items-center gap-0.5 xl:flex">
+          <div className={`hidden items-center gap-0.5 xl:flex ${onColor ? 'on-color' : ''}`}>
             {NAV.map((n) =>
               isGroup(n) ? (
                 <Dropdown key={n.name} group={n} active={n.items.some((i) => isActive(i.path))} />
@@ -215,7 +217,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
 
           <div className="hidden items-center gap-2 xl:flex">
-            <Link to="/rejoindre" className="flex items-center gap-2 rounded-full border border-ink-900/15 px-4 py-2.5 text-[13.5px] font-bold text-ink-900 transition hover:border-ink-900 hover:bg-ink-900 hover:text-white">
+            <Link to="/rejoindre" className={`flex items-center gap-2 rounded-full border px-4 py-2.5 text-[13.5px] font-bold transition ${onColor ? 'border-white/50 text-white hover:bg-white hover:text-ink-900' : 'border-ink-900/15 text-ink-900 hover:border-ink-900 hover:bg-ink-900 hover:text-white'}`}>
               <UserPlus className="h-4 w-4" /> Rejoindre
             </Link>
             <Link to="/donations" className="flex items-center gap-2 rounded-full bg-gradient-to-b from-brand-500 to-brand-600 px-4 py-2.5 text-[13.5px] font-bold text-white shadow-[0_10px_24px_-10px_rgba(226,112,10,0.9)] transition hover:brightness-105">
@@ -223,7 +225,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </Link>
           </div>
 
-          <button onClick={() => setMobileOpen(true)} className="grid h-11 w-11 place-items-center rounded-full border border-ink-900/10 bg-white/70 text-ink-900 shadow-sm xl:hidden" aria-label="Ouvrir le menu">
+          <button onClick={() => setMobileOpen(true)} className={`grid h-11 w-11 place-items-center rounded-full border shadow-sm xl:hidden ${onColor ? 'border-white/40 bg-white/15 text-white backdrop-blur' : 'border-ink-900/10 bg-white/70 text-ink-900'}`} aria-label="Ouvrir le menu">
             <Menu className="h-5 w-5" />
           </button>
         </div>
@@ -233,7 +235,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] xl:hidden" role="dialog" aria-modal="true" aria-label="Menu">
           <div className="absolute inset-0 bg-ink-950/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute inset-y-0 right-0 flex w-[90%] max-w-sm flex-col overflow-y-auto bg-ivory-100 shadow-2xl animate-fade-up">
+          <div
+            onClick={(e) => (e.target as HTMLElement).closest('a') && setMobileOpen(false)}
+            className="absolute inset-y-0 right-0 flex w-[90%] max-w-sm flex-col overflow-y-auto bg-ivory-100 shadow-2xl animate-fade-up"
+          >
             <div className="flex items-center justify-between border-b border-ink-900/[0.07] p-4">
               <Logo showArabic={false} size="sm" />
               <button onClick={() => setMobileOpen(false)} className="grid h-10 w-10 place-items-center rounded-full text-ink-500 hover:bg-ink-900/5" aria-label="Fermer le menu">

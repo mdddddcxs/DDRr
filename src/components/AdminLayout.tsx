@@ -66,8 +66,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-ink-900/5 bg-ivory-50 lg:block">{nav}</aside>
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 bg-ivory-50">
+          <div className="absolute inset-0 bg-ink-950/40 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <aside onClick={(e) => (e.target as HTMLElement).closest('a') && setOpen(false)} className="absolute inset-y-0 left-0 w-72 overflow-y-auto bg-ivory-50 shadow-2xl">
             <button onClick={() => setOpen(false)} className="absolute right-3 top-4 rounded-full p-2 text-ink-500" aria-label="Fermer"><X className="h-5 w-5" /></button>
             {nav}
           </aside>

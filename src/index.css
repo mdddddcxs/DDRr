@@ -227,6 +227,15 @@
   .r-soft { background-color: var(--r-soft); }
   .r-ink { color: var(--r-ink); }
   .r-from { color: var(--r-from); }
+  /* Menu principal posé sur un en-tête coloré */
+  .on-color > div > button,
+  .on-color > a {
+    color: #fff !important;
+  }
+  .on-color > div > button > span,
+  .on-color > a > span {
+    background: #fff !important;
+  }
   .capitalize-first::first-letter {
     text-transform: uppercase;
   }

@@ -24,7 +24,10 @@ const Conversions = lazy(() => import('./pages/Conversions'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const Legal = lazy(() => import('./pages/Legal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
-const ComingSoon = lazy(() => import('./pages/ComingSoon'));
+const LaDDR = lazy(() => import('./pages/Rubriques').then((m) => ({ default: m.LaDDR })));
+const Decouvrir = lazy(() => import('./pages/Rubriques').then((m) => ({ default: m.Decouvrir })));
+const Agenda = lazy(() => import('./pages/Rubriques').then((m) => ({ default: m.Agenda })));
+const Rejoindre = lazy(() => import('./pages/Rubriques').then((m) => ({ default: m.Rejoindre })));
 
 const AdminLogin = lazy(() => import('./pages/Admin/AdminLogin'));
 const AdminLayout = lazy(() => import('./components/AdminLayout'));
@@ -112,10 +115,10 @@ const AppRoutes = () => {
                   <Route path="/khatma" element={<Khatma />} />
                   <Route path="/donations" element={<Donations />} />
                   <Route path="/news" element={<News />} />
-                  <Route path="/la-ddr/*" element={<ComingSoon title="La DDR" text="Notre histoire, notre mission, nos valeurs et les voix de la DDR. Cette rubrique arrive très bientôt." />} />
-                  <Route path="/decouvrir" element={<ComingSoon title="Découvrir l’Islam" text="Les bases de l’Islam expliquées simplement, Jésus dans l’Islam et les questions fréquentes. Bientôt en ligne." />} />
-                  <Route path="/agenda" element={<ComingSoon title="Agenda" text="Le rappel hebdomadaire, les conférences et les tournées de la DDR, avec un bouton pour les ajouter à votre agenda." />} />
-                  <Route path="/rejoindre" element={<ComingSoon title="Rejoindre la DDR" text="Devenir bénévole ou membre de la DDR : le formulaire d’inscription arrive très bientôt." />} />
+                  <Route path="/la-ddr/*" element={<LaDDR />} />
+                  <Route path="/decouvrir" element={<Decouvrir />} />
+                  <Route path="/agenda" element={<Agenda />} />
+                  <Route path="/rejoindre" element={<Rejoindre />} />
                   <Route path="/news/:id" element={<NewsDetail />} />
                   <Route path="/debates" element={<Debates />} />
                   <Route path="/conversions" element={<Conversions />} />

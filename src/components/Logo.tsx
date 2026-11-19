@@ -38,7 +38,7 @@ const Logo: React.FC<{ className?: string; showArabic?: boolean; tone?: 'dark' |
     <LogoMark tone={tone} className={`${size === 'sm' ? 'h-10' : 'h-12'} w-auto shrink-0`} />
     <span className="flex flex-col leading-none">
       <span className={`font-display font-extrabold tracking-tight ${size === 'sm' ? 'text-[22px]' : 'text-[26px]'} ${tone === 'light' ? 'text-white' : 'text-ink-900'}`}>DDR</span>
-      <span className="mt-0.5 font-serif text-[12.5px] font-semibold text-brand-600 whitespace-nowrap">La Da’awah Dans la Rue</span>
+      <span className={`mt-0.5 font-serif text-[12.5px] font-semibold whitespace-nowrap ${tone === 'light' ? 'text-gold-200' : 'text-brand-600'}`}>La Da’awah Dans la Rue</span>
       {showArabic && (
         <span className={`mt-0.5 font-arabic text-[13px] ${tone === 'light' ? 'text-white/80' : 'text-ink-700'}`} lang="ar" dir="rtl">
           الدعوة في الشارع
